@@ -1,0 +1,69 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "baseUrl": ".",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "incremental": true,
+    "ignoreDeprecations": "6.0",
+    "lib": [
+      "ESNext",
+      "WebWorker"
+    ],
+    "paths": {
+      "@cf-template/shared": [
+        "../../packages/shared/index.ts"
+      ],
+      "@scalar/hono-api-reference": [
+        "../../node_modules/.pnpm/@scalar+hono-api-reference@0.9.48_hono@4.12.10/node_modules/@scalar/hono-api-reference"
+      ],
+      "@hono/zod-openapi": [
+        "../../node_modules/.pnpm/@hono+zod-openapi@0.19.10_hono@4.12.10_zod@3.25.76/node_modules/@hono/zod-openapi"
+      ],
+      "hono": [
+        "../../node_modules/.pnpm/hono@4.12.10/node_modules/hono"
+      ],
+      "hono/cors": [
+        "../../node_modules/.pnpm/hono@4.12.10/node_modules/hono/dist/types/middleware/cors/index.d.ts"
+      ],
+      "hono/etag": [
+        "../../node_modules/.pnpm/hono@4.12.10/node_modules/hono/dist/types/middleware/etag/index.d.ts"
+      ],
+      "hono/jwt": [
+        "../../node_modules/.pnpm/hono@4.12.10/node_modules/hono/dist/types/middleware/jwt/index.d.ts"
+      ],
+      "hono/logger": [
+        "../../node_modules/.pnpm/hono@4.12.10/node_modules/hono/dist/types/middleware/logger/index.d.ts"
+      ],
+      "hono/secure-headers": [
+        "../../node_modules/.pnpm/hono@4.12.10/node_modules/hono/dist/types/middleware/secure-headers/index.d.ts"
+      ],
+      "vitest": [
+        "../../node_modules/.pnpm/vitest@3.2.4_@types+node@25.5.2_jiti@2.6.1_lightningcss@1.32.0_terser@5.46.1_tsx@4.21.0_yaml@2.8.0/node_modules/vitest"
+      ],
+      "cloudflare:test": [
+        "../../node_modules/.pnpm/node_modules/@cloudflare/vitest-pool-workers/types/cloudflare-test.d.ts"
+      ],
+      "@cloudflare/workers-types": [
+        "../../node_modules/.pnpm/@cloudflare+workers-types@4.20260405.1/node_modules/@cloudflare/workers-types"
+      ],
+      "*": [
+        "./node_modules/*",
+        "../../node_modules/*"
+      ]
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx"
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "worker-configuration.d.ts"
+  ]
+}

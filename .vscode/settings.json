@@ -1,0 +1,6 @@
+{
+  "typescript.tsdk": "node_modules/.pnpm/typescript@6.0.2/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": false,
+  "js/ts.tsdk.path": "node_modules/.pnpm/typescript@6.0.2/node_modules/typescript/lib",
+  "js/ts.tsdk.promptToUseWorkspaceVersion": false
+}

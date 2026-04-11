@@ -1,0 +1,22 @@
+packages:
+  - apps/*
+  - packages/*
+
+overrides:
+  "drizzle-orm>@prisma/client": "-"
+  "drizzle-orm>prisma": "-"
+  yaml: "2.8.3"
+
+ignoredBuiltDependencies:
+  - '@parcel/watcher'
+  - '@swc/core'
+  - esbuild
+  - workerd
+
+ignoredOptionalDependencies:
+  - '@prisma/client'
+  - prisma
+
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver

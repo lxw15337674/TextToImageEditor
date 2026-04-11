@@ -1,0 +1,4 @@
+# No additional environment variables are required for the starter API by default.
+# Local D1 setup is configured through `wrangler.jsonc` with the `APP_DB` binding.
+#
+# Add project-specific variables here when your own product needs them.

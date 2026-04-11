@@ -1,0 +1,16 @@
+{
+  "name": "@cf-template/config-ts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base.json": "./base.json",
+    "./web.json": "./web.json",
+    "./api.json": "./api.json"
+  },
+  "files": [
+    "base.json",
+    "web.json",
+    "api.json"
+  ]
+}

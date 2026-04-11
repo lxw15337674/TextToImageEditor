@@ -1,0 +1,37 @@
+{
+  "name": "cf-monorepo-template",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm run dev:web",
+    "dev:web": "pnpm --filter cf-template-web dev",
+    "dev:api": "pnpm --filter cf-template-api dev",
+    "dev:all": "pnpm -r --parallel --stream --filter cf-template-web --filter cf-template-api dev",
+    "build": "pnpm run build:web",
+    "build:web": "pnpm --filter cf-template-web build",
+    "build:api": "pnpm --filter cf-template-api build",
+    "build:all": "pnpm run build:web && pnpm run build:api",
+    "start": "pnpm run start:web",
+    "start:web": "pnpm --filter cf-template-web start",
+    "lint": "pnpm run lint:web",
+    "lint:web": "pnpm --filter cf-template-web lint",
+    "typecheck": "pnpm run typecheck:web && pnpm run typecheck:api",
+    "typecheck:web": "pnpm --filter cf-template-web typecheck",
+    "typecheck:api": "pnpm --filter cf-template-api typecheck",
+    "check": "pnpm run lint:web && pnpm run build:web",
+    "db:migrations:list": "pnpm --filter cf-template-api d1:migrations:list:local",
+    "db:migrate": "pnpm --filter cf-template-api d1:migrate:local",
+    "db:migrate:local": "pnpm --filter cf-template-api d1:migrate:local",
+    "db:migrate:remote": "pnpm --filter cf-template-api d1:migrate:remote",
+    "deploy:web": "pnpm --filter cf-template-web deploy:cloudflare",
+    "deploy:web:preview": "pnpm --filter cf-template-web deploy:cloudflare:preview",
+    "deploy:cloudflare": "pnpm run deploy:web",
+    "deploy:cloudflare:preview": "pnpm run deploy:web:preview",
+    "deploy:api": "pnpm --filter cf-template-api deploy"
+  },
+  "packageManager": "pnpm@10.11.1",
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}
