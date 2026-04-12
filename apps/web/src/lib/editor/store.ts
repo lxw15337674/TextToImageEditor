@@ -27,7 +27,7 @@ export function createDefaultDocument(): EditorDocument {
   return {
     id: EDITOR_DOCUMENT_ID,
     content: '',
-    previewMode: 'preview',
+    contentFormat: 'plain',
     exportTheme: 'light',
     exportPreset: '3:4',
     exportResolution: '1080x1440',
@@ -41,9 +41,12 @@ export async function getOrCreateDocument() {
   const existing = await db.documents.get(EDITOR_DOCUMENT_ID);
 
   if (existing) {
+    const existingPreviewMode = (existing as EditorDocument & { previewMode?: 'preview' | 'plain' }).previewMode;
+
     return {
       ...createDefaultDocument(),
       ...existing,
+      contentFormat: existing.contentFormat ?? (existingPreviewMode === 'preview' ? 'markdown' : 'plain'),
     };
   }
 

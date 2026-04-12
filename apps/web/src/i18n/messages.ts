@@ -67,6 +67,7 @@ interface LocaleMessages {
     exportText: string;
     exportImage: string;
     shareImage: string;
+    markdownTab: string;
     editorCardTitle: string;
     editorCardDescription: string;
     editorBodyLabel: string;
@@ -235,9 +236,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportText: 'Export text',
       exportImage: 'Export PNG',
       shareImage: 'Share image',
+      markdownTab: 'Markdown',
       editorCardTitle: 'Editor',
       editorCardDescription: 'Write in Markdown on the left and shape a single-page poster on the right.',
-      editorBodyLabel: 'Markdown body',
+      editorBodyLabel: 'Content',
       previewTab: 'Preview',
       plainTab: 'Plain text',
       mobileEditorTab: 'Edit',
@@ -401,9 +403,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportText: '导出纯文本',
       exportImage: '导出 PNG',
       shareImage: '分享图片',
+      markdownTab: 'Markdown',
       editorCardTitle: '编辑器',
       editorCardDescription: '左侧编辑 Markdown，右侧直接调整单页海报效果。',
-      editorBodyLabel: 'Markdown 正文',
+      editorBodyLabel: '内容',
       previewTab: '渲染预览',
       plainTab: '纯文本',
       mobileEditorTab: '编辑',
@@ -567,9 +570,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportText: 'Export text',
       exportImage: 'Export PNG',
       shareImage: 'Share image',
+      markdownTab: 'Markdown',
       editorCardTitle: 'Editor',
       editorCardDescription: 'Write in Markdown on the left and shape a single-page poster on the right.',
-      editorBodyLabel: 'Markdown body',
+      editorBodyLabel: 'Content',
       previewTab: 'Preview',
       plainTab: 'Plain text',
       mobileEditorTab: 'Edit',
@@ -733,9 +737,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportText: 'テキストを書き出す',
       exportImage: 'PNG を書き出す',
       shareImage: '画像を共有',
+      markdownTab: 'Markdown',
       editorCardTitle: 'エディタ',
       editorCardDescription: '左で Markdown を編集し、右で単一ページのポスターを整えます。',
-      editorBodyLabel: 'Markdown 本文',
+      editorBodyLabel: '本文',
       previewTab: 'プレビュー',
       plainTab: 'プレーンテキスト',
       mobileEditorTab: '編集',

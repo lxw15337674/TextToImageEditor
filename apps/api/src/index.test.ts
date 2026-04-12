@@ -11,6 +11,36 @@ declare module 'cloudflare:test' {
   interface ProvidedEnv extends TestBindings {}
 }
 
+type CreatedNotePayload = {
+  success: true
+  data: {
+    note: {
+      id: string
+      title: string
+    }
+  }
+}
+
+type NotesListPayload = {
+  success: true
+  data: {
+    notes: Array<{ id: string; title: string }>
+  }
+}
+
+type EmptyNotesListPayload = {
+  success: true
+  data: {
+    notes: unknown[]
+  }
+}
+
+type OpenApiPayload = {
+  info: {
+    title: string
+  }
+}
+
 async function initializeTestSchema() {
   if (!workerEnv.APP_DB) {
     throw new Error('Missing D1 binding APP_DB in test environment')
@@ -63,27 +93,14 @@ describe('cf template api', () => {
     )
 
     expect(createResponse.status).toBe(201)
-    const createdPayload = await createResponse.json() as {
-      success: true
-      data: {
-        note: {
-          id: string
-          title: string
-        }
-      }
-    }
+    const createdPayload: CreatedNotePayload = await createResponse.json()
 
     expect(createdPayload.data.note.title).toBe('First template note')
 
     const listResponse = await app.request(`http://localhost${API_PATHS.notes}`, undefined, workerEnv)
     expect(listResponse.status).toBe(200)
 
-    const listPayload = await listResponse.json() as {
-      success: true
-      data: {
-        notes: Array<{ id: string; title: string }>
-      }
-    }
+    const listPayload: NotesListPayload = await listResponse.json()
 
     expect(listPayload.data.notes).toHaveLength(1)
     expect(listPayload.data.notes[0]?.id).toBe(createdPayload.data.note.id)
@@ -104,14 +121,7 @@ describe('cf template api', () => {
       workerEnv,
     )
 
-    const createdPayload = await createResponse.json() as {
-      success: true
-      data: {
-        note: {
-          id: string
-        }
-      }
-    }
+    const createdPayload: CreatedNotePayload = await createResponse.json()
 
     const deleteResponse = await app.request(
       `http://localhost/api/notes/${createdPayload.data.note.id}`,
@@ -124,12 +134,7 @@ describe('cf template api', () => {
     expect(deleteResponse.status).toBe(200)
 
     const listResponse = await app.request(`http://localhost${API_PATHS.notes}`, undefined, workerEnv)
-    const listPayload = await listResponse.json() as {
-      success: true
-      data: {
-        notes: unknown[]
-      }
-    }
+    const listPayload: EmptyNotesListPayload = await listResponse.json()
 
     expect(listPayload.data.notes).toHaveLength(0)
   })
@@ -138,11 +143,7 @@ describe('cf template api', () => {
     const response = await app.request(`http://localhost${API_PATHS.openapi}`, undefined, workerEnv)
     expect(response.status).toBe(200)
 
-    const payload = await response.json() as {
-      info: {
-        title: string
-      }
-    }
+    const payload: OpenApiPayload = await response.json()
 
     expect(payload.info.title).toBe(API_DOC_INFO.title)
   })

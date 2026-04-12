@@ -1,10 +1,10 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from 'next';
 import { LOCALES } from '@/i18n/config';
 import { toAbsoluteUrl } from '@/lib/seo/site-origin';
 
 const INDEXABLE_LOCALIZED_PATHS = ['/', '/starter', '/notes'];
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
   return LOCALES.flatMap((locale) =>

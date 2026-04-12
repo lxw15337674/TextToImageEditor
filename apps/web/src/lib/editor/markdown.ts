@@ -1,6 +1,6 @@
 'use client';
 
-import type { EditorDocument, ExportPreset, ExportResolution, PosterPage } from '@/lib/editor/types';
+import type { ContentFormat, EditorDocument, ExportPreset, ExportResolution, PosterPage } from '@/lib/editor/types';
 
 export const POSTER_DIMENSIONS: Record<ExportResolution, { width: number; height: number; preset: ExportPreset }> = {
   '1080x1080': { width: 1080, height: 1080, preset: '1:1' },
@@ -17,11 +17,11 @@ export const PRESET_RESOLUTIONS: Record<ExportPreset, ExportResolution[]> = {
 };
 
 export function createDocumentSignature(
-  document: Pick<EditorDocument, 'content' | 'previewMode' | 'exportTheme' | 'exportPreset' | 'exportResolution' | 'exportTemplate'>,
+  document: Pick<EditorDocument, 'content' | 'contentFormat' | 'exportTheme' | 'exportPreset' | 'exportResolution' | 'exportTemplate'>,
 ) {
   return JSON.stringify({
     content: document.content,
-    previewMode: document.previewMode,
+    contentFormat: document.contentFormat,
     exportTheme: document.exportTheme,
     exportPreset: document.exportPreset,
     exportResolution: document.exportResolution,
@@ -67,6 +67,20 @@ export function parseMarkdownImport(source: string) {
 
 export function parsePlainTextImport(source: string) {
   return source.replace(/\r\n/g, '\n');
+}
+
+export function splitPlainTextBlocks(content: string) {
+  const normalized = content.replace(/\r\n/g, '\n').trim();
+
+  if (!normalized) {
+    return [];
+  }
+
+  return normalized.split(/\n{2,}/).map((block) => block.trim()).filter(Boolean);
+}
+
+export function splitContentBlocks(content: string, contentFormat: ContentFormat) {
+  return contentFormat === 'plain' ? splitPlainTextBlocks(content) : splitMarkdownBlocks(content);
 }
 
 function formatFileTimestamp(date = new Date()) {
@@ -206,10 +220,15 @@ export function createManualMilestoneLabel() {
   return `Milestone ${formatTimestamp(Date.now())}`;
 }
 
-export function normalizeImportedDocument(currentDocument: EditorDocument, nextContent: string): EditorDocument {
+export function normalizeImportedDocument(
+  currentDocument: EditorDocument,
+  nextContent: string,
+  contentFormat = currentDocument.contentFormat,
+): EditorDocument {
   return {
     ...currentDocument,
     content: nextContent.replace(/\r\n/g, '\n'),
+    contentFormat,
   };
 }
 

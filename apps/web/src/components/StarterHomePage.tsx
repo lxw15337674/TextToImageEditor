@@ -64,7 +64,7 @@ export function StarterHomePage({ locale }: StarterHomePageProps) {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {messages.featureItems.map((item, index) => {
-          const Icon = featureIcons[index % featureIcons.length];
+          const Icon = featureIcons[index % featureIcons.length] ?? Globe2;
           return (
             <Card key={item.title} className="border-border/70">
               <CardHeader className="space-y-4">

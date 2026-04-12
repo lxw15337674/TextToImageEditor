@@ -8,12 +8,11 @@ import { EditorView, keymap } from '@codemirror/view';
 import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
 import { startTransition, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { Download, History, Import, LoaderCircle, PencilLine, Redo2, RotateCcw, Share2, Undo2 } from 'lucide-react';
+import { Download, History, Import, LoaderCircle, Redo2, RotateCcw, Share2, Undo2 } from 'lucide-react';
 import Zoom from 'react-medium-image-zoom';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +23,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
   buildMarkdownExport,
   buildPlainTextExport,
@@ -52,7 +54,7 @@ import {
   trimAutoSnapshots,
   updateVersionLabel,
 } from '@/lib/editor/store';
-import type { EditorDocument, EditorVersion, ExportResolution, ExportTemplate, ExportTheme, SaveStatus, VersionKind } from '@/lib/editor/types';
+import type { ContentFormat, EditorDocument, EditorVersion, ExportResolution, ExportTemplate, ExportTheme, SaveStatus, VersionKind } from '@/lib/editor/types';
 import type { Locale } from '@/i18n/config';
 import { getMessages } from '@/i18n/messages';
 import { cn } from '@/lib/utils';
@@ -125,6 +127,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
 
   const [documentState, setDocumentState] = useState<EditorDocument | null>(null);
   const [versions, setVersions] = useState<EditorVersion[]>([]);
+  const [selectedVersionId, setSelectedVersionId] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('saved');
   const [canUndo, setCanUndo] = useState(false);
@@ -141,10 +144,13 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   const previewTheme = documentState?.exportTheme;
   const previewResolution = documentState?.exportResolution;
   const previewTemplate = documentState?.exportTemplate;
+  const contentFormat = documentState?.contentFormat ?? 'plain';
+  const isPlainTextMode = contentFormat === 'plain';
 
+  const baseEditorExtensions = useMemo(() => [history(), EditorView.lineWrapping, keymap.of(historyKeymap)], []);
   const editorExtensions = useMemo(
-    () => [markdown(), history(), EditorView.lineWrapping, keymap.of(historyKeymap)],
-    [],
+    () => (isPlainTextMode ? baseEditorExtensions : [markdown(), ...baseEditorExtensions]),
+    [baseEditorExtensions, isPlainTextMode],
   );
 
   useEffect(() => {
@@ -222,6 +228,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
       try {
         const blob = await renderPosterBlob(
           previewContent,
+          contentFormat,
           previewTheme,
           previewResolution,
           previewTemplate,
@@ -255,6 +262,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     };
   }, [
     previewContent,
+    contentFormat,
     previewResolution,
     previewTemplate,
     previewTheme,
@@ -398,10 +406,31 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   }, [
     mobilePane,
     previewContent,
+    contentFormat,
     documentState?.exportResolution,
     documentState?.exportTemplate,
     documentState?.exportTheme,
   ]);
+
+  useEffect(() => {
+    if (!isHistoryOpen) {
+      return;
+    }
+
+    if (versions.length === 0) {
+      setSelectedVersionId(null);
+      return;
+    }
+
+    setSelectedVersionId((currentId) => {
+      if (currentId && versions.some((version) => version.id === currentId)) {
+        return currentId;
+      }
+
+      const firstVersion = versions[0];
+      return firstVersion ? firstVersion.id : null;
+    });
+  }, [isHistoryOpen, versions]);
 
   function syncHistoryDepth(view: EditorView) {
     setCanUndo(undoDepth(view.state) > 0);
@@ -482,8 +511,9 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     try {
       await createVersionFromDocument(documentState, 'import-backup', messages.versionKindImportBackup);
       const content = await selectedFile.text();
-      const nextContent = selectedFile.name.toLowerCase().endsWith('.md') ? parseMarkdownImport(content) : parsePlainTextImport(content);
-      const nextDocument = normalizeImportedDocument(documentState, nextContent);
+      const nextContentFormat: ContentFormat = selectedFile.name.toLowerCase().endsWith('.md') ? 'markdown' : 'plain';
+      const nextContent = nextContentFormat === 'markdown' ? parseMarkdownImport(content) : parsePlainTextImport(content);
+      const nextDocument = normalizeImportedDocument(documentState, nextContent, nextContentFormat);
       const savedDocument = await persistNow(nextDocument);
       lastVersionSignatureRef.current = createSnapshotSignature(savedDocument);
       await refreshVersions();
@@ -574,6 +604,15 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     }
   }
 
+  function handleHistoryOpenChange(open: boolean) {
+    setIsHistoryOpen(open);
+
+    if (!open) {
+      setEditingLabelId(null);
+      setEditingLabelValue('');
+    }
+  }
+
   async function exportPosterImage(shareInsteadOfDownload: boolean) {
     if (!documentState) {
       return;
@@ -584,6 +623,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     try {
       const blob = await renderPosterBlob(
         documentState.content,
+        documentState.contentFormat,
         documentState.exportTheme,
         documentState.exportResolution,
         documentState.exportTemplate,
@@ -632,6 +672,8 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   const resolutionOptions = PRESET_RESOLUTIONS[documentState.exportPreset];
   const dimensions = POSTER_DIMENSIONS[documentState.exportResolution];
   const posterPreviewScale = Math.min(1, 420 / dimensions.width);
+  const selectedVersion = versions.find((version) => version.id === selectedVersionId) ?? null;
+
   return (
     <>
       <input ref={fileInputRef} type="file" accept=".md,.txt,text/plain,text/markdown" className="hidden" onChange={handleImportFile} />
@@ -680,7 +722,31 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2 px-4 pb-4 pt-4">
+                  <div className="flex flex-wrap items-center gap-3 px-4 pb-4 pt-4">
+                    <div className="inline-flex rounded-full border border-border/70 bg-background/80 p-1">
+                      <button
+                        type="button"
+                        className={cn(
+                          'rounded-full px-3 py-1.5 text-sm transition-colors',
+                          isPlainTextMode ? 'text-muted-foreground' : 'bg-primary text-primary-foreground',
+                        )}
+                        onClick={() => handleDocumentChange('contentFormat', 'markdown')}
+                        disabled={isBusy}
+                      >
+                        {messages.markdownTab}
+                      </button>
+                      <button
+                        type="button"
+                        className={cn(
+                          'rounded-full px-3 py-1.5 text-sm transition-colors',
+                          isPlainTextMode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground',
+                        )}
+                        onClick={() => handleDocumentChange('contentFormat', 'plain')}
+                        disabled={isBusy}
+                      >
+                        {messages.plainTab}
+                      </button>
+                    </div>
                     <Button type="button" variant="outline" className="gap-2" onClick={handleUndo} disabled={!canUndo || isBusy}>
                       <Undo2 className="size-4" />
                       {messages.undo}
@@ -787,8 +853,12 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                         value={documentState.exportPreset}
                         onValueChange={(value) => {
                           const preset = value as EditorDocument['exportPreset'];
+                          const nextResolution = PRESET_RESOLUTIONS[preset][0];
                           handleDocumentChange('exportPreset', preset);
-                          handleDocumentChange('exportResolution', PRESET_RESOLUTIONS[preset][0]);
+
+                          if (nextResolution) {
+                            handleDocumentChange('exportResolution', nextResolution);
+                          }
                         }}
                       >
                         <SelectTrigger>
@@ -872,7 +942,8 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                               }}
                             >
                               <PosterCanvas
-                                markdown={previewContent}
+                                content={previewContent}
+                                contentFormat={contentFormat}
                                 theme={documentState.exportTheme}
                                 resolution={documentState.exportResolution}
                                 template={documentState.exportTemplate}
@@ -908,85 +979,139 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
         </Card>
       </main>
 
-      <Dialog open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
-        <DialogContent className="max-h-[85vh] max-w-4xl overflow-hidden p-0">
-          <DialogHeader className="border-b border-border/60 px-6 py-5">
-            <DialogTitle>{messages.historyTitle}</DialogTitle>
-            <DialogDescription>{messages.historyDescription}</DialogDescription>
-          </DialogHeader>
+      <Sheet open={isHistoryOpen} onOpenChange={handleHistoryOpenChange}>
+        <SheetContent side="right" className="flex h-full w-full max-w-none flex-col border-l border-border/70 bg-background p-0 sm:max-w-xl">
+          <SheetHeader className="border-b border-border/60 px-5 py-4">
+            <SheetTitle className="text-base font-semibold">{messages.historyTitle}</SheetTitle>
+            <SheetDescription className="text-xs leading-5 text-muted-foreground">{messages.historyDescription}</SheetDescription>
+          </SheetHeader>
 
-          <div className="max-h-[65vh] overflow-y-auto px-6 py-5">
-            {versions.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border/70 px-4 py-8 text-sm text-muted-foreground">
-                {messages.emptyHistory}
-              </div>
-            ) : (
-              <div className="grid gap-3">
-                {versions.map((version) => (
-                  <div key={version.id} className="rounded-[1.5rem] border border-border/70 bg-background/70 p-4">
-                    <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-                      <div className="min-w-0 flex-1 space-y-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className={cn('rounded-full border px-2.5 py-1 text-xs font-medium', VERSION_KIND_STYLES[version.kind])}>
+          <div className="flex min-h-0 flex-1 flex-col">
+            <ScrollArea className="min-h-0 flex-1">
+              <div className="space-y-2 p-4">
+                {versions.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border/70 px-4 py-8 text-sm text-muted-foreground">
+                    {messages.emptyHistory}
+                  </div>
+                ) : (
+                  versions.map((version) => {
+                    const isSelected = selectedVersion?.id === version.id;
+
+                    return (
+                      <button
+                        key={version.id}
+                        type="button"
+                        className={cn(
+                          'w-full rounded-xl border px-3 py-3 text-left transition-colors',
+                          isSelected
+                            ? 'border-primary/45 bg-primary/10'
+                            : 'border-border/70 bg-background/40 hover:bg-accent/35',
+                        )}
+                        onClick={() => {
+                          setSelectedVersionId(version.id);
+
+                          if (editingLabelId && editingLabelId !== version.id) {
+                            setEditingLabelId(null);
+                            setEditingLabelValue('');
+                          }
+                        }}
+                      >
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className={cn('rounded-full border px-2 py-0.5 text-[11px] font-medium', VERSION_KIND_STYLES[version.kind])}>
                             {getVersionKindLabel(version.kind, messages)}
                           </span>
-                          <span className="text-xs text-muted-foreground">{formatTimestamp(version.createdAt)}</span>
+                          <span className="truncate text-[11px] tabular-nums text-muted-foreground">{formatTimestamp(version.createdAt)}</span>
                         </div>
 
-                        {editingLabelId === version.id ? (
-                          <div className="flex flex-col gap-2 sm:flex-row">
-                            <Input value={editingLabelValue} onChange={(event) => setEditingLabelValue(event.target.value)} placeholder={messages.versionLabelPlaceholder} />
-                            <div className="flex gap-2">
-                              <Button type="button" size="sm" onClick={() => void handleSaveVersionLabel(version.id)}>
-                                {messages.saveVersionLabel}
-                              </Button>
-                              <Button type="button" size="sm" variant="outline" onClick={() => setEditingLabelId(null)}>
-                                {messages.cancel}
-                              </Button>
-                            </div>
-                          </div>
-                        ) : version.label ? (
-                          <div className="text-sm font-medium text-foreground">{version.label}</div>
-                        ) : null}
+                        <div className="mt-2 truncate text-sm font-medium text-foreground">
+                          {version.label || getVersionKindLabel(version.kind, messages)}
+                        </div>
 
-                        <div className="text-sm leading-6 text-muted-foreground">{summarizeContent(version.contentSnapshot) || messages.emptyVersionSummary}</div>
-                      </div>
+                        <p className="mt-1 max-h-10 overflow-hidden break-all text-xs leading-5 text-muted-foreground">
+                          {summarizeContent(version.contentSnapshot) || messages.emptyVersionSummary}
+                        </p>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </ScrollArea>
 
-                      <div className="flex flex-wrap gap-2 xl:justify-end">
-                        <Button type="button" size="sm" onClick={() => void handleRestoreVersion(version)} disabled={isBusy}>
-                          {messages.restoreVersion}
+            <Separator />
+
+            <div className="space-y-3 p-4">
+              {selectedVersion ? (
+                <>
+                  <div className="rounded-lg border border-border/70 bg-background/70 px-3 py-2">
+                    <div className="truncate text-sm font-medium text-foreground">
+                      {selectedVersion.label || getVersionKindLabel(selectedVersion.kind, messages)}
+                    </div>
+                    <div className="mt-1 text-xs tabular-nums text-muted-foreground">{formatTimestamp(selectedVersion.createdAt)}</div>
+                  </div>
+
+                  {editingLabelId === selectedVersion.id ? (
+                    <div className="space-y-2">
+                      <Input
+                        value={editingLabelValue}
+                        onChange={(event) => setEditingLabelValue(event.target.value)}
+                        placeholder={messages.versionLabelPlaceholder}
+                      />
+
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="button" size="sm" onClick={() => void handleSaveVersionLabel(selectedVersion.id)} disabled={isBusy}>
+                          {messages.saveVersionLabel}
                         </Button>
-                        <Button type="button" size="sm" variant="outline" onClick={() => void handleDuplicateAsMilestone(version)} disabled={isBusy}>
-                          {messages.saveAsMilestone}
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingLabelId(null);
+                            setEditingLabelValue('');
+                          }}
+                          disabled={isBusy}
+                        >
+                          {messages.cancel}
                         </Button>
-                        {version.kind === 'milestone' ? (
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            onClick={() => {
-                              setEditingLabelId(version.id);
-                              setEditingLabelValue(version.label ?? '');
-                            }}
-                          >
-                            <PencilLine className="size-4" />
-                            {messages.renameMilestone}
-                          </Button>
-                        ) : null}
-                        {version.kind === 'auto' ? (
-                          <Button type="button" size="sm" variant="outline" onClick={() => void handleDeleteAutoVersion(version.id)}>
-                            {messages.deleteVersion}
-                          </Button>
-                        ) : null}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ) : (
+                    <div className="flex flex-wrap gap-2">
+                      <Button type="button" size="sm" onClick={() => void handleRestoreVersion(selectedVersion)} disabled={isBusy}>
+                        {messages.restoreVersion}
+                      </Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => void handleDuplicateAsMilestone(selectedVersion)} disabled={isBusy}>
+                        {messages.saveAsMilestone}
+                      </Button>
+                      {selectedVersion.kind === 'milestone' ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingLabelId(selectedVersion.id);
+                            setEditingLabelValue(selectedVersion.label ?? '');
+                          }}
+                          disabled={isBusy}
+                        >
+                          {messages.renameMilestone}
+                        </Button>
+                      ) : null}
+                      {selectedVersion.kind === 'auto' ? (
+                        <Button type="button" size="sm" variant="outline" onClick={() => void handleDeleteAutoVersion(selectedVersion.id)} disabled={isBusy}>
+                          {messages.deleteVersion}
+                        </Button>
+                      ) : null}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="text-xs text-muted-foreground">{messages.emptyHistory}</div>
+              )}
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

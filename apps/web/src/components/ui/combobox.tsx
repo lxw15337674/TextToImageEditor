@@ -54,7 +54,7 @@ function defaultItemToValue(item: unknown) {
     const value = (item as { value?: unknown }).value;
     if (typeof value === 'string') return value;
   }
-  return String(item ?? '');
+  return '';
 }
 
 function defaultItemToLabel(item: unknown) {

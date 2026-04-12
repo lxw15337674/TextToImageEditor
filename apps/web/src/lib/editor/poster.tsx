@@ -2,11 +2,12 @@
 
 import { createRoot } from 'react-dom/client';
 import { domToBlob } from 'modern-screenshot';
-import { POSTER_DIMENSIONS, splitMarkdownBlocks, splitOversizedBlock } from '@/lib/editor/markdown';
-import type { ExportResolution, ExportTemplate, ExportTheme } from '@/lib/editor/types';
+import { POSTER_DIMENSIONS, splitContentBlocks, splitOversizedBlock } from '@/lib/editor/markdown';
+import type { ContentFormat, ExportResolution, ExportTemplate, ExportTheme } from '@/lib/editor/types';
 
 interface PosterCanvasProps {
-  markdown: string;
+  content: string;
+  contentFormat: ContentFormat;
   theme: ExportTheme;
   resolution: ExportResolution;
   template: ExportTemplate;
@@ -33,8 +34,18 @@ function createHost() {
   return host;
 }
 
-function createTextBlocks(markdown: string) {
-  const normalized = markdown
+function createTextBlocks(content: string, contentFormat: ContentFormat) {
+  if (contentFormat === 'plain') {
+    const normalized = content.replace(/\r\n/g, '\n').trim();
+
+    if (!normalized) {
+      return [];
+    }
+
+    return normalized.split(/\n{2,}/).map((item) => item.trim()).filter(Boolean);
+  }
+
+  const normalized = content
     .replace(/\r\n/g, '\n')
     .replace(/^#{1,6}\s+/gm, '')
     .replace(/^>\s?/gm, '')
@@ -347,9 +358,9 @@ function SpotifyTemplate({
   );
 }
 
-export function PosterCanvas({ markdown, theme, resolution, template, pageIndex, pageCount }: PosterCanvasProps) {
+export function PosterCanvas({ content, contentFormat, theme, resolution, template, pageIndex, pageCount }: PosterCanvasProps) {
   const { width, height } = POSTER_DIMENSIONS[resolution];
-  const blocks = createTextBlocks(markdown);
+  const blocks = createTextBlocks(content, contentFormat);
 
   switch (template) {
     case 'image-background':
@@ -361,11 +372,13 @@ export function PosterCanvas({ markdown, theme, resolution, template, pageIndex,
   }
 }
 
-async function posterFits(markdown: string, theme: ExportTheme, resolution: ExportResolution, template: ExportTemplate) {
+async function posterFits(content: string, contentFormat: ContentFormat, theme: ExportTheme, resolution: ExportResolution, template: ExportTemplate) {
   const host = createHost();
   const root = createRoot(host);
 
-  root.render(<PosterCanvas markdown={markdown} theme={theme} resolution={resolution} template={template} pageIndex={1} pageCount={1} />);
+  root.render(
+    <PosterCanvas content={content} contentFormat={contentFormat} theme={theme} resolution={resolution} template={template} pageIndex={1} pageCount={1} />,
+  );
   await waitForPaint();
 
   const body = host.querySelector<HTMLElement>('[data-poster-body]');
@@ -379,11 +392,12 @@ async function posterFits(markdown: string, theme: ExportTheme, resolution: Expo
 
 export async function paginateMarkdownForPoster(
   content: string,
+  contentFormat: ContentFormat,
   theme: ExportTheme,
   resolution: ExportResolution,
   template: ExportTemplate,
 ) {
-  const blocks = splitMarkdownBlocks(content);
+  const blocks = splitContentBlocks(content, contentFormat);
 
   if (blocks.length === 0) {
     return [''];
@@ -395,7 +409,7 @@ export async function paginateMarkdownForPoster(
   for (const block of blocks) {
     const candidate = [...currentBlocks, block].join('\n\n');
 
-    if (await posterFits(candidate, theme, resolution, template)) {
+    if (await posterFits(candidate, contentFormat, theme, resolution, template)) {
       currentBlocks.push(block);
       continue;
     }
@@ -410,7 +424,7 @@ export async function paginateMarkdownForPoster(
     for (const segment of splitBlocks) {
       const segmentCandidate = [...nextBlocks, segment].join('\n\n');
 
-      if (await posterFits(segmentCandidate, theme, resolution, template)) {
+      if (await posterFits(segmentCandidate, contentFormat, theme, resolution, template)) {
         nextBlocks.push(segment);
         continue;
       }
@@ -433,7 +447,8 @@ export async function paginateMarkdownForPoster(
 }
 
 export async function renderPosterBlob(
-  markdown: string,
+  content: string,
+  contentFormat: ContentFormat,
   theme: ExportTheme,
   resolution: ExportResolution,
   template: ExportTemplate,
@@ -445,7 +460,8 @@ export async function renderPosterBlob(
 
   root.render(
     <PosterCanvas
-      markdown={markdown}
+      content={content}
+      contentFormat={contentFormat}
       theme={theme}
       resolution={resolution}
       template={template}

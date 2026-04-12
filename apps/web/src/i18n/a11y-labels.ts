@@ -27,7 +27,7 @@ function resolveDocumentLocale(documentLang: string | null | undefined): Locale 
   return isLocale(baseLocale) ? baseLocale : DEFAULT_LOCALE;
 }
 
-export function getLocalizedA11yLabel(key: A11yLabelKey, documentLang?: string | null | undefined) {
+export function getLocalizedA11yLabel(key: A11yLabelKey, documentLang?: string | null) {
   const locale =
     documentLang !== undefined
       ? resolveDocumentLocale(documentLang)

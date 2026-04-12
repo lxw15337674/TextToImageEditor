@@ -1,4 +1,4 @@
-export type PreviewMode = 'preview' | 'plain';
+export type ContentFormat = 'markdown' | 'plain';
 export type SaveStatus = 'dirty' | 'saving' | 'saved';
 export type ExportTheme = 'light' | 'dark';
 export type ExportPreset = '1:1' | '3:4' | '9:16';
@@ -9,7 +9,7 @@ export type VersionKind = 'auto' | 'milestone' | 'import-backup' | 'rollback-bac
 export interface EditorDocument {
   id: string;
   content: string;
-  previewMode: PreviewMode;
+  contentFormat: ContentFormat;
   exportTheme: ExportTheme;
   exportPreset: ExportPreset;
   exportResolution: ExportResolution;

@@ -73,7 +73,7 @@ export function getAcceptedLanguages(acceptLanguage: string | null | undefined):
     .split(',')
     .map((part) => {
       const [tagPart, qualityPart] = part.trim().split(';q=');
-      const tag = tagPart.trim();
+      const tag = (tagPart ?? '').trim();
       const quality = qualityPart ? Number.parseFloat(qualityPart) : 1;
 
       return {
