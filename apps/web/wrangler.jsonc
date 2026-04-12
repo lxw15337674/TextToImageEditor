@@ -18,8 +18,12 @@
     "binding": "IMAGES"
   },
   "vars": {
-    "NEXT_PUBLIC_SITE_URL": "https://example.com",
-    "NEXT_PUBLIC_API_BASE_URL": "https://api.example.com"
+    "NEXT_PUBLIC_SITE_URL": "https://hub.bhwa233.com",
+    "NEXT_PUBLIC_API_BASE_URL": "https://api.bhwa233.com",
+    "NEXT_PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAC5ycpUTycvfVE8g",
+    "NEXT_PUBLIC_GA_MEASUREMENT_ID": "G-VQSGGPC9RP",
+    "GOOGLE_SITE_VERIFICATION": "google-site-verification-token",
+    "SITE_LAST_MODIFIED": "2026-04-12T00:00:00.000Z"
   },
   "observability": {
     "logs": {

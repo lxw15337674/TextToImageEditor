@@ -1,7 +1,12 @@
-import { env as workerEnv } from 'cloudflare:test'
+import { createExecutionContext, env as workerEnv } from 'cloudflare:test'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { API_DOC_INFO, API_PATHS, createHealthResponse } from '@cf-template/shared'
-import { app } from './index'
+import {
+  API_DOC_INFO as LINKDISK_API_DOC_INFO,
+  API_PATHS as LINKDISK_API_PATHS,
+  createHealthResponse as createLinkDiskHealthResponse
+} from '@linkdisk/shared'
+import worker, { app } from './index'
 
 interface TestBindings {
   APP_DB?: D1Database
@@ -40,6 +45,14 @@ type OpenApiPayload = {
     title: string
   }
 }
+
+type LinkDiskOpenApiPayload = {
+  info: {
+    title: string
+  }
+}
+
+const workerBindings = workerEnv as unknown as Parameters<typeof worker.fetch>[1]
 
 async function initializeTestSchema() {
   if (!workerEnv.APP_DB) {
@@ -146,5 +159,31 @@ describe('cf template api', () => {
     const payload: OpenApiPayload = await response.json()
 
     expect(payload.info.title).toBe(API_DOC_INFO.title)
+  })
+
+  it('routes LinkDisk health requests through the default worker', async () => {
+    const ctx = createExecutionContext()
+    const response = await worker.fetch(
+      new Request(`http://localhost${LINKDISK_API_PATHS.health}`),
+      workerBindings,
+      ctx,
+    )
+
+    expect(response.status).toBe(200)
+    await expect(response.json()).resolves.toEqual(createLinkDiskHealthResponse())
+  })
+
+  it('exposes LinkDisk OpenAPI metadata through the default worker', async () => {
+    const ctx = createExecutionContext()
+    const response = await worker.fetch(
+      new Request(`http://localhost${LINKDISK_API_PATHS.openapi}`),
+      workerBindings,
+      ctx,
+    )
+
+    expect(response.status).toBe(200)
+    const payload: LinkDiskOpenApiPayload = await response.json()
+
+    expect(payload.info.title).toBe(LINKDISK_API_DOC_INFO.title)
   })
 })

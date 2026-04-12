@@ -1,23 +1,32 @@
 # tools
 
-Cloudflare-oriented pnpm monorepo template for building a localized web app and a Worker API from the same codebase.
+Cloudflare-oriented pnpm monorepo for a localized web app and a Worker API from the same codebase. The current repo contains two product surfaces:
+
+- `Text to Image Editor`: a localized editor for writing, versioned drafting, and generating shareable images
+- `LinkDisk`: temporary text and file sharing under `/:locale/linkdisk`
 
 ## What You Get
 
 - Localized Next.js frontend under `apps/web`
 - Hono + Cloudflare Workers API under `apps/api`
 - OpenAPI JSON and Scalar docs out of the box
-- A minimal D1-backed `notes` example to show end-to-end data flow
+- A D1-backed `notes` example to keep the starter API surface small and testable
+- LinkDisk web routes, clipboard sharing flow, and shared contracts in the same deployments
 - Shared workspace contracts in `packages/shared`
 - Shared TypeScript presets in `packages/config-ts`
 
-This repository is intentionally opinionated about infrastructure and intentionally light on product logic. It keeps the reusable shell and removes domain-specific upload, sharing, storage, and archival features.
+This repository is infrastructure-opinionated, but it now includes a production-oriented LinkDisk module with temporary shares, attachments, and archival hooks.
 
 ## Starter Surface
 
 Web routes:
 
 - `/:locale`
+- `/:locale/linkdisk`
+- `/:locale/linkdisk/use-cases`
+- `/:locale/linkdisk/clipboard/recent`
+- `/:locale/linkdisk/s/:shareId`
+- `/:locale/linkdisk/m/:manageId`
 - `/:locale/starter`
 - `/:locale/notes`
 
@@ -29,12 +38,16 @@ API routes:
 - `DELETE /api/notes/:id`
 - `GET /openapi.json`
 - `GET /docs`
+- `GET /api/linkdisk/health`
+- `GET /openapi/linkdisk.json`
+- `GET /docs/linkdisk`
 
 ## Stack
 
 - `apps/web`: Next.js 15, Vinext, React 19, next-intl, next-themes, shadcn-style UI primitives
 - `apps/api`: Hono, Drizzle ORM, Cloudflare Workers, D1, OpenAPI via `@hono/zod-openapi`
-- `packages/shared`: API paths and transport types shared across apps
+- `packages/shared`: starter API paths and transport types
+- `packages/linkdisk-shared`: LinkDisk API paths and transport types
 
 ## Repository Layout
 
@@ -83,6 +96,7 @@ Required web values:
 
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_API_BASE_URL`
+- `NEXT_PUBLIC_TURNSTILE_SITE_KEY` when LinkDisk Turnstile verification is enabled
 
 API local example:
 
@@ -91,8 +105,29 @@ API local example:
 API binding:
 
 - `APP_DB` in `apps/api/wrangler.jsonc`
+- `LINKDISK_R2` in `apps/api/wrangler.jsonc` for LinkDisk body/object storage
 
-The starter API does not require extra secrets until you add your own product features.
+Required LinkDisk API secrets and vars for production:
+
+- `ADMIN_JWT_SECRET`
+- `TELEGRAM_API_TOKEN`
+- `TELEGRAM_CHAT_ID`
+- `TURNSTILE_SECRET_KEY` when Turnstile is enabled
+- `TURNSTILE_SITE_KEY` should match `NEXT_PUBLIC_TURNSTILE_SITE_KEY`
+
+Optional LinkDisk API vars:
+
+- `DASHBOARD_ACCESS_TOKEN`
+- `INSTANT_UPLOAD_ENABLED`
+- `R2_DIRECT_UPLOAD_ENABLED`
+- `DOWNLOAD_PREFETCH_WINDOW`
+- `CLIPBOARD_MAX_BODY_CHARS`
+- `CLIPBOARD_MAX_ATTACHMENTS`
+- `CLIPBOARD_ATTACHMENT_MAX_MB`
+- `CLIPBOARD_MAX_EXPIRE_DAYS`
+- `CLIPBOARD_DRAFT_TTL_HOURS`
+- `CLIPBOARD_UPLOAD_TTL_HOURS`
+- `CLIPBOARD_CLEANUP_BATCH_SIZE`
 
 ## Database
 
@@ -114,7 +149,10 @@ Apply remote migrations:
 pnpm db:migrate:remote
 ```
 
-The current D1 example schema is defined in `apps/api/src/schema.ts` and migrated by `apps/api/migrations/0000_create_notes.sql`.
+The current D1 schema includes:
+
+- starter notes in `apps/api/migrations/0000_create_notes.sql`
+- LinkDisk clipboard/object tables in `apps/api/migrations/0001_linkdisk_clipboard_body_r2.sql`, `0002_linkdisk_attachment_object_reuse.sql`, and `0003_linkdisk_telegram_file_path_cache.sql`
 
 ## Validation
 
@@ -155,3 +193,13 @@ Before deployment, update:
 
 - `apps/web/wrangler.jsonc`
 - `apps/api/wrangler.jsonc`
+
+Production checklist for LinkDisk:
+
+1. Replace placeholder public URLs and bucket/database identifiers in both Wrangler configs.
+2. Create the `LINKDISK_R2` bucket and bind it in `apps/api/wrangler.jsonc`.
+3. Configure API secrets: `ADMIN_JWT_SECRET`, `TELEGRAM_API_TOKEN`, `TELEGRAM_CHAT_ID`, `TURNSTILE_SECRET_KEY`.
+4. Keep `TURNSTILE_SITE_KEY` on the API side aligned with `NEXT_PUBLIC_TURNSTILE_SITE_KEY` on the web side.
+5. Apply D1 migrations before deploy with `pnpm db:migrate:remote`.
+6. Run `pnpm verify:deploy-config`.
+7. Run `pnpm lint && pnpm typecheck && pnpm build:web && pnpm build:api && pnpm --filter cf-template-api test`.

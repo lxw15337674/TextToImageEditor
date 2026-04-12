@@ -1,4 +1,5 @@
 import * as React from "react"
+import ReactTextareaAutosize from "react-textarea-autosize"
 
 import { cn } from "@/lib/utils"
 
@@ -19,4 +20,18 @@ const Textarea = React.forwardRef<
 })
 Textarea.displayName = "Textarea"
 
-export { Textarea, textareaClassName }
+const TextareaAutosize = React.forwardRef<
+  HTMLTextAreaElement,
+  React.ComponentProps<typeof ReactTextareaAutosize>
+>(({ className, ...props }, ref) => {
+  return (
+    <ReactTextareaAutosize
+      className={cn(textareaClassName, className)}
+      ref={ref}
+      {...props}
+    />
+  )
+})
+TextareaAutosize.displayName = "TextareaAutosize"
+
+export { Textarea, TextareaAutosize, textareaClassName }

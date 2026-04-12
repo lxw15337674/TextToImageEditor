@@ -10,6 +10,10 @@ interface LocaleMessages {
     navStarter: string;
     navNotes: string;
     openEditor: string;
+    featureLauncher: string;
+    featureMenuDescription: string;
+    featureGroupCore: string;
+    featureGroupMore: string;
     themeLabel: string;
     themeLight: string;
     themeDark: string;
@@ -220,6 +224,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       navStarter: 'Starter Guide',
       navNotes: 'Poster Editor',
       openEditor: 'Open Editor',
+      featureLauncher: 'Features',
+      featureMenuDescription: 'Jump between the main product surfaces from one place.',
+      featureGroupCore: 'Core',
+      featureGroupMore: 'More',
       themeLabel: 'Theme',
       themeLight: 'Light',
       themeDark: 'Dark',
@@ -532,6 +540,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       navStarter: '模板说明',
       navNotes: '海报编辑器',
       openEditor: '打开编辑器',
+      featureLauncher: '功能',
+      featureMenuDescription: '把主要功能入口集中在这里，后面扩展也只需要改配置。',
+      featureGroupCore: '核心功能',
+      featureGroupMore: '更多',
       themeLabel: '主题',
       themeLight: '浅色',
       themeDark: '深色',
@@ -838,6 +850,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       navStarter: 'Guía',
       navNotes: 'Poster Editor',
       openEditor: 'Abrir editor',
+      featureLauncher: 'Funciones',
+      featureMenuDescription: 'Jump between the main product areas from one place.',
+      featureGroupCore: 'Principal',
+      featureGroupMore: 'Más',
       themeLabel: 'Tema',
       themeLight: 'Claro',
       themeDark: 'Oscuro',
@@ -1149,6 +1165,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       navStarter: 'ガイド',
       navNotes: 'Poster Editor',
       openEditor: 'エディタを開く',
+      featureLauncher: '機能',
+      featureMenuDescription: '主な機能への移動先を 1 か所にまとめています。',
+      featureGroupCore: '主要機能',
+      featureGroupMore: 'その他',
       themeLabel: 'テーマ',
       themeLight: 'ライト',
       themeDark: 'ダーク',

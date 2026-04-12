@@ -7,7 +7,7 @@ const tsconfigRootDir = fileURLToPath(new URL('.', import.meta.url));
 
 export default [
   {
-    ignores: ['dist/**', 'coverage/**', 'worker-configuration.d.ts', 'eslint.config.mjs', 'vitest.config.mts'],
+    ignores: ['dist/**', 'coverage/**', '.wrangler/**', 'worker-configuration.d.ts', 'eslint.config.mjs', 'vitest.config.mts'],
   },
   js.configs.recommended,
   ...tsPlugin.configs['flat/recommended-type-checked'],

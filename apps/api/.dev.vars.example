@@ -1,4 +1,32 @@
-# No additional environment variables are required for the starter API by default.
-# Local D1 setup is configured through `wrangler.jsonc` with the `APP_DB` binding.
-#
-# Add project-specific variables here when your own product needs them.
+# Starter notes API works with APP_DB from wrangler.jsonc only.
+# LinkDisk needs additional local variables when you want the full share flow.
+
+# Required for LinkDisk Turnstile verification when enabled in web:
+# TURNSTILE_SITE_KEY=0x4AAAAAAC5ycpUTycvfVE8g
+# TURNSTILE_SECRET_KEY=your-turnstile-secret
+
+# Required for Telegram archival / fallback download:
+# TELEGRAM_API_TOKEN=123456:abc
+# TELEGRAM_CHAT_ID=-1001234567890
+
+# Required for protected admin upload endpoints:
+# ADMIN_JWT_SECRET=replace-with-a-long-random-secret
+
+# Optional dashboard access token:
+# DASHBOARD_ACCESS_TOKEN=replace-with-a-long-random-token
+
+# Optional LinkDisk runtime tuning:
+INSTANT_UPLOAD_ENABLED=false
+# TELEGRAM_FETCH_TIMEOUT_MS=45000
+# DOWNLOAD_PREFETCH_WINDOW=3
+# ARCHIVE_MAX_ATTEMPTS=10
+# ARCHIVE_BATCH_SIZE=20
+# ARCHIVE_LEASE_SECONDS=540
+# ARCHIVE_RETRY_BASE_SECONDS=300
+# CLIPBOARD_ATTACHMENT_MAX_MB=2048
+# R2_DIRECT_UPLOAD_ENABLED=false
+# R2_S3_ACCOUNT_ID=replace-with-your-cloudflare-account-id
+# R2_S3_ACCESS_KEY_ID=replace-with-your-r2-access-key-id
+# R2_S3_SECRET_ACCESS_KEY=replace-with-your-r2-secret-access-key
+# R2_S3_BUCKET_NAME=linkdisk-r2
+# R2_PRESIGNED_URL_TTL_SECONDS=900

@@ -20,6 +20,7 @@
     "typecheck:web": "pnpm --filter cf-template-web typecheck",
     "typecheck:api": "pnpm --filter cf-template-api typecheck",
     "check": "pnpm run lint && pnpm run typecheck",
+    "verify:deploy-config": "node ./scripts/verify-deploy-config.mjs",
     "db:migrations:list": "pnpm --filter cf-template-api d1:migrations:list:local",
     "db:migrate": "pnpm --filter cf-template-api d1:migrate:local",
     "db:migrate:local": "pnpm --filter cf-template-api d1:migrate:local",

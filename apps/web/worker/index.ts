@@ -16,6 +16,9 @@ interface Env {
   ASSETS: Fetcher;
   NEXT_PUBLIC_SITE_URL?: string;
   NEXT_PUBLIC_API_BASE_URL?: string;
+  NEXT_PUBLIC_GA_MEASUREMENT_ID?: string;
+  GOOGLE_SITE_VERIFICATION?: string;
+  SITE_LAST_MODIFIED?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -38,6 +41,9 @@ function syncProcessEnvFromBindings(env?: Partial<Env>) {
   const bindings: Record<string, string | undefined> = {
     NEXT_PUBLIC_SITE_URL: sourceEnv.NEXT_PUBLIC_SITE_URL,
     NEXT_PUBLIC_API_BASE_URL: sourceEnv.NEXT_PUBLIC_API_BASE_URL,
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: sourceEnv.NEXT_PUBLIC_GA_MEASUREMENT_ID,
+    GOOGLE_SITE_VERIFICATION: sourceEnv.GOOGLE_SITE_VERIFICATION,
+    SITE_LAST_MODIFIED: sourceEnv.SITE_LAST_MODIFIED,
   };
 
   for (const [key, value] of Object.entries(bindings)) {

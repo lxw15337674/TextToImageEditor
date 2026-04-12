@@ -9,13 +9,44 @@
   "d1_databases": [
     {
       "binding": "APP_DB",
-      "database_name": "cf-template-db",
-      "database_id": "00000000-0000-0000-0000-000000000000"
+      "database_name": "linkdisk-db",
+      "database_id": "d7caf81e-a3c0-4f39-b8ed-3b4013993d4f"
     }
   ],
+  "r2_buckets": [
+    {
+      "binding": "LINKDISK_R2",
+      "bucket_name": "linkdisk-r2"
+    }
+  ],
+  "routes": [
+    {
+      "pattern": "api.bhwa233.com",
+      "custom_domain": true
+    }
+  ],
+  "triggers": {
+    "crons": [
+      "*/10 * * * *"
+    ]
+  },
+  "vars": {
+    "TURNSTILE_SITE_KEY": "0x4AAAAAAC5ycpUTycvfVE8g"
+  },
   "workers_dev": true,
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
+  },
+  "env": {
+    "dev": {
+      "name": "link-disk-api-dev",
+      "routes": [
+        {
+          "pattern": "api-dev.bhwa233.com",
+          "custom_domain": true
+        }
+      ]
+    }
   }
 }
