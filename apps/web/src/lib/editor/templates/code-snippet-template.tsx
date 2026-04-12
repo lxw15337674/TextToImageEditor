@@ -2,7 +2,7 @@ import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body'
 import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function CodeSnippetTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
+export function CodeSnippetTemplate({ content, contentFormat, width, height, theme, fontSizePreset }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const canvasBackground = isDark
     ? 'linear-gradient(180deg, #050816 0%, #0f172a 100%)'
@@ -117,10 +117,7 @@ export function CodeSnippetTemplate({ content, contentFormat, width, height, the
           }}
         >
           <span>UTF-8</span>
-          <span>
-            {pageIndex}/{pageCount}
-          </span>
-        </div>
+          </div>
       </div>
     </div>
   );

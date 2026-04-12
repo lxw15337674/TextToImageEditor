@@ -30,7 +30,7 @@ export function SiteHeader({ locale }: { locale: Locale }) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur-xl">
-      <div className="mx-auto h-14 max-w-6xl px-3 sm:px-4 md:px-6">
+      <div className="mx-auto h-14 w-full max-w-[92rem] px-4 sm:px-6 lg:px-8">
         <div className="flex h-full min-w-0 items-center gap-2">
           <Link
             href={withLocalePrefix('/', locale)}

@@ -8,11 +8,22 @@ import { EditorView, keymap } from '@codemirror/view';
 import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
 import { startTransition, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { Download, History, Import, LoaderCircle, Redo2, RotateCcw, Share2, Undo2 } from 'lucide-react';
+import { Download, FolderOpen, History, Import, LoaderCircle, Redo2, RotateCcw, Share2, Undo2 } from 'lucide-react';
 import Zoom from 'react-medium-image-zoom';
 import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { TemplateSelector, type TemplateSelectorOption } from '@/components/TemplateSelector';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,7 +33,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
@@ -49,6 +59,7 @@ import {
   resolvePosterPreviewLayout,
 } from '@/lib/editor/poster';
 import {
+  createDefaultDocument,
   createVersionFromDocument,
   deleteVersion,
   duplicateVersionAsMilestone,
@@ -59,7 +70,7 @@ import {
   trimAutoSnapshots,
   updateVersionLabel,
 } from '@/lib/editor/store';
-import type { ContentFormat, EditorDocument, EditorVersion, ExportTemplate, ExportTheme, PosterFontSize, SaveStatus, VersionKind } from '@/lib/editor/types';
+import type { ContentFormat, EditorDocument, EditorVersion, PosterFontSize, SaveStatus, VersionKind } from '@/lib/editor/types';
 import type { Locale } from '@/i18n/config';
 import { getMessages } from '@/i18n/messages';
 import { cn } from '@/lib/utils';
@@ -79,6 +90,7 @@ const VERSION_KIND_STYLES: Record<VersionKind, string> = {
   milestone: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200',
   'import-backup': 'border-amber-500/30 bg-amber-500/10 text-amber-100',
   'rollback-backup': 'border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-100',
+  'reset-backup': 'border-rose-500/30 bg-rose-500/10 text-rose-100',
 };
 
 function getVersionKindLabel(kind: VersionKind, messages: ReturnType<typeof getMessages>['notes']) {
@@ -89,6 +101,8 @@ function getVersionKindLabel(kind: VersionKind, messages: ReturnType<typeof getM
       return messages.versionKindImportBackup;
     case 'rollback-backup':
       return messages.versionKindRollbackBackup;
+    case 'reset-backup':
+      return messages.versionKindResetBackup;
     default:
       return messages.versionKindAuto;
   }
@@ -174,9 +188,9 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   const [isPosterOverflowing, setIsPosterOverflowing] = useState(false);
   const [previewHeight, setPreviewHeight] = useState<number | null>(null);
   const [previewZoomUrl, setPreviewZoomUrl] = useState<string | null>(null);
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
   const previewContent = useDeferredValue(documentState?.content ?? '');
-  const previewTheme = documentState?.exportTheme;
   const previewTemplate = documentState?.exportTemplate;
   const previewFontSizePreset = documentState?.fontSizePreset ?? 'medium';
   const contentFormat = documentState?.contentFormat ?? 'plain';
@@ -254,7 +268,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   }, []);
 
   useEffect(() => {
-    if (!previewTheme || !previewTemplate) {
+    if (!previewTemplate) {
       return;
     }
 
@@ -264,7 +278,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
         const layout = await resolvePosterPreviewLayout(
           previewContent,
           contentFormat,
-          previewTheme,
           previewTemplate,
           previewFontSizePreset,
         );
@@ -279,7 +292,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
         const blob = await renderPosterBlob(
           previewContent,
           contentFormat,
-          previewTheme,
           previewTemplate,
           previewFontSizePreset,
           1,
@@ -316,7 +328,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     contentFormat,
     previewFontSizePreset,
     previewTemplate,
-    previewTheme,
   ]);
 
   useEffect(() => {
@@ -596,7 +607,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
       const layout = await resolvePosterLayout(
         documentState.content,
         documentState.contentFormat,
-        documentState.exportTheme,
         documentState.exportTemplate,
         documentState.fontSizePreset,
         MAX_POSTER_HEIGHT,
@@ -605,7 +615,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
       const html = await renderPosterHtml(
         documentState.content,
         documentState.contentFormat,
-        documentState.exportTheme,
         documentState.exportTemplate,
         documentState.fontSizePreset,
         1,
@@ -691,6 +700,31 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     }
   }
 
+  async function handleResetNote() {
+    if (!documentState) {
+      return;
+    }
+
+    setIsBusy(true);
+
+    try {
+      await createVersionFromDocument(documentState, 'reset-backup', messages.versionKindResetBackup);
+      const savedDocument = await persistNow({
+        ...createDefaultDocument(),
+        id: documentState.id,
+      });
+      lastVersionSignatureRef.current = createSnapshotSignature(savedDocument);
+      await refreshVersions();
+      setIsResetDialogOpen(false);
+      toast.success(messages.resetSuccess);
+    } catch (error) {
+      console.error(error);
+      toast.error(messages.resetError);
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
   async function exportPosterImage(shareInsteadOfDownload: boolean) {
     if (!documentState) {
       return;
@@ -702,7 +736,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
       const layout = await resolvePosterLayout(
         documentState.content,
         documentState.contentFormat,
-        documentState.exportTheme,
         documentState.exportTemplate,
         documentState.fontSizePreset,
         MAX_POSTER_HEIGHT,
@@ -714,7 +747,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
       const blob = await renderPosterBlob(
         documentState.content,
         documentState.contentFormat,
-        documentState.exportTheme,
         documentState.exportTemplate,
         documentState.fontSizePreset,
         1,
@@ -758,7 +790,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
       const layout = await resolvePosterLayout(
         documentState.content,
         documentState.contentFormat,
-        documentState.exportTheme,
         documentState.exportTemplate,
         documentState.fontSizePreset,
         MAX_POSTER_HEIGHT,
@@ -770,7 +801,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
       const pngBlob = await renderPosterBlob(
         documentState.content,
         documentState.contentFormat,
-        documentState.exportTheme,
         documentState.exportTemplate,
         documentState.fontSizePreset,
         1,
@@ -791,7 +821,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
 
   if (!documentState) {
     return (
-      <main className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
+      <main className="mx-auto flex w-full max-w-6xl flex-1 px-4 py-4 sm:px-6 lg:px-8">
         <Card className="w-full border-border/70">
           <CardContent className="flex min-h-[16rem] items-center justify-center gap-3 p-6 text-muted-foreground">
             <LoaderCircle className="size-5 animate-spin" />
@@ -806,15 +836,41 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   const effectivePreviewHeight = previewHeight ?? dimensions.height;
   const posterPreviewScale = Math.min(1, 420 / dimensions.width);
   const selectedVersion = versions.find((version) => version.id === selectedVersionId) ?? null;
+  const templateOptions: TemplateSelectorOption[] = [
+    { value: 'calendar-essay-light', label: `${messages.templateCalendarEssay} · ${messages.exportThemeLight}`, aliases: ['calendar essay', 'chronicle'] },
+    { value: 'calendar-essay-dark', label: `${messages.templateCalendarEssay} · ${messages.exportThemeDark}`, aliases: ['calendar essay', 'chronicle'] },
+    { value: 'xiaohongshu-light', label: `${messages.templateXiaohongshu} · ${messages.exportThemeLight}`, aliases: ['xiaohongshu', 'crimson'] },
+    { value: 'xiaohongshu-dark', label: `${messages.templateXiaohongshu} · ${messages.exportThemeDark}`, aliases: ['xiaohongshu', 'crimson'] },
+    { value: 'spotify-light', label: `${messages.templateSpotify} · ${messages.exportThemeLight}`, aliases: ['spotify', 'vibe'] },
+    { value: 'spotify-dark', label: `${messages.templateSpotify} · ${messages.exportThemeDark}`, aliases: ['spotify', 'vibe'] },
+    { value: 'ocean-quote-light', label: `${messages.templateOceanQuote} · ${messages.exportThemeLight}`, aliases: ['ocean quote', 'azure'] },
+    { value: 'ocean-quote-dark', label: `${messages.templateOceanQuote} · ${messages.exportThemeDark}`, aliases: ['ocean quote', 'azure'] },
+    { value: 'editorial-card-light', label: `${messages.templateEditorialCard} · ${messages.exportThemeLight}`, aliases: ['editorial card', 'ink'] },
+    { value: 'editorial-card-dark', label: `${messages.templateEditorialCard} · ${messages.exportThemeDark}`, aliases: ['editorial card', 'ink'] },
+    { value: 'cinema-book-light', label: `${messages.templateCinemaBook} · ${messages.exportThemeLight}`, aliases: ['cinema book', 'cinema'] },
+    { value: 'cinema-book-dark', label: `${messages.templateCinemaBook} · ${messages.exportThemeDark}`, aliases: ['cinema book', 'cinema'] },
+    { value: 'code-snippet-light', label: `${messages.templateCodeSnippet} · ${messages.exportThemeLight}`, aliases: ['code snippet', 'kernel'] },
+    { value: 'code-snippet-dark', label: `${messages.templateCodeSnippet} · ${messages.exportThemeDark}`, aliases: ['code snippet', 'kernel'] },
+    { value: 'ticket-stub-light', label: `${messages.templateTicketStub} · ${messages.exportThemeLight}`, aliases: ['ticket stub', 'entry'] },
+    { value: 'ticket-stub-dark', label: `${messages.templateTicketStub} · ${messages.exportThemeDark}`, aliases: ['ticket stub', 'entry'] },
+    { value: 'zen-vertical-light', label: `${messages.templateZenVertical} · ${messages.exportThemeLight}`, aliases: ['zen vertical', 'zen'] },
+    { value: 'zen-vertical-dark', label: `${messages.templateZenVertical} · ${messages.exportThemeDark}`, aliases: ['zen vertical', 'zen'] },
+    { value: 'news-flash-light', label: `${messages.templateNewsFlash} · ${messages.exportThemeLight}`, aliases: ['news flash', 'herald'] },
+    { value: 'news-flash-dark', label: `${messages.templateNewsFlash} · ${messages.exportThemeDark}`, aliases: ['news flash', 'herald'] },
+    { value: 'polaroid-light', label: `${messages.templatePolaroid} · ${messages.exportThemeLight}`, aliases: ['polaroid'] },
+    { value: 'polaroid-dark', label: `${messages.templatePolaroid} · ${messages.exportThemeDark}`, aliases: ['polaroid'] },
+    { value: 'literature-light', label: `${messages.templateLiterature} · ${messages.exportThemeLight}`, aliases: ['literature'] },
+    { value: 'literature-dark', label: `${messages.templateLiterature} · ${messages.exportThemeDark}`, aliases: ['literature'] },
+  ];
 
   return (
     <>
       <input ref={fileInputRef} type="file" accept=".md,.txt,text/plain,text/markdown" className="hidden" onChange={handleImportFile} />
 
-      <main className="mx-auto flex min-h-0 w-full max-w-[92rem] flex-1 overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
-        <Card className="flex min-h-0 w-full flex-1 border-border/70">
-          <CardContent className="flex min-h-0 w-full flex-1 flex-col p-0">
-            <div className="border-b border-border/60 px-4 py-3 xl:hidden">
+      <main className="mx-auto flex w-full max-w-[92rem] flex-1 px-3 py-3 sm:px-5 sm:py-4 lg:px-8">
+        <Card className="isolate flex w-full flex-1 overflow-hidden border-border/70">
+          <CardContent className="flex w-full flex-1 flex-col p-0">
+            <div className="border-b border-border/60 px-3 py-3 xl:hidden">
               <div className="inline-flex rounded-full border border-border/70 bg-background/80 p-1">
                 <button
                   type="button"
@@ -839,10 +895,15 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
               </div>
             </div>
 
-            <div className="grid min-h-0 flex-1 xl:grid-cols-2">
-              <div className={cn('flex min-h-0 flex-col xl:border-r xl:border-border/60', mobilePane === 'preview' ? 'hidden xl:flex' : 'flex')}>
-                <div className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/40 bg-background/60 px-5 backdrop-blur-md">
-                  <div className="flex items-center gap-3">
+            <div className="flex flex-1 flex-col xl:grid xl:min-h-0 xl:grid-cols-2">
+              <div
+                className={cn(
+                  'flex flex-col xl:min-h-0 xl:border-r xl:border-border/60',
+                  mobilePane === 'preview' ? 'hidden xl:flex' : 'flex',
+                )}
+              >
+                <div className="sticky top-0 z-20 flex flex-wrap items-start justify-between gap-3 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:h-14 xl:flex-nowrap xl:items-center xl:rounded-tl-[calc(var(--radius)-1px)] xl:px-5 xl:py-0">
+                  <div className="flex min-w-0 items-center gap-3">
                     <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50">{messages.editorCardTitle}</span>
                     <div className="flex items-center cursor-help" title={getSaveStatusLabel(saveStatus, messages)}>
                       <div
@@ -852,25 +913,14 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           saveStatus === 'saving' ? 'bg-amber-500 animate-pulse' : 'bg-sky-500',
                         )}
                       />
-                      <span className="ml-2 whitespace-nowrap text-sm font-semibold tracking-normal text-muted-foreground/80">
+                      <span className="ml-2 truncate whitespace-nowrap text-sm font-semibold tracking-normal text-muted-foreground/80">
                         {getSaveStatusLabel(saveStatus, messages)}
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2">
-                    <div className="mr-2 flex items-center rounded-lg bg-muted/40 p-1">
-                      <button
-                        type="button"
-                        className={cn(
-                          'rounded-md px-3 py-1.5 text-sm font-bold transition-all',
-                          !isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
-                        )}
-                        onClick={() => handleDocumentChange('contentFormat', 'markdown')}
-                        disabled={isBusy}
-                      >
-                        MD
-                      </button>
+                  <div className="flex w-full flex-wrap items-center gap-2 xl:w-auto xl:flex-nowrap">
+                    <div className="mr-0 flex items-center rounded-lg bg-muted/40 p-1 xl:mr-1">
                       <button
                         type="button"
                         className={cn(
@@ -882,46 +932,76 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                       >
                         TXT
                       </button>
+                      <button
+                        type="button"
+                        className={cn(
+                          'rounded-md px-3 py-1.5 text-sm font-bold transition-all',
+                          !isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                        )}
+                        onClick={() => handleDocumentChange('contentFormat', 'markdown')}
+                        disabled={isBusy}
+                      >
+                        MD
+                      </button>
                     </div>
 
-                    <div className="flex items-center">
+                    <div className="flex flex-1 flex-wrap items-center gap-1 sm:flex-nowrap xl:flex-none">
                       <Button 
                         variant="ghost" 
-                        size="icon" 
-                        className="size-9 text-muted-foreground hover:text-foreground hover:bg-muted/50" 
+                        size="sm"
+                        className="h-9 gap-2 px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3" 
                         onClick={handleUndo} 
                         disabled={!canUndo || isBusy}
                       >
-                        <Undo2 className="size-[18px]" />
+                        <Undo2 className="size-[18px]" data-icon="inline-start" />
+                        <span className="hidden lg:inline">{messages.undo}</span>
                       </Button>
                       <Button 
                         variant="ghost" 
-                        size="icon" 
-                        className="size-9 text-muted-foreground hover:text-foreground hover:bg-muted/50" 
+                        size="sm"
+                        className="h-9 gap-2 px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3" 
                         onClick={handleRedo} 
                         disabled={!canRedo || isBusy}
                       >
-                        <Redo2 className="size-[18px]" />
+                        <Redo2 className="size-[18px]" data-icon="inline-start" />
+                        <span className="hidden lg:inline">{messages.redo}</span>
                       </Button>
-                      
-                      <Separator orientation="vertical" className="mx-1.5 h-5 opacity-20" />
+
+                      <Separator orientation="vertical" className="mx-1 h-5 opacity-20" />
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 gap-2 px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3"
+                        onClick={() => setIsHistoryOpen(true)}
+                        disabled={isBusy}
+                      >
+                        <History className="size-[18px]" data-icon="inline-start" />
+                        <span className="hidden lg:inline">{messages.history}</span>
+                      </Button>
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="size-9 hover:bg-muted/50" disabled={isBusy}>
-                            {isBusy ? <LoaderCircle className="size-[18px] animate-spin" /> : <Import className="size-[18px] rotate-90" />}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-9 gap-2 px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3"
+                            disabled={isBusy}
+                          >
+                            {isBusy ? (
+                              <LoaderCircle className="size-[18px] animate-spin" data-icon="inline-start" />
+                            ) : (
+                              <FolderOpen className="size-[18px]" data-icon="inline-start" />
+                            )}
+                            <span className="hidden lg:inline">{messages.fileMenu}</span>
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56 p-2">
-                          <DropdownMenuLabel className="px-3 py-2 text-sm uppercase tracking-[0.12em] opacity-60">{messages.history}</DropdownMenuLabel>
+                          <DropdownMenuLabel className="px-3 py-2 text-sm uppercase tracking-[0.12em] opacity-60">{messages.fileMenu}</DropdownMenuLabel>
                           <DropdownMenuItem onClick={() => void handleCreateMilestone()} className="gap-2.5 px-3 py-2.5 text-sm">
                             <RotateCcw className="size-[18px] opacity-70" /> {messages.saveMilestone}
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setIsHistoryOpen(true)} className="gap-2.5 px-3 py-2.5 text-sm">
-                            <History className="size-[18px] opacity-70" /> {messages.history}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator className="opacity-50" />
-                          <DropdownMenuLabel className="px-3 py-2 text-sm uppercase tracking-[0.12em] opacity-60">{messages.fileMenu}</DropdownMenuLabel>
                           <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 text-sm">
                             <Import className="size-[18px] opacity-70" /> {messages.importFile}
                           </DropdownMenuItem>
@@ -931,13 +1011,20 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           <DropdownMenuItem onClick={handleExportPlainText} className="gap-2.5 px-3 py-2.5 text-sm">
                             <Download className="size-[18px] opacity-70" /> {messages.exportText}
                           </DropdownMenuItem>
+                          <DropdownMenuSeparator className="opacity-50" />
+                          <DropdownMenuItem
+                            onClick={() => setIsResetDialogOpen(true)}
+                            className="gap-2.5 px-3 py-2.5 text-sm text-destructive focus:text-destructive"
+                          >
+                            <RotateCcw className="size-[18px] opacity-70" /> {messages.resetNote}
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
                   </div>
                 </div>
 
-                <div className="markdown-editor min-h-[16rem] flex-1 overflow-y-auto xl:min-h-0">
+                <div className="markdown-editor min-h-[52svh] flex-1 overflow-y-auto xl:min-h-0">
                   <CodeMirror
                     value={documentState.content}
                     theme={resolvedTheme === 'dark' ? oneDark : 'light'}
@@ -963,21 +1050,26 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                 </div>
               </div>
 
-              <div className={cn('flex min-h-0 flex-col overflow-y-auto', mobilePane === 'editor' ? 'hidden xl:flex' : 'flex')}>
-                <div className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/40 bg-background/60 px-5 backdrop-blur-md">
-                  <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  'flex flex-col overflow-visible xl:min-h-0 xl:overflow-y-auto',
+                  mobilePane === 'editor' ? 'hidden xl:flex' : 'flex',
+                )}
+              >
+                <div className="sticky top-0 z-20 flex flex-wrap items-start justify-between gap-3 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:h-14 xl:flex-nowrap xl:items-center xl:rounded-tr-[calc(var(--radius)-1px)] xl:px-5 xl:py-0">
+                  <div className="flex min-w-0 items-center gap-3">
                     <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50">{messages.previewCardTitle}</span>
-                    <span className="text-sm font-semibold tabular-nums text-muted-foreground/60">
+                    <span className="truncate text-sm font-semibold tabular-nums text-muted-foreground/60">
                       {dimensions.width}×{effectivePreviewHeight}
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex w-full items-center gap-2 sm:w-auto">
                     <Button 
                       type="button" 
                       variant="ghost" 
                       size="sm"
-                        className="h-10 gap-2 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground" 
+                        className="h-10 flex-1 gap-2 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:flex-none" 
                       disabled={isBusy} 
                       onClick={() => void exportPosterImage(true)}
                     >
@@ -991,7 +1083,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           type="button" 
                           variant="ghost"
                           size="sm"
-                            className="h-10 gap-2 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground" 
+                            className="h-10 flex-1 gap-2 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:flex-none" 
                           disabled={isBusy}
                         >
                             {isBusy ? <LoaderCircle className="size-[18px] animate-spin" /> : <Download className="size-[18px]" />}
@@ -1015,52 +1107,18 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                 </div>
 
                 <div className="border-b border-border/60 bg-muted/5">
-                  <div className="grid gap-x-8 gap-y-5 px-5 py-5 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid gap-4 px-3 py-4 sm:px-4 xl:grid-cols-2 xl:gap-x-8 xl:gap-y-5 xl:px-5 xl:py-5">
                     <div className="space-y-1.5">
                       <label className="text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground/80">{messages.exportTemplateLabel}</label>
-                      <Select value={documentState.exportTemplate} onValueChange={(value) => handleDocumentChange('exportTemplate', value as ExportTemplate)}>
-                        <SelectTrigger className="h-11 rounded-lg border-border/60 bg-background/50 text-sm">
-                          <SelectValue placeholder={messages.exportTemplateLabel} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="calendar-essay">{messages.templateCalendarEssay}</SelectItem>
-                          <SelectItem value="xiaohongshu">{messages.templateXiaohongshu}</SelectItem>
-                          <SelectItem value="image-background">{messages.templateImageBackground}</SelectItem>
-                          <SelectItem value="spotify">{messages.templateSpotify}</SelectItem>
-                          <SelectItem value="ocean-quote">{messages.templateOceanQuote}</SelectItem>
-                          <SelectItem value="editorial-card">{messages.templateEditorialCard}</SelectItem>
-                          <SelectItem value="cinema-book">{messages.templateCinemaBook}</SelectItem>
-                          <SelectItem value="code-snippet">{messages.templateCodeSnippet}</SelectItem>
-                          <SelectItem value="ticket-stub">{messages.templateTicketStub}</SelectItem>
-                          <SelectItem value="zen-vertical">{messages.templateZenVertical}</SelectItem>
-                          <SelectItem value="news-flash">{messages.templateNewsFlash}</SelectItem>
-                          <SelectItem value="polaroid">{messages.templatePolaroid}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <div className="text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground/80">{messages.exportThemeLabel}</div>
-                      <RadioGroup
-                        value={documentState.exportTheme}
-                        onValueChange={(value) => handleDocumentChange('exportTheme', value as ExportTheme)}
-                        className="flex gap-2"
-                      >
-                        <label className={cn(
-                          "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border/60 bg-background/50 px-3 py-2.5 text-sm font-medium transition-all",
-                          documentState.exportTheme === 'light' ? "border-primary/40 bg-primary/5 text-primary" : "hover:bg-accent/50"
-                        )}>
-                          <RadioGroupItem value="light" id="export-theme-light" className="sr-only" />
-                          {messages.exportThemeLight}
-                        </label>
-                        <label className={cn(
-                          "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border/60 bg-background/50 px-3 py-2.5 text-sm font-medium transition-all",
-                          documentState.exportTheme === 'dark' ? "border-primary/40 bg-primary/5 text-primary" : "hover:bg-accent/50"
-                        )}>
-                          <RadioGroupItem value="dark" id="export-theme-dark" className="sr-only" />
-                          {messages.exportThemeDark}
-                        </label>
-                      </RadioGroup>
+                      <TemplateSelector
+                        options={templateOptions}
+                        value={documentState.exportTemplate}
+                        placeholder={messages.templateSearchPlaceholder}
+                        emptyText={messages.templateSearchEmpty}
+                        clearLabel={messages.templateSearchPlaceholder}
+                        disabled={isBusy}
+                        onValueChange={(value) => handleDocumentChange('exportTemplate', value)}
+                      />
                     </div>
 
                     <div className="space-y-1.5">
@@ -1097,12 +1155,11 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               alt={messages.exportPreviewLabel}
-                              className="mx-auto block cursor-zoom-in shadow-lg"
+                              className="mx-auto block h-auto w-full cursor-zoom-in shadow-lg"
                               draggable={false}
                               src={previewZoomUrl}
                               style={{
-                                width: dimensions.width * posterPreviewScale,
-                                height: effectivePreviewHeight * posterPreviewScale,
+                                maxWidth: dimensions.width * posterPreviewScale,
                               }}
                             />
                           </Zoom>
@@ -1110,8 +1167,9 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           <div
                             className="mx-auto flex items-center justify-center text-sm text-muted-foreground"
                             style={{
-                              width: dimensions.width * posterPreviewScale,
-                              height: effectivePreviewHeight * posterPreviewScale,
+                              width: '100%',
+                              maxWidth: dimensions.width * posterPreviewScale,
+                              aspectRatio: `${dimensions.width} / ${effectivePreviewHeight}`,
                             }}
                           >
                             {messages.exportPreviewLoading}
@@ -1266,6 +1324,21 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
           </div>
         </SheetContent>
       </Sheet>
+
+      <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{messages.resetConfirmTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{messages.resetConfirmDescription}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isBusy}>{messages.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void handleResetNote()} disabled={isBusy}>
+              {messages.resetNote}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

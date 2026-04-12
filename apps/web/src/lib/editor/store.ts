@@ -1,7 +1,14 @@
 'use client';
 
 import Dexie, { type Table } from 'dexie';
-import type { EditorDocument, EditorVersion, VersionKind } from '@/lib/editor/types';
+import type {
+  EditorDocument,
+  EditorVersion,
+  ExportTemplate,
+  ExportTheme,
+  PosterTemplateBase,
+  VersionKind,
+} from '@/lib/editor/types';
 
 export const EDITOR_DOCUMENT_ID = 'singleton';
 export const AUTO_SNAPSHOT_LIMIT = 50;
@@ -21,6 +28,49 @@ class EditorLocalDb extends Dexie {
 
 const db = new EditorLocalDb();
 
+const TEMPLATE_BASES: PosterTemplateBase[] = [
+  'calendar-essay',
+  'xiaohongshu',
+  'spotify',
+  'ocean-quote',
+  'editorial-card',
+  'cinema-book',
+  'code-snippet',
+  'ticket-stub',
+  'zen-vertical',
+  'news-flash',
+  'polaroid',
+];
+
+function isTheme(value: unknown): value is ExportTheme {
+  return value === 'light' || value === 'dark';
+}
+
+function isTemplateBase(value: unknown): value is PosterTemplateBase {
+  return typeof value === 'string' && TEMPLATE_BASES.includes(value as PosterTemplateBase);
+}
+
+function normalizeTemplateVariant(templateValue: unknown, legacyThemeValue: unknown): ExportTemplate {
+  if (typeof templateValue === 'string') {
+    const variantMatch = templateValue.match(/^(.*)-(light|dark)$/);
+
+    if (variantMatch) {
+      const [, base, theme] = variantMatch;
+
+      if (isTemplateBase(base) && isTheme(theme)) {
+        return `${base}-${theme}`;
+      }
+    }
+
+    if (isTemplateBase(templateValue)) {
+      const fallbackTheme = isTheme(legacyThemeValue) ? legacyThemeValue : 'light';
+      return `${templateValue}-${fallbackTheme}`;
+    }
+  }
+
+  return 'xiaohongshu-light';
+}
+
 export function createDefaultDocument(): EditorDocument {
   const now = Date.now();
 
@@ -28,8 +78,7 @@ export function createDefaultDocument(): EditorDocument {
     id: EDITOR_DOCUMENT_ID,
     content: '',
     contentFormat: 'plain',
-    exportTheme: 'light',
-    exportTemplate: 'xiaohongshu',
+    exportTemplate: 'xiaohongshu-light',
     fontSizePreset: 'medium',
     updatedAt: now,
     lastSavedAt: now,
@@ -40,9 +89,16 @@ export async function getOrCreateDocument() {
   const existing = await db.documents.get(EDITOR_DOCUMENT_ID);
 
   if (existing) {
+    const legacyDocument = existing as EditorDocument & {
+      exportTheme?: unknown;
+      exportTemplate?: unknown;
+    };
+    const { exportTheme: _legacyTheme, ...existingWithoutTheme } = legacyDocument;
+
     return {
       ...createDefaultDocument(),
-      ...existing,
+      ...existingWithoutTheme,
+      exportTemplate: normalizeTemplateVariant(legacyDocument.exportTemplate, legacyDocument.exportTheme),
     };
   }
 

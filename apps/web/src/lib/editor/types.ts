@@ -2,10 +2,9 @@ export type ContentFormat = 'markdown' | 'plain';
 export type SaveStatus = 'dirty' | 'saving' | 'saved';
 export type ExportTheme = 'light' | 'dark';
 export type PosterFontSize = 'small' | 'medium' | 'large';
-export type ExportTemplate =
+export type PosterTemplateBase =
   | 'calendar-essay'
   | 'xiaohongshu'
-  | 'image-background'
   | 'spotify'
   | 'ocean-quote'
   | 'editorial-card'
@@ -14,14 +13,15 @@ export type ExportTemplate =
   | 'ticket-stub'
   | 'zen-vertical'
   | 'news-flash'
-  | 'polaroid';
-export type VersionKind = 'auto' | 'milestone' | 'import-backup' | 'rollback-backup';
+  | 'polaroid'
+  | 'literature';
+export type ExportTemplate = `${PosterTemplateBase}-${ExportTheme}`;
+export type VersionKind = 'auto' | 'milestone' | 'import-backup' | 'rollback-backup' | 'reset-backup';
 
 export interface EditorDocument {
   id: string;
   content: string;
   contentFormat: ContentFormat;
-  exportTheme: ExportTheme;
   exportTemplate: ExportTemplate;
   fontSizePreset: PosterFontSize;
   updatedAt: number;

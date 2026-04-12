@@ -1,8 +1,16 @@
+import { getPosterBodyContainerStyle, getPosterBodyContentStyle } from '@/lib/editor/templates/poster-body-layout';
 import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body';
+import type { PosterBodyLayoutConfig } from '@/lib/editor/templates/template-types';
 import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function ZenVerticalTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
+const ZEN_VERTICAL_BODY_LAYOUT = {
+  textAlign: 'left',
+  verticalAlign: 'top',
+  maxWidthMode: 'full',
+} satisfies PosterBodyLayoutConfig;
+
+export function ZenVerticalTemplate({ content, contentFormat, width, height, theme, fontSizePreset }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const canvasBackground = isDark ? '#161616' : '#f6f0e8';
   const panelBackground = isDark ? 'rgba(24, 24, 24, 0.92)' : 'rgba(255, 250, 244, 0.92)';
@@ -102,17 +110,19 @@ export function ZenVerticalTemplate({ content, contentFormat, width, height, the
             style={{
               flex: 1,
               overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
+              ...getPosterBodyContainerStyle(ZEN_VERTICAL_BODY_LAYOUT),
             }}
           >
-            <PosterMarkdownBody
-              content={content}
-              contentFormat={contentFormat}
-              theme={theme}
-              color={textColor}
-              fontSize={bodyFontSize}
-            />
+            <div style={getPosterBodyContentStyle(ZEN_VERTICAL_BODY_LAYOUT)}>
+              <PosterMarkdownBody
+                content={content}
+                contentFormat={contentFormat}
+                theme={theme}
+                color={textColor}
+                fontSize={bodyFontSize}
+                bodyLayout={ZEN_VERTICAL_BODY_LAYOUT}
+              />
+            </div>
           </div>
 
           <div
@@ -128,10 +138,7 @@ export function ZenVerticalTemplate({ content, contentFormat, width, height, the
             }}
           >
             <span>Stillness</span>
-            <span>
-              {pageIndex}/{pageCount}
-            </span>
-          </div>
+              </div>
         </div>
       </div>
     </div>

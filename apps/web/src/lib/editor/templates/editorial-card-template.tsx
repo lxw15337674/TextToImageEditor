@@ -2,7 +2,7 @@ import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body'
 import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function EditorialCardTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
+export function EditorialCardTemplate({ content, contentFormat, width, height, theme, fontSizePreset }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const canvasBackground = isDark
     ? 'radial-gradient(circle at top left, rgba(120, 138, 163, 0.18), transparent 34%), linear-gradient(180deg, #11151c 0%, #1b222d 100%)'
@@ -127,10 +127,7 @@ export function EditorialCardTemplate({ content, contentFormat, width, height, t
           }}
         >
           <span>Local first poster</span>
-          <span>
-            {pageIndex}/{pageCount}
-          </span>
-        </div>
+          </div>
       </div>
     </div>
   );

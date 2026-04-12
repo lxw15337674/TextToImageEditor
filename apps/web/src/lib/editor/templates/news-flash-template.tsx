@@ -2,31 +2,13 @@ import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body'
 import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-function splitNewsFlashSections(blocks: string[], content: string) {
-  const normalizedBlocks = blocks.map((block) => block.trim()).filter(Boolean);
-
-  if (normalizedBlocks.length === 0) {
-    return {
-      headline: content.trim(),
-      bodyContent: '',
-    };
-  }
-
-  return {
-    headline: normalizedBlocks[0] ?? '',
-    bodyContent: normalizedBlocks.slice(1).join('\n\n'),
-  };
-}
-
-export function NewsFlashTemplate({ content, blocks, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
+export function NewsFlashTemplate({ content, contentFormat, width, height, theme, fontSizePreset }: PosterTemplateProps) {
   const isDark = theme === 'dark';
-  const { headline, bodyContent } = splitNewsFlashSections(blocks, content);
   const canvasBackground = isDark ? '#050505' : '#fffdf8';
   const lineColor = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(15, 23, 42, 0.12)';
   const textColor = isDark ? '#f8fafc' : '#0f172a';
   const mutedColor = isDark ? 'rgba(226,232,240,0.64)' : 'rgba(71,85,105,0.72)';
   const bodyFontSize = getPosterBodyFontSize(width, fontSizePreset);
-  const headlineSize = width >= 1400 ? 82 : 62;
 
   return (
     <div
@@ -79,22 +61,6 @@ export function NewsFlashTemplate({ content, blocks, contentFormat, width, heigh
       </div>
 
       <div
-        style={{
-          fontSize: headlineSize,
-          lineHeight: 0.92,
-          letterSpacing: '-0.05em',
-          fontWeight: 800,
-          textTransform: contentFormat === 'plain' ? 'uppercase' : 'none',
-          marginBottom: Math.round(width * 0.026),
-          wordBreak: 'break-word',
-        }}
-      >
-        {headline || 'Flash Update'}
-      </div>
-
-      <div style={{ width: '100%', height: 1, background: lineColor, marginBottom: Math.round(width * 0.03) }} />
-
-      <div
         data-poster-body
         data-poster-measure
         style={{
@@ -105,7 +71,7 @@ export function NewsFlashTemplate({ content, blocks, contentFormat, width, heigh
         }}
       >
         <PosterMarkdownBody
-          content={bodyContent || headline || content}
+          content={content}
           contentFormat={contentFormat}
           theme={theme}
           color={isDark ? '#e5e7eb' : '#334155'}
@@ -128,9 +94,6 @@ export function NewsFlashTemplate({ content, blocks, contentFormat, width, heigh
         }}
       >
         <span>Digital Herald</span>
-        <span>
-          {pageIndex}/{pageCount}
-        </span>
       </div>
     </div>
   );

@@ -93,6 +93,12 @@ interface LocaleMessages {
     versionKindAuto: string;
     versionKindMilestone: string;
     versionKindImportBackup: string;
+    versionKindResetBackup: string;
+    resetSuccess: string;
+    resetError: string;
+    resetNote: string;
+    resetConfirmTitle: string;
+    resetConfirmDescription: string;
     versionKindRollbackBackup: string;
     versionLabelPlaceholder: string;
     saveVersionLabel: string;
@@ -113,8 +119,9 @@ interface LocaleMessages {
     fontSizeMedium: string;
     fontSizeLarge: string;
     exportTemplateLabel: string;
+    templateSearchPlaceholder: string;
+    templateSearchEmpty: string;
     templateXiaohongshu: string;
-    templateImageBackground: string;
     templateSpotify: string;
     templateOceanQuote: string;
     templateCalendarEssay: string;
@@ -125,6 +132,7 @@ interface LocaleMessages {
     templateZenVertical: string;
     templateNewsFlash: string;
     templatePolaroid: string;
+    templateLiterature: string;
     exportResolutionLabel: string;
     exportPreviewLabel: string;
     exportPreviewLoading: string;
@@ -281,6 +289,12 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       versionKindAuto: 'Auto snapshot',
       versionKindMilestone: 'Milestone',
       versionKindImportBackup: 'Import backup',
+      versionKindResetBackup: 'Reset Backup',
+      resetSuccess: 'Content reset to default.',
+      resetError: 'Failed to reset.',
+      resetNote: 'Reset Content',
+      resetConfirmTitle: 'Are you sure?',
+      resetConfirmDescription: 'This will clear the current content and create a backup. Continue?',
       versionKindRollbackBackup: 'Rollback backup',
       versionLabelPlaceholder: 'Add a milestone label',
       saveVersionLabel: 'Save label',
@@ -301,8 +315,9 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       fontSizeMedium: 'Medium',
       fontSizeLarge: 'Large',
       exportTemplateLabel: 'Template',
+      templateSearchPlaceholder: 'Search templates',
+      templateSearchEmpty: 'No matching templates.',
       templateXiaohongshu: 'Crimson',
-      templateImageBackground: 'Lumina',
       templateSpotify: 'Vibe',
       templateOceanQuote: 'Azure',
       templateCalendarEssay: 'Chronicle',
@@ -313,6 +328,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       templateZenVertical: 'Zen',
       templateNewsFlash: 'Herald',
       templatePolaroid: 'Polaroid',
+      templateLiterature: 'Literature',
       exportResolutionLabel: 'Resolution',
       exportPreviewLabel: 'Live preview',
       exportPreviewLoading: 'Building preview…',
@@ -467,6 +483,12 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       versionKindAuto: '自动快照',
       versionKindMilestone: '手动里程碑',
       versionKindImportBackup: '导入前备份',
+      versionKindResetBackup: '重置前备份',
+      resetSuccess: '内容已重置。',
+      resetError: '重置失败。',
+      resetNote: '重置内容',
+      resetConfirmTitle: '确定要重置吗？',
+      resetConfirmDescription: '这会清空当前内容并恢复为默认状态，将提前创建备份。',
       versionKindRollbackBackup: '回滚前备份',
       versionLabelPlaceholder: '输入里程碑标签',
       saveVersionLabel: '保存标签',
@@ -487,8 +509,9 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       fontSizeMedium: '中',
       fontSizeLarge: '大',
       exportTemplateLabel: '模板',
+      templateSearchPlaceholder: '搜索模板',
+      templateSearchEmpty: '没有匹配的模板。',
       templateXiaohongshu: '赤红',
-      templateImageBackground: '映象',
       templateSpotify: '律动',
       templateOceanQuote: '蔚蓝',
       templateCalendarEssay: '光阴',
@@ -499,6 +522,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       templateZenVertical: '留白长页',
       templateNewsFlash: '快讯',
       templatePolaroid: '拍立得',
+      templateLiterature: '传统文学',
       exportResolutionLabel: '导出分辨率',
       exportPreviewLabel: '实时预览',
       exportPreviewLoading: '正在生成预览…',
@@ -653,6 +677,12 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       versionKindAuto: 'Auto snapshot',
       versionKindMilestone: 'Milestone',
       versionKindImportBackup: 'Import backup',
+      versionKindResetBackup: 'Reset Backup',
+      resetSuccess: 'Content reset to default.',
+      resetError: 'Failed to reset.',
+      resetNote: 'Reset Content',
+      resetConfirmTitle: 'Are you sure?',
+      resetConfirmDescription: 'This will clear the current content and create a backup. Continue?',
       versionKindRollbackBackup: 'Rollback backup',
       versionLabelPlaceholder: 'Add a milestone label',
       saveVersionLabel: 'Save label',
@@ -673,8 +703,9 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       fontSizeMedium: 'Medium',
       fontSizeLarge: 'Large',
       exportTemplateLabel: 'Template',
+      templateSearchPlaceholder: 'Search templates',
+      templateSearchEmpty: 'No matching templates.',
       templateXiaohongshu: 'Plantilla 1',
-      templateImageBackground: 'Plantilla 2',
       templateSpotify: 'Plantilla 3',
       templateOceanQuote: 'Plantilla 4',
       templateCalendarEssay: 'Plantilla 5',
@@ -685,6 +716,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       templateZenVertical: 'Zen',
       templateNewsFlash: 'Herald',
       templatePolaroid: 'Polaroid',
+      templateLiterature: 'Literature',
       exportResolutionLabel: 'Resolution',
       exportPreviewLabel: 'Live preview',
       exportPreviewLoading: 'Building preview…',
@@ -839,6 +871,12 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       versionKindAuto: '自動スナップショット',
       versionKindMilestone: 'マイルストーン',
       versionKindImportBackup: 'インポート前バックアップ',
+      versionKindResetBackup: 'Reset Backup',
+      resetSuccess: 'Content reset to default.',
+      resetError: 'Failed to reset.',
+      resetNote: 'Reset Content',
+      resetConfirmTitle: 'Are you sure?',
+      resetConfirmDescription: 'This will clear the current content and create a backup. Continue?',
       versionKindRollbackBackup: 'ロールバック前バックアップ',
       versionLabelPlaceholder: 'マイルストーン名を入力',
       saveVersionLabel: 'ラベルを保存',
@@ -859,8 +897,9 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       fontSizeMedium: '中',
       fontSizeLarge: '大',
       exportTemplateLabel: 'テンプレート',
+      templateSearchPlaceholder: 'テンプレートを検索',
+      templateSearchEmpty: '一致するテンプレートはありません。',
       templateXiaohongshu: 'テンプレート 1',
-      templateImageBackground: 'テンプレート 2',
       templateSpotify: 'テンプレート 3',
       templateOceanQuote: 'テンプレート 4',
       templateCalendarEssay: 'テンプレート 5',
@@ -871,6 +910,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       templateZenVertical: 'Zen',
       templateNewsFlash: 'Herald',
       templatePolaroid: 'Polaroid',
+      templateLiterature: 'Literature',
       exportResolutionLabel: '解像度',
       exportPreviewLabel: 'ライブプレビュー',
       exportPreviewLoading: 'プレビューを生成中…',

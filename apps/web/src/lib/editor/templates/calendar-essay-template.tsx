@@ -44,7 +44,7 @@ function splitCalendarEssaySections(blocks: string[]) {
   };
 }
 
-export function CalendarEssayTemplate({ blocks, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
+export function CalendarEssayTemplate({ blocks, contentFormat, width, height, theme, fontSizePreset }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const { bodyBlocks, footerLines } = splitCalendarEssaySections(blocks);
   const bodyContent = bodyBlocks.join('\n\n');
@@ -54,7 +54,7 @@ export function CalendarEssayTemplate({ blocks, contentFormat, width, height, th
     month: 'long',
     year: 'numeric',
   }).format(date).toUpperCase();
-  const weekday = new Intl.DateTimeFormat('zh-CN', {
+  const weekday = new Intl.DateTimeFormat('en-US', {
     weekday: 'long',
   }).format(date);
 
@@ -181,20 +181,6 @@ export function CalendarEssayTemplate({ blocks, contentFormat, width, height, th
               {line}
             </p>
           ))}
-        </div>
-      ) : null}
-
-      {pageCount > 1 ? (
-        <div
-          style={{
-            alignSelf: 'center',
-            marginTop: Math.round(height * 0.004),
-            fontFamily: 'Space Grotesk, system-ui, sans-serif',
-            fontSize: Math.round(width * 0.03),
-            color: subtleTextColor,
-          }}
-        >
-          {pageIndex}/{pageCount}
         </div>
       ) : null}
     </div>

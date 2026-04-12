@@ -1,8 +1,16 @@
+import { getPosterBodyContainerStyle, getPosterBodyContentStyle } from '@/lib/editor/templates/poster-body-layout';
 import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body';
+import type { PosterBodyLayoutConfig } from '@/lib/editor/templates/template-types';
 import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function PolaroidTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
+const POLAROID_BODY_LAYOUT = {
+  textAlign: 'left',
+  verticalAlign: 'top',
+  maxWidthMode: 'full',
+} satisfies PosterBodyLayoutConfig;
+
+export function PolaroidTemplate({ content, contentFormat, width, height, theme, fontSizePreset }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const canvasBackground = isDark ? '#1f2937' : '#e5e7eb';
   const frameBackground = isDark ? '#f8fafc' : '#fffefc';
@@ -51,20 +59,19 @@ export function PolaroidTemplate({ content, contentFormat, width, height, theme,
             border: '1px solid rgba(148, 163, 184, 0.18)',
             padding: `${Math.round(width * 0.04)}px`,
             boxSizing: 'border-box',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
+            ...getPosterBodyContainerStyle(POLAROID_BODY_LAYOUT),
           }}
         >
-          <PosterMarkdownBody
-            content={content}
-            contentFormat={contentFormat}
-            theme="light"
-            color={textColor}
-            fontSize={bodyFontSize}
-            centered
-          />
+          <div style={getPosterBodyContentStyle(POLAROID_BODY_LAYOUT)}>
+            <PosterMarkdownBody
+              content={content}
+              contentFormat={contentFormat}
+              theme="light"
+              color={textColor}
+              fontSize={bodyFontSize}
+              bodyLayout={POLAROID_BODY_LAYOUT}
+            />
+          </div>
         </div>
 
         <div
@@ -97,10 +104,7 @@ export function PolaroidTemplate({ content, contentFormat, width, height, theme,
             }}
           >
             <span>Polaroid Frame</span>
-            <span>
-              {pageIndex}/{pageCount}
-            </span>
-          </div>
+              </div>
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@ import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body'
 import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function XiaohongshuTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
+export function XiaohongshuTemplate({ content, contentFormat, width, height, theme, fontSizePreset }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const bodyFontSize = getPosterBodyFontSize(width, fontSizePreset);
 
@@ -55,7 +55,6 @@ export function XiaohongshuTemplate({ content, contentFormat, width, height, the
               opacity: 0.78,
             }}
           >
-            <span>Local draft</span>
             <span>{new Date().toISOString().slice(0, 10)}</span>
           </div>
 
@@ -86,10 +85,6 @@ export function XiaohongshuTemplate({ content, contentFormat, width, height, the
               opacity: 0.78,
             }}
           >
-            <span>Markdown Poster</span>
-            <span>
-              {pageIndex}/{pageCount}
-            </span>
           </div>
         </div>
       </div>

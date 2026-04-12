@@ -1,8 +1,16 @@
+import { getPosterBodyContainerStyle, getPosterBodyContentStyle } from '@/lib/editor/templates/poster-body-layout';
 import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body';
+import type { PosterBodyLayoutConfig } from '@/lib/editor/templates/template-types';
 import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function SpotifyTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
+const SPOTIFY_BODY_LAYOUT = {
+  textAlign: 'left',
+  verticalAlign: 'top',
+  maxWidthMode: 'full',
+} satisfies PosterBodyLayoutConfig;
+
+export function SpotifyTemplate({ content, contentFormat, width, height, theme, fontSizePreset }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const bodyFontSize = getPosterBodyFontSize(width, fontSizePreset);
 
@@ -33,7 +41,7 @@ export function SpotifyTemplate({ content, contentFormat, width, height, theme, 
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: Math.round(width * 0.023), opacity: 0.7 }}>
-          <span>Now writing</span>
+          <span> </span>
           <span>{new Date().toISOString().slice(0, 10)}</span>
         </div>
 
@@ -42,27 +50,22 @@ export function SpotifyTemplate({ content, contentFormat, width, height, theme, 
           style={{
             flex: 1,
             overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-start',
+            ...getPosterBodyContainerStyle(SPOTIFY_BODY_LAYOUT),
           }}
         >
-          <PosterMarkdownBody
-            content={content}
-            contentFormat={contentFormat}
-            theme={theme}
-            color="#111827"
-            fontSize={bodyFontSize}
-            centered
-          />
+          <div style={getPosterBodyContentStyle(SPOTIFY_BODY_LAYOUT)}>
+            <PosterMarkdownBody
+              content={content}
+              contentFormat={contentFormat}
+              theme={theme}
+              color="#111827"
+              fontSize={bodyFontSize}
+              bodyLayout={SPOTIFY_BODY_LAYOUT}
+            />
+          </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: Math.round(width * 0.024), opacity: 0.74, fontWeight: 600 }}>
-          <span>Markdown Poster</span>
-          <span>
-            {pageIndex}/{pageCount}
-          </span>
-        </div>
+       
       </div>
     </div>
   );

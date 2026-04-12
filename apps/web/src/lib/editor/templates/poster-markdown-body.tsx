@@ -1,5 +1,7 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { resolvePosterBodyLayout } from '@/lib/editor/templates/poster-body-layout';
+import type { PosterBodyLayoutConfig } from '@/lib/editor/templates/template-types';
 import type { ContentFormat, ExportTheme } from '@/lib/editor/types';
 
 interface PosterMarkdownBodyProps {
@@ -8,7 +10,7 @@ interface PosterMarkdownBodyProps {
   theme: ExportTheme;
   color: string;
   fontSize: number;
-  centered?: boolean;
+  bodyLayout?: PosterBodyLayoutConfig;
 }
 
 function splitPlainTextParagraphs(content: string) {
@@ -27,9 +29,10 @@ export function PosterMarkdownBody({
   theme,
   color,
   fontSize,
-  centered = false,
+  bodyLayout,
 }: PosterMarkdownBodyProps) {
   const isDark = theme === 'dark';
+  const resolvedBodyLayout = resolvePosterBodyLayout(bodyLayout);
   const accentColor = isDark ? '#cbd5e1' : '#334155';
   const mutedColor = isDark ? 'rgba(226, 232, 240, 0.72)' : 'rgba(51, 65, 85, 0.72)';
   const inlineCodeBackground = isDark ? 'rgba(148, 163, 184, 0.16)' : 'rgba(15, 23, 42, 0.08)';
@@ -44,7 +47,10 @@ export function PosterMarkdownBody({
     color,
     fontSize,
     lineHeight: 1.72,
-    textAlign: centered ? ('center' as const) : ('left' as const),
+    direction: 'ltr' as const,
+    writingMode: 'horizontal-tb' as const,
+    textOrientation: 'mixed' as const,
+    textAlign: resolvedBodyLayout.textAlign,
   };
 
   if (contentFormat === 'plain') {

@@ -2,7 +2,7 @@ import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body'
 import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function TicketStubTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
+export function TicketStubTemplate({ content, contentFormat, width, height, theme, fontSizePreset }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const canvasBackground = isDark ? '#09090b' : '#f8fafc';
   const ticketBackground = isDark ? '#111827' : '#fffef8';
@@ -172,7 +172,6 @@ export function TicketStubTemplate({ content, contentFormat, width, height, them
               Page
             </div>
             <div style={{ fontSize: Math.round(width * 0.035), fontWeight: 700 }}>
-              {pageIndex}/{pageCount}
             </div>
           </div>
         </div>

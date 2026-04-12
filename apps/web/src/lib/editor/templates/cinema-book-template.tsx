@@ -1,8 +1,16 @@
+import { getPosterBodyContainerStyle, getPosterBodyContentStyle } from '@/lib/editor/templates/poster-body-layout';
 import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body';
+import type { PosterBodyLayoutConfig } from '@/lib/editor/templates/template-types';
 import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function CinemaBookTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
+const CINEMA_BOOK_BODY_LAYOUT = {
+  textAlign: 'left',
+  verticalAlign: 'top',
+  maxWidthMode: 'full',
+} satisfies PosterBodyLayoutConfig;
+
+export function CinemaBookTemplate({ content, contentFormat, width, height, theme, fontSizePreset }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const canvasBackground = isDark
     ? 'radial-gradient(circle at top, rgba(96, 165, 250, 0.18), transparent 36%), linear-gradient(180deg, #06070b 0%, #11131a 42%, #06070b 100%)'
@@ -100,21 +108,18 @@ export function CinemaBookTemplate({ content, contentFormat, width, height, them
             position: 'relative',
             flex: 1,
             overflow: 'hidden',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
             padding: `0 ${Math.round(width * 0.025)}px`,
-            textAlign: 'center',
+            ...getPosterBodyContainerStyle(CINEMA_BOOK_BODY_LAYOUT),
           }}
         >
-          <div style={{ width: '100%' }}>
+          <div style={getPosterBodyContentStyle(CINEMA_BOOK_BODY_LAYOUT)}>
             <PosterMarkdownBody
               content={content}
               contentFormat={contentFormat}
               theme={theme}
               color={textColor}
               fontSize={bodyFontSize}
-              centered
+              bodyLayout={CINEMA_BOOK_BODY_LAYOUT}
             />
           </div>
         </div>
@@ -134,10 +139,7 @@ export function CinemaBookTemplate({ content, contentFormat, width, height, them
           }}
         >
           <span>Must watch / read</span>
-          <span>
-            {pageIndex}/{pageCount}
-          </span>
-        </div>
+          </div>
       </div>
     </div>
   );

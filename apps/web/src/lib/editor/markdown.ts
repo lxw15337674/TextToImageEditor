@@ -8,12 +8,11 @@ export const POSTER_DIMENSIONS = {
 } as const;
 
 export function createDocumentSignature(
-  document: Pick<EditorDocument, 'content' | 'contentFormat' | 'exportTheme' | 'exportTemplate' | 'fontSizePreset'>,
+  document: Pick<EditorDocument, 'content' | 'contentFormat' | 'exportTemplate' | 'fontSizePreset'>,
 ) {
   return JSON.stringify({
     content: document.content,
     contentFormat: document.contentFormat,
-    exportTheme: document.exportTheme,
     exportTemplate: document.exportTemplate,
     fontSizePreset: document.fontSizePreset,
   });
