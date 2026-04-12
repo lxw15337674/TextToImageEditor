@@ -6,7 +6,7 @@
     "dev": "pnpm run dev:web",
     "dev:web": "pnpm --filter cf-template-web dev",
     "dev:api": "pnpm --filter cf-template-api dev",
-    "dev:all": "pnpm -r --parallel --stream --filter cf-template-web --filter cf-template-api dev",
+    "dev:all": "concurrently \"pnpm run dev:web\" \"pnpm run dev:api\"",
     "build": "pnpm run build:web",
     "build:web": "pnpm --filter cf-template-web build",
     "build:api": "pnpm --filter cf-template-api build",
@@ -32,6 +32,7 @@
   "packageManager": "pnpm@10.11.1",
   "type": "module",
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "typescript": "^6.0.2"
   }
 }

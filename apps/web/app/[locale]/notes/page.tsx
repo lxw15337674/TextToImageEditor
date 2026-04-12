@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { hasLocale } from 'next-intl';
 import { notFound } from 'next/navigation';
-import { StarterNotesPage } from '@/components/StarterNotesPage';
+import { MarkdownPosterEditor } from '@/components/MarkdownPosterEditor';
 import type { Locale } from '@/i18n/config';
 import { getMessages } from '@/i18n/messages';
 import { routing } from '@/i18n/routing';
@@ -40,5 +40,5 @@ export default async function NotesPage({ params }: NotesPageProps) {
   const { locale: requestedLocale } = await params;
   const locale = resolveLocale(requestedLocale);
 
-  return <StarterNotesPage locale={locale} />;
+  return <MarkdownPosterEditor locale={locale} />;
 }

@@ -1,30 +1,28 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-This repository is a pnpm monorepo with a localized web app and a Cloudflare Worker API. Frontend route entrypoints live in `apps/web/app/`, with active localized pages under `apps/web/app/[locale]/`. Shared web shell and UI primitives live in `apps/web/src/components/`. Locale config and copy live in `apps/web/src/i18n/`. Web API helpers live in `apps/web/src/lib/`. Backend service code lives in `apps/api/src/`, with the current D1 schema in `apps/api/src/schema.ts` and migrations in `apps/api/migrations/`. Shared cross-app contracts live in `packages/shared/`.
+This workspace is part of a pnpm monorepo. Apps live in `apps/web` and `apps/api`, with shared code under `packages/`. Web routes are in `apps/web/app/`, shared UI in `apps/web/src/components/`, i18n files in `apps/web/src/i18n/`, static assets in `apps/web/public/`, and Cloudflare runtime code in `apps/web/worker/`. API code lives in `apps/api/src/`, with D1 migrations in `apps/api/migrations/` and colocated tests such as `apps/api/src/index.test.ts`.
 
 ## Build, Test, and Development Commands
-Use `pnpm` throughout.
+Run commands from the repository root unless a section says otherwise.
 
-- `pnpm dev:web`: start the web app on port `3003`.
-- `pnpm dev:api`: run the API worker locally with Wrangler.
-- `pnpm dev:all`: run web and API together.
-- `pnpm build:web` / `pnpm build:api`: build the web app or API worker artifacts.
-- `pnpm lint`: run the web ESLint baseline.
-- `pnpm typecheck`: run TypeScript checks for both web and API.
-- `pnpm db:migrations:list`: list local D1 migrations for the API.
-- `pnpm db:migrate:local`: apply local API D1 migrations.
-- `pnpm db:migrate:remote`: apply remote API D1 migrations.
-- `pnpm --filter cf-template-api test`: run the Worker test suite.
+- `pnpm dev:web`: start the web app locally on port `3003`.
+- `pnpm dev:api`: run the API Worker with Wrangler.
+- `pnpm dev:all`: run both apps in parallel.
+- `pnpm build:web` / `pnpm build:api`: produce release artifacts for each app.
+- `pnpm lint`: run the web ESLint checks.
+- `pnpm typecheck`: run TypeScript checks for web and API.
+- `pnpm db:migrate`: apply local API D1 migrations.
+- `pnpm --filter link-disk-api test`: run the API Vitest suite.
 
 ## Coding Style & Naming Conventions
-TypeScript runs in `strict` mode; keep types explicit at module boundaries. Use 2-space indentation and ESM imports. In web code, use the `@/*` path alias for files under `apps/web/src/` and `@cf-template/shared` for shared contracts. Use PascalCase for React components and kebab-case for route folders and non-component filenames. Keep the starter generic: add new domain logic under product-area names instead of reviving legacy business names.
+Use TypeScript with `strict` mode and explicit types at module boundaries. Prefer 2-space indentation, ESM imports, and the `@/*` alias for files under `apps/web/src/`. Use PascalCase for React components and kebab-case for route folders and non-component filenames. For complex parsing, storage, validation, or protocol logic, prefer mature open-source libraries over custom implementations unless platform constraints require otherwise.
 
 ## Testing Guidelines
-Treat `pnpm lint`, `pnpm typecheck`, and `pnpm build:web` as the web validation baseline. API baseline validation is `pnpm build:api` plus `pnpm --filter cf-template-api test`. For D1 schema changes, add or update a migration in `apps/api/migrations/` and validate it locally before editing docs.
+Web has no dedicated unit-test suite yet; the baseline is `pnpm lint`, `pnpm typecheck`, and `pnpm build:web`. API changes should pass `pnpm build:api` and `pnpm --filter link-disk-api test`. Keep API tests close to the code they cover using `*.test.ts`. For browser-facing or production-like debugging, use `agent-browser`. Review generated SQL before applying schema or migration changes.
 
 ## Commit & Pull Request Guidelines
-Use short imperative Conventional Commit subjects such as `feat: add auth shell` or `chore: simplify worker docs`. Keep unrelated changes separate. Pull requests should summarize the user-facing change, affected routes or APIs, and any new env vars, bindings, or migration requirements. Ensure validation passes before requesting review.
+Recent history uses short Conventional Commit subjects such as `feat: add google analytics`. Keep commits scoped to one concern. PRs should summarize user-facing changes, list affected routes or APIs, note env var or migration requirements, and include screenshots for visible web UI changes.
 
-## Security & Configuration Tips
-Secrets belong in local env files or deployment secret stores, never in source. The starter currently expects placeholder public URLs in the web env and an `APP_DB` D1 binding for the API. Before deploying, update each app's `wrangler.jsonc` and confirm that canonical URLs and database identifiers match the target environment.
+## Deployment, Data & Security
+Deploy to Cloudflare through the automatic deployment pipeline; avoid manual production releases except for emergency recovery. Use Cloudflare D1 for relational data and R2 for object or file storage by default. Never commit secrets. Store web values such as `NEXT_PUBLIC_SITE_URL` in local env files and configure Worker secrets through Wrangler or deployment secret stores. If you work inside `apps/api`, also check `apps/api/AGENTS.md`.

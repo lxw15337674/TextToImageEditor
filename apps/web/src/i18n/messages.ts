@@ -53,26 +53,86 @@ interface LocaleMessages {
     metadataDescription: string;
     title: string;
     description: string;
-    formTitle: string;
-    formDescription: string;
-    formLabel: string;
-    formPlaceholder: string;
-    submit: string;
-    submitting: string;
-    refresh: string;
-    listTitle: string;
-    listDescription: string;
-    loading: string;
-    emptyState: string;
-    delete: string;
-    deleting: string;
-    createdAtLabel: string;
-    updatedAtLabel: string;
-    errorTitle: string;
-    errorList: string;
-    errorCreate: string;
-    errorDelete: string;
-    emptyValidation: string;
+    loadingDocument: string;
+    statusEditing: string;
+    statusSaving: string;
+    statusSaved: string;
+    undo: string;
+    redo: string;
+    saveMilestone: string;
+    history: string;
+    fileMenu: string;
+    importFile: string;
+    exportMarkdown: string;
+    exportText: string;
+    exportImage: string;
+    shareImage: string;
+    editorCardTitle: string;
+    editorCardDescription: string;
+    editorBodyLabel: string;
+    previewTab: string;
+    plainTab: string;
+    mobileEditorTab: string;
+    mobilePreviewTab: string;
+    previewCardTitle: string;
+    previewCardDescription: string;
+    plainCardTitle: string;
+    emptyPlainPreview: string;
+    localOnlyTitle: string;
+    localOnlyDescription: string;
+    localOnlyStorage: string;
+    localOnlyVersions: string;
+    localOnlyExport: string;
+    historyTitle: string;
+    historyDescription: string;
+    emptyHistory: string;
+    versionKindAuto: string;
+    versionKindMilestone: string;
+    versionKindImportBackup: string;
+    versionKindRollbackBackup: string;
+    versionLabelPlaceholder: string;
+    saveVersionLabel: string;
+    versionLabelSaved: string;
+    restoreVersion: string;
+    saveAsMilestone: string;
+    renameMilestone: string;
+    deleteVersion: string;
+    cancel: string;
+    emptyVersionSummary: string;
+    exportDialogTitle: string;
+    exportDialogDescription: string;
+    exportThemeLabel: string;
+    exportThemeLight: string;
+    exportThemeDark: string;
+    exportTemplateLabel: string;
+    templateXiaohongshu: string;
+    templateImageBackground: string;
+    templateSpotify: string;
+    exportPresetLabel: string;
+    exportResolutionLabel: string;
+    exportPreviewLabel: string;
+    exportPreviewLoading: string;
+    exportPreviewPages: string;
+    previewZoomOpenLabel: string;
+    previewZoomCloseLabel: string;
+    exportHint: string;
+    overflowWarning: string;
+    loadError: string;
+    saveError: string;
+    versionError: string;
+    importError: string;
+    importSuccess: string;
+    exportMarkdownSuccess: string;
+    exportTextSuccess: string;
+    exportImageError: string;
+    exportImagesSuccessOne: string;
+    exportImagesSuccessMany: string;
+    shareError: string;
+    shareSuccess: string;
+    shareFirstPageSuccess: string;
+    shareFallback: string;
+    milestoneSaved: string;
+    restoreSuccess: string;
   };
 }
 
@@ -84,7 +144,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       siteDescription: 'Localized Next.js frontend and Cloudflare Worker API template.',
       navHome: 'Home',
       navStarter: 'Starter Guide',
-      navNotes: 'Notes Example',
+      navNotes: 'Poster Editor',
       themeLabel: 'Theme',
       themeLight: 'Light',
       themeDark: 'Dark',
@@ -100,7 +160,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       eyebrow: 'Localized Full-Stack Starter',
       title: 'Start from a clean baseline instead of carving business logic out later.',
       description: 'This template keeps the shell that matters: routing by locale, theme switching, shared UI primitives, Cloudflare Worker deployment, OpenAPI docs, and one minimal D1-backed example.',
-      primaryCta: 'Open Notes Example',
+      primaryCta: 'Open Poster Editor',
       secondaryCta: 'Read Starter Guide',
       stackTitle: 'What stays in the template',
       stackDescription: 'The project keeps the infrastructure layer and removes product-specific workflows.',
@@ -108,7 +168,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         'Next.js app router with locale-prefixed routes',
         'Theme switcher and reusable UI primitives',
         'Hono API with OpenAPI JSON and Scalar docs',
-        'D1 integration through a single notes example',
+        'A local-first Markdown editor with poster export',
       ],
       featureItems: [
         {
@@ -125,7 +185,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         },
         {
           title: 'Minimal data example',
-          description: 'Notes routes show how to connect the frontend, Worker, and D1 without carrying old domain logic.',
+          description: 'The editor route shows how to turn the starter shell into a real local-first product.',
         },
       ],
     },
@@ -133,7 +193,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       metadataTitle: 'Starter Guide',
       metadataDescription: 'Overview of the retained template structure for the web app and API worker.',
       title: 'Starter Guide',
-      description: 'Use this scaffold as the first stable layer for a new product. Replace the notes example, expand the shared package, and add domain modules where they belong.',
+      description: 'Use this scaffold as the first stable layer for a new product. Replace the sample editor copy, expand the shared package, and add domain modules where they belong.',
       webTitle: 'Web foundation',
       webDescription: 'What the frontend keeps after removing business-specific pages.',
       webItems: [
@@ -152,35 +212,95 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       checklistDescription: 'Typical work you should do before turning this template into a real app.',
       checklist: [
         'Replace template copy, app names, and public URLs.',
-        'Swap the notes example for your real first domain module.',
+        'Replace the sample editor copy and keep the reusable shell.',
         'Add auth, background jobs, or storage only when a product need exists.',
       ],
     },
     notes: {
-      metadataTitle: 'Notes Example',
-      metadataDescription: 'Minimal end-to-end D1 example powered by the starter API.',
-      title: 'Notes Example',
-      description: 'This page demonstrates the smallest useful full-stack loop in the template: create a record, read it back from D1, and delete it again.',
-      formTitle: 'Create note',
-      formDescription: 'Submit a short title to store a note through the Worker API.',
-      formLabel: 'Title',
-      formPlaceholder: 'Write a short note title',
-      submit: 'Create note',
-      submitting: 'Creating…',
-      refresh: 'Refresh',
-      listTitle: 'Saved notes',
-      listDescription: 'Each row comes from the D1-backed `/api/notes` endpoint.',
-      loading: 'Loading notes…',
-      emptyState: 'No notes yet. Create one to verify the end-to-end setup.',
-      delete: 'Delete',
-      deleting: 'Deleting…',
-      createdAtLabel: 'Created',
-      updatedAtLabel: 'Updated',
-      errorTitle: 'Request failed',
-      errorList: 'Could not load notes.',
-      errorCreate: 'Could not create the note.',
-      errorDelete: 'Could not delete the note.',
-      emptyValidation: 'Enter a title before submitting.',
+      metadataTitle: 'Markdown Poster Editor',
+      metadataDescription: 'Local-first Markdown editor with autosave, history, rollback, and poster image export.',
+      title: 'Markdown Poster Editor',
+      description: 'Write in Markdown, keep your history locally, and export polished poster images without creating an account.',
+      loadingDocument: 'Loading your local document…',
+      statusEditing: 'Editing',
+      statusSaving: 'Saving',
+      statusSaved: 'Saved',
+      undo: 'Undo',
+      redo: 'Redo',
+      saveMilestone: 'Save milestone',
+      history: 'Versions',
+      fileMenu: 'Files',
+      importFile: 'Import .md or .txt',
+      exportMarkdown: 'Export Markdown',
+      exportText: 'Export text',
+      exportImage: 'Export PNG',
+      shareImage: 'Share image',
+      editorCardTitle: 'Editor',
+      editorCardDescription: 'Write in Markdown on the left and shape a single-page poster on the right.',
+      editorBodyLabel: 'Markdown body',
+      previewTab: 'Preview',
+      plainTab: 'Plain text',
+      mobileEditorTab: 'Edit',
+      mobilePreviewTab: 'Preview',
+      previewCardTitle: 'Live poster',
+      previewCardDescription: 'These controls drive the live preview and the exported PNG.',
+      plainCardTitle: 'Plain text view',
+      emptyPlainPreview: 'Nothing here yet. Start writing on the left.',
+      localOnlyTitle: 'Local-first',
+      localOnlyDescription: 'Everything stays in this browser unless you explicitly export it.',
+      localOnlyStorage: 'Autosave writes the current content to IndexedDB on this device.',
+      localOnlyVersions: 'Version history keeps automatic snapshots, milestones, import backups, and rollback backups.',
+      localOnlyExport: 'You can export Markdown, plain text, or poster PNG files to local storage.',
+      historyTitle: 'Version history',
+      historyDescription: 'Review local snapshots, turn any version into a milestone, or roll back in one click.',
+      emptyHistory: 'No versions yet. Keep writing and the editor will create local snapshots.',
+      versionKindAuto: 'Auto snapshot',
+      versionKindMilestone: 'Milestone',
+      versionKindImportBackup: 'Import backup',
+      versionKindRollbackBackup: 'Rollback backup',
+      versionLabelPlaceholder: 'Add a milestone label',
+      saveVersionLabel: 'Save label',
+      versionLabelSaved: 'Version label updated.',
+      restoreVersion: 'Restore version',
+      saveAsMilestone: 'Save as milestone',
+      renameMilestone: 'Rename',
+      deleteVersion: 'Delete',
+      cancel: 'Cancel',
+      emptyVersionSummary: 'This version has no content yet.',
+      exportDialogTitle: 'Export poster image',
+      exportDialogDescription: 'Choose a theme and size, then export one or more PNG posters.',
+      exportThemeLabel: 'Poster theme',
+      exportThemeLight: 'Light',
+      exportThemeDark: 'Dark',
+      exportTemplateLabel: 'Template',
+      templateXiaohongshu: 'Xiaohongshu',
+      templateImageBackground: 'Image Background',
+      templateSpotify: 'Spotify',
+      exportPresetLabel: 'Aspect ratio',
+      exportResolutionLabel: 'Resolution',
+      exportPreviewLabel: 'Live preview',
+      exportPreviewLoading: 'Building preview…',
+      exportPreviewPages: '{count} pages',
+      previewZoomOpenLabel: 'Expand live preview',
+      previewZoomCloseLabel: 'Minimize live preview',
+      exportHint: 'Export size: {size}. This editor currently exports a single poster page.',
+      overflowWarning: 'Content below the visible poster area will be clipped in the exported PNG.',
+      loadError: 'Could not load your local document.',
+      saveError: 'Could not save locally.',
+      versionError: 'Could not update local version history.',
+      importError: 'Could not import this file.',
+      importSuccess: 'File imported and the previous state was backed up.',
+      exportMarkdownSuccess: 'Markdown file exported.',
+      exportTextSuccess: 'Text file exported.',
+      exportImageError: 'Could not export PNG images.',
+      exportImagesSuccessOne: 'PNG image exported.',
+      exportImagesSuccessMany: '{count} PNG images exported.',
+      shareError: 'Could not share the image.',
+      shareSuccess: 'Image shared.',
+      shareFirstPageSuccess: 'First poster page shared. Remaining pages can be exported as PNG files.',
+      shareFallback: 'This browser cannot share image files. The first PNG was downloaded instead.',
+      milestoneSaved: 'Milestone saved.',
+      restoreSuccess: 'Version restored and the previous state was backed up.',
     },
   },
   zh: {
@@ -190,7 +310,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       siteDescription: '内置多语言 Next.js 前端和 Cloudflare Worker API 模板。',
       navHome: '首页',
       navStarter: '模板说明',
-      navNotes: 'Notes 示例',
+      navNotes: '海报编辑器',
       themeLabel: '主题',
       themeLight: '浅色',
       themeDark: '深色',
@@ -206,7 +326,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       eyebrow: '本地化全栈模板',
       title: '从干净的基础层开始，而不是以后再一点点剥离业务代码。',
       description: '这个模板只保留真正有复用价值的部分：按 locale 的路由、多主题、通用 UI、Cloudflare Worker 部署、OpenAPI 文档，以及一个最小 D1 示例。',
-      primaryCta: '打开 Notes 示例',
+      primaryCta: '打开海报编辑器',
       secondaryCta: '查看模板说明',
       stackTitle: '模板保留内容',
       stackDescription: '保留基础设施，移除产品特定流程。',
@@ -214,7 +334,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         '带 locale 前缀的 Next.js App Router',
         '主题切换和可复用 UI primitives',
         '带 OpenAPI JSON 与 Scalar 文档的 Hono API',
-        '通过 Notes 示例演示 D1 集成',
+        '本地优先的 Markdown 编辑器与海报导出',
       ],
       featureItems: [
         {
@@ -231,7 +351,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         },
         {
           title: '最小数据闭环',
-          description: 'Notes 路由展示前端、Worker 和 D1 的最小联通方式，不带旧业务包袱。',
+          description: '编辑器路由展示了如何把模板壳层变成一个真正的本地优先产品。',
         },
       ],
     },
@@ -239,7 +359,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       metadataTitle: '模板说明',
       metadataDescription: '概览当前模板中保留下来的 Web 和 API 结构。',
       title: '模板说明',
-      description: '这个骨架适合作为新产品的第一层稳定基础。后续你可以替换 Notes 示例、扩展 shared 包，并按业务域拆出自己的模块。',
+      description: '这个骨架适合作为新产品的第一层稳定基础。后续你可以替换示例文案、扩展 shared 包，并按业务域拆出自己的模块。',
       webTitle: 'Web 基础层',
       webDescription: '移除业务页之后，前端保留下来的部分。',
       webItems: [
@@ -258,35 +378,95 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       checklistDescription: '把模板变成真实项目之前，通常还需要做这些事。',
       checklist: [
         '替换模板文案、应用名和公开域名。',
-        '把 Notes 示例换成你的第一个真实业务模块。',
+        '替换示例文案，并保留这套可复用的产品壳层。',
         '只有在产品确实需要时，再引入鉴权、后台任务或对象存储。',
       ],
     },
     notes: {
-      metadataTitle: 'Notes 示例',
-      metadataDescription: '一个由 starter API 驱动的最小 D1 全栈示例。',
-      title: 'Notes 示例',
-      description: '这个页面演示模板里最小但完整的全栈闭环：创建一条记录，从 D1 读出来，再删除它。',
-      formTitle: '创建 note',
-      formDescription: '提交一个简短标题，通过 Worker API 写入一条 note。',
-      formLabel: '标题',
-      formPlaceholder: '输入一个简短的 note 标题',
-      submit: '创建 note',
-      submitting: '创建中…',
-      refresh: '刷新',
-      listTitle: '已保存的 notes',
-      listDescription: '下面的数据直接来自基于 D1 的 `/api/notes` 接口。',
-      loading: '正在加载 notes…',
-      emptyState: '还没有数据，先创建一条以验证前后端链路。',
-      delete: '删除',
-      deleting: '删除中…',
-      createdAtLabel: '创建时间',
-      updatedAtLabel: '更新时间',
-      errorTitle: '请求失败',
-      errorList: '加载 notes 失败。',
-      errorCreate: '创建 note 失败。',
-      errorDelete: '删除 note 失败。',
-      emptyValidation: '提交前请先输入标题。',
+      metadataTitle: 'Markdown 海报编辑器',
+      metadataDescription: '本地优先的 Markdown 编辑器，支持自动保存、历史版本、回滚和海报导出。',
+      title: 'Markdown 海报编辑器',
+      description: '用 Markdown 写内容，把版本记录留在本机，再导出成适合分享的海报图片。',
+      loadingDocument: '正在加载本地文档…',
+      statusEditing: '编辑中',
+      statusSaving: '保存中',
+      statusSaved: '已保存',
+      undo: '撤回',
+      redo: '重做',
+      saveMilestone: '保存里程碑',
+      history: '版本记录',
+      fileMenu: '文件',
+      importFile: '导入 .md 或 .txt',
+      exportMarkdown: '导出 Markdown',
+      exportText: '导出纯文本',
+      exportImage: '导出 PNG',
+      shareImage: '分享图片',
+      editorCardTitle: '编辑器',
+      editorCardDescription: '左侧编辑 Markdown，右侧直接调整单页海报效果。',
+      editorBodyLabel: 'Markdown 正文',
+      previewTab: '渲染预览',
+      plainTab: '纯文本',
+      mobileEditorTab: '编辑',
+      mobilePreviewTab: '预览',
+      previewCardTitle: '实时海报',
+      previewCardDescription: '这里的设置会同时驱动实时预览和最终导出的 PNG。',
+      plainCardTitle: '纯文本视图',
+      emptyPlainPreview: '这里还是空的，先在左侧开始写吧。',
+      localOnlyTitle: '仅保存在本机',
+      localOnlyDescription: '除非你主动导出，否则所有内容都只保存在当前浏览器里。',
+      localOnlyStorage: '自动保存会把当前内容写入这台设备的 IndexedDB。',
+      localOnlyVersions: '版本记录会保存自动快照、手动里程碑、导入前备份和回滚前备份。',
+      localOnlyExport: '你可以把内容导出为 Markdown、纯文本或海报 PNG 图片。',
+      historyTitle: '版本记录',
+      historyDescription: '查看本地快照，把任意版本另存为里程碑，或一键回滚。',
+      emptyHistory: '还没有版本记录。继续编辑，系统会自动创建本地快照。',
+      versionKindAuto: '自动快照',
+      versionKindMilestone: '手动里程碑',
+      versionKindImportBackup: '导入前备份',
+      versionKindRollbackBackup: '回滚前备份',
+      versionLabelPlaceholder: '输入里程碑标签',
+      saveVersionLabel: '保存标签',
+      versionLabelSaved: '版本标签已更新。',
+      restoreVersion: '恢复此版本',
+      saveAsMilestone: '另存为里程碑',
+      renameMilestone: '重命名',
+      deleteVersion: '删除',
+      cancel: '取消',
+      emptyVersionSummary: '这个版本里还没有内容。',
+      exportDialogTitle: '导出海报图片',
+      exportDialogDescription: '选择主题和尺寸，然后导出一张或多张 PNG 海报。',
+      exportThemeLabel: '海报主题',
+      exportThemeLight: '浅色',
+      exportThemeDark: '深色',
+      exportTemplateLabel: '模板',
+      templateXiaohongshu: '小红书风格',
+      templateImageBackground: '图片背景风格',
+      templateSpotify: 'Spotify 风格',
+      exportPresetLabel: '画布比例',
+      exportResolutionLabel: '导出分辨率',
+      exportPreviewLabel: '实时预览',
+      exportPreviewLoading: '正在生成预览…',
+      exportPreviewPages: '{count} 页',
+      previewZoomOpenLabel: '放大实时预览',
+      previewZoomCloseLabel: '收起实时预览',
+      exportHint: '当前导出尺寸：{size}。当前版本只导出单张海报。',
+      overflowWarning: '超出当前海报可见区域的内容会在导出的 PNG 中被裁切。',
+      loadError: '加载本地文档失败。',
+      saveError: '本地保存失败。',
+      versionError: '更新本地版本记录失败。',
+      importError: '导入文件失败。',
+      importSuccess: '文件已导入，导入前状态已自动备份。',
+      exportMarkdownSuccess: 'Markdown 文件已导出。',
+      exportTextSuccess: '纯文本文件已导出。',
+      exportImageError: '导出 PNG 图片失败。',
+      exportImagesSuccessOne: 'PNG 图片已导出。',
+      exportImagesSuccessMany: '已导出 {count} 张 PNG 图片。',
+      shareError: '分享图片失败。',
+      shareSuccess: '图片已分享。',
+      shareFirstPageSuccess: '已分享第一页海报，其余页面可继续导出为 PNG。',
+      shareFallback: '当前浏览器不支持分享图片文件，已改为下载第一张 PNG。',
+      milestoneSaved: '里程碑已保存。',
+      restoreSuccess: '版本已恢复，恢复前状态已自动备份。',
     },
   },
   es: {
@@ -296,7 +476,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       siteDescription: 'Plantilla con frontend Next.js localizado y API Worker de Cloudflare.',
       navHome: 'Inicio',
       navStarter: 'Guía',
-      navNotes: 'Ejemplo Notes',
+      navNotes: 'Poster Editor',
       themeLabel: 'Tema',
       themeLight: 'Claro',
       themeDark: 'Oscuro',
@@ -312,7 +492,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       eyebrow: 'Starter full-stack localizado',
       title: 'Empieza desde una base limpia en lugar de extraer lógica de negocio más tarde.',
       description: 'La plantilla conserva solo lo útil para futuros proyectos: rutas por locale, cambio de tema, UI reutilizable, despliegue en Workers, documentación OpenAPI y un ejemplo mínimo con D1.',
-      primaryCta: 'Abrir ejemplo Notes',
+      primaryCta: 'Open Poster Editor',
       secondaryCta: 'Leer la guía',
       stackTitle: 'Qué permanece',
       stackDescription: 'Se conserva la infraestructura y se elimina la lógica específica del producto.',
@@ -320,7 +500,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         'Next.js App Router con rutas por locale',
         'Cambio de tema y componentes reutilizables',
         'API Hono con OpenAPI JSON y docs de Scalar',
-        'Integración con D1 mediante un ejemplo mínimo de notes',
+        'A local-first Markdown editor with poster export',
       ],
       featureItems: [
         {
@@ -337,7 +517,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         },
         {
           title: 'Ejemplo de datos mínimo',
-          description: 'Las rutas de notes muestran cómo unir frontend, Worker y D1 sin arrastrar la lógica anterior.',
+          description: 'The editor route shows how to turn the starter shell into a real local-first product.',
         },
       ],
     },
@@ -345,7 +525,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       metadataTitle: 'Guía',
       metadataDescription: 'Resumen de la estructura web y API que se mantiene en la plantilla.',
       title: 'Guía de inicio',
-      description: 'Usa este scaffold como una primera capa estable para un producto nuevo. Sustituye el ejemplo de notes, amplía el paquete compartido y añade tus módulos de dominio.',
+      description: 'Use this scaffold as a stable first layer for a new product. Replace the sample copy, extend the shared package, and add domain modules where they belong.',
       webTitle: 'Base web',
       webDescription: 'Qué conserva el frontend tras retirar las páginas de negocio.',
       webItems: [
@@ -364,35 +544,95 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       checklistDescription: 'Trabajo habitual antes de convertir la plantilla en una app real.',
       checklist: [
         'Reemplaza el texto de plantilla, los nombres y las URLs públicas.',
-        'Sustituye el ejemplo de notes por tu primer módulo real.',
+        'Replace the sample copy and keep the reusable shell.',
         'Añade auth, jobs o storage solo cuando el producto lo necesite.',
       ],
     },
     notes: {
-      metadataTitle: 'Ejemplo Notes',
-      metadataDescription: 'Ejemplo mínimo de extremo a extremo con D1 y la starter API.',
-      title: 'Ejemplo Notes',
-      description: 'Esta página demuestra el ciclo full-stack más pequeño útil en la plantilla: crear un registro, leerlo desde D1 y volver a eliminarlo.',
-      formTitle: 'Crear note',
-      formDescription: 'Envía un título corto para guardar una note mediante la API Worker.',
-      formLabel: 'Título',
-      formPlaceholder: 'Escribe un título corto',
-      submit: 'Crear note',
-      submitting: 'Creando…',
-      refresh: 'Actualizar',
-      listTitle: 'Notes guardadas',
-      listDescription: 'Cada fila viene del endpoint `/api/notes` respaldado por D1.',
-      loading: 'Cargando notes…',
-      emptyState: 'Todavía no hay notes. Crea una para validar la integración.',
-      delete: 'Eliminar',
-      deleting: 'Eliminando…',
-      createdAtLabel: 'Creado',
-      updatedAtLabel: 'Actualizado',
-      errorTitle: 'Error en la petición',
-      errorList: 'No se pudieron cargar las notes.',
-      errorCreate: 'No se pudo crear la note.',
-      errorDelete: 'No se pudo eliminar la note.',
-      emptyValidation: 'Introduce un título antes de enviar.',
+      metadataTitle: 'Markdown Poster Editor',
+      metadataDescription: 'Local-first Markdown editor with autosave, history, rollback, and poster export.',
+      title: 'Markdown Poster Editor',
+      description: 'Write in Markdown, keep version history in this browser, and export polished poster images.',
+      loadingDocument: 'Loading your local document…',
+      statusEditing: 'Editing',
+      statusSaving: 'Saving',
+      statusSaved: 'Saved',
+      undo: 'Undo',
+      redo: 'Redo',
+      saveMilestone: 'Save milestone',
+      history: 'Versions',
+      fileMenu: 'Files',
+      importFile: 'Import .md or .txt',
+      exportMarkdown: 'Export Markdown',
+      exportText: 'Export text',
+      exportImage: 'Export PNG',
+      shareImage: 'Share image',
+      editorCardTitle: 'Editor',
+      editorCardDescription: 'Write in Markdown on the left and shape a single-page poster on the right.',
+      editorBodyLabel: 'Markdown body',
+      previewTab: 'Preview',
+      plainTab: 'Plain text',
+      mobileEditorTab: 'Edit',
+      mobilePreviewTab: 'Preview',
+      previewCardTitle: 'Live poster',
+      previewCardDescription: 'These controls drive the live preview and the exported PNG.',
+      plainCardTitle: 'Plain text view',
+      emptyPlainPreview: 'Nothing here yet. Start writing on the left.',
+      localOnlyTitle: 'Local-first',
+      localOnlyDescription: 'Everything stays in this browser unless you export it yourself.',
+      localOnlyStorage: 'Autosave writes the current content to IndexedDB on this device.',
+      localOnlyVersions: 'Version history keeps automatic snapshots, milestones, import backups, and rollback backups.',
+      localOnlyExport: 'You can export Markdown, plain text, or poster PNG files locally.',
+      historyTitle: 'Version history',
+      historyDescription: 'Review local snapshots, turn any version into a milestone, or roll back in one click.',
+      emptyHistory: 'No versions yet. Keep writing and the editor will create local snapshots.',
+      versionKindAuto: 'Auto snapshot',
+      versionKindMilestone: 'Milestone',
+      versionKindImportBackup: 'Import backup',
+      versionKindRollbackBackup: 'Rollback backup',
+      versionLabelPlaceholder: 'Add a milestone label',
+      saveVersionLabel: 'Save label',
+      versionLabelSaved: 'Version label updated.',
+      restoreVersion: 'Restore version',
+      saveAsMilestone: 'Save as milestone',
+      renameMilestone: 'Rename',
+      deleteVersion: 'Delete',
+      cancel: 'Cancel',
+      emptyVersionSummary: 'This version has no content yet.',
+      exportDialogTitle: 'Export poster image',
+      exportDialogDescription: 'Choose a theme and size, then export one or more PNG posters.',
+      exportThemeLabel: 'Poster theme',
+      exportThemeLight: 'Light',
+      exportThemeDark: 'Dark',
+      exportTemplateLabel: 'Template',
+      templateXiaohongshu: 'Xiaohongshu',
+      templateImageBackground: 'Image Background',
+      templateSpotify: 'Spotify',
+      exportPresetLabel: 'Aspect ratio',
+      exportResolutionLabel: 'Resolution',
+      exportPreviewLabel: 'Live preview',
+      exportPreviewLoading: 'Building preview…',
+      exportPreviewPages: '{count} pages',
+      previewZoomOpenLabel: 'Ampliar vista previa en vivo',
+      previewZoomCloseLabel: 'Cerrar vista previa ampliada',
+      exportHint: 'Export size: {size}. This editor currently exports a single poster page.',
+      overflowWarning: 'Content below the visible poster area will be clipped in the exported PNG.',
+      loadError: 'Could not load your local document.',
+      saveError: 'Could not save locally.',
+      versionError: 'Could not update local version history.',
+      importError: 'Could not import this file.',
+      importSuccess: 'File imported and the previous state was backed up.',
+      exportMarkdownSuccess: 'Markdown file exported.',
+      exportTextSuccess: 'Text file exported.',
+      exportImageError: 'Could not export PNG images.',
+      exportImagesSuccessOne: 'PNG image exported.',
+      exportImagesSuccessMany: '{count} PNG images exported.',
+      shareError: 'Could not share the image.',
+      shareSuccess: 'Image shared.',
+      shareFirstPageSuccess: 'First poster page shared. Remaining pages can be exported as PNG files.',
+      shareFallback: 'This browser cannot share image files. The first PNG was downloaded instead.',
+      milestoneSaved: 'Milestone saved.',
+      restoreSuccess: 'Version restored and the previous state was backed up.',
     },
   },
   ja: {
@@ -402,7 +642,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       siteDescription: '多言語 Next.js フロントエンドと Cloudflare Worker API を備えたテンプレートです。',
       navHome: 'ホーム',
       navStarter: 'ガイド',
-      navNotes: 'Notes 例',
+      navNotes: 'Poster Editor',
       themeLabel: 'テーマ',
       themeLight: 'ライト',
       themeDark: 'ダーク',
@@ -418,7 +658,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       eyebrow: '多言語フルスタック スターター',
       title: 'あとで業務コードを削ぎ落とすのではなく、最初からクリーンな土台で始める。',
       description: 'このテンプレートは、本当に再利用したい層だけを残します。locale 付きルーティング、テーマ切替、共通 UI、Workers へのデプロイ、OpenAPI ドキュメント、そして最小の D1 例です。',
-      primaryCta: 'Notes 例を開く',
+      primaryCta: 'Poster Editor を開く',
       secondaryCta: 'ガイドを読む',
       stackTitle: 'テンプレートに残すもの',
       stackDescription: 'インフラ層だけを保持し、製品固有のワークフローは削除します。',
@@ -426,7 +666,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         'locale プレフィックス付きの Next.js App Router',
         'テーマ切替と再利用可能な UI primitives',
         'OpenAPI JSON と Scalar docs を備えた Hono API',
-        'Notes 例による D1 連携',
+        'ポスター画像を書き出せるローカルファーストの Markdown エディタ',
       ],
       featureItems: [
         {
@@ -443,7 +683,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         },
         {
           title: '最小のデータ例',
-          description: 'Notes ルートは、旧ドメインロジックなしで frontend、Worker、D1 をつなぐ最小例です。',
+          description: 'エディタルートは、スターターのシェルをローカルファーストな実製品へ変える流れを示します。',
         },
       ],
     },
@@ -451,7 +691,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       metadataTitle: 'ガイド',
       metadataDescription: 'テンプレートに残した Web と API の構成を確認します。',
       title: 'スターターガイド',
-      description: 'この scaffold を新しい製品の最初の安定層として使ってください。Notes 例を差し替え、shared パッケージを拡張し、ドメイン単位で機能を追加していけます。',
+      description: 'この scaffold を新しい製品の最初の安定層として使ってください。サンプル文言を差し替え、shared パッケージを拡張し、ドメイン単位で機能を追加していけます。',
       webTitle: 'Web の土台',
       webDescription: '業務ページを取り除いたあとにフロントエンドへ残るもの。',
       webItems: [
@@ -470,35 +710,95 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       checklistDescription: 'このテンプレートを実プロダクトにする前に、通常は次を行います。',
       checklist: [
         'テンプレート文言、アプリ名、公開 URL を置き換える。',
-        'Notes 例を最初の実ドメインモジュールへ差し替える。',
+        'サンプル文言を置き換えつつ、再利用できるシェルを維持する。',
         '認証、バックグラウンド処理、ストレージは必要になってから追加する。',
       ],
     },
     notes: {
-      metadataTitle: 'Notes 例',
-      metadataDescription: 'starter API を使った最小の D1 エンドツーエンド例です。',
-      title: 'Notes 例',
-      description: 'このページでは、テンプレート内で最も小さく実用的なフルスタックの流れを示します。レコードを作成し、D1 から読み出し、再び削除します。',
-      formTitle: 'note を作成',
-      formDescription: '短いタイトルを送信して、Worker API 経由で note を保存します。',
-      formLabel: 'タイトル',
-      formPlaceholder: '短い note のタイトルを入力',
-      submit: 'note を作成',
-      submitting: '作成中…',
-      refresh: '再読み込み',
-      listTitle: '保存済み notes',
-      listDescription: '各行は D1 に接続された `/api/notes` から取得しています。',
-      loading: 'notes を読み込み中…',
-      emptyState: 'まだ note はありません。1 件作成して接続を確認してください。',
-      delete: '削除',
-      deleting: '削除中…',
-      createdAtLabel: '作成日時',
-      updatedAtLabel: '更新日時',
-      errorTitle: 'リクエスト失敗',
-      errorList: 'notes を読み込めませんでした。',
-      errorCreate: 'note を作成できませんでした。',
-      errorDelete: 'note を削除できませんでした。',
-      emptyValidation: '送信前にタイトルを入力してください。',
+      metadataTitle: 'Markdown Poster Editor',
+      metadataDescription: 'Local-first Markdown editor with autosave, history, rollback, and poster export.',
+      title: 'Markdown Poster Editor',
+      description: 'Write in Markdown, keep version history in this browser, and export polished poster images.',
+      loadingDocument: 'ローカルのドキュメントを読み込み中…',
+      statusEditing: '編集中',
+      statusSaving: '保存中',
+      statusSaved: '保存済み',
+      undo: '元に戻す',
+      redo: 'やり直す',
+      saveMilestone: 'マイルストーンを保存',
+      history: 'バージョン',
+      fileMenu: 'ファイル',
+      importFile: '.md / .txt を読み込む',
+      exportMarkdown: 'Markdown を書き出す',
+      exportText: 'テキストを書き出す',
+      exportImage: 'PNG を書き出す',
+      shareImage: '画像を共有',
+      editorCardTitle: 'エディタ',
+      editorCardDescription: '左で Markdown を編集し、右で単一ページのポスターを整えます。',
+      editorBodyLabel: 'Markdown 本文',
+      previewTab: 'プレビュー',
+      plainTab: 'プレーンテキスト',
+      mobileEditorTab: '編集',
+      mobilePreviewTab: 'プレビュー',
+      previewCardTitle: 'ライブポスター',
+      previewCardDescription: 'ここでの設定がライブプレビューと書き出し PNG の両方に反映されます。',
+      plainCardTitle: 'プレーンテキスト表示',
+      emptyPlainPreview: 'まだ何もありません。左側から書き始めてください。',
+      localOnlyTitle: 'ローカル保存',
+      localOnlyDescription: '自分で書き出さない限り、内容はこのブラウザ内だけに残ります。',
+      localOnlyStorage: 'オートセーブは現在の内容をこの端末の IndexedDB に保存します。',
+      localOnlyVersions: '履歴には自動スナップショット、マイルストーン、インポート前バックアップ、ロールバック前バックアップが残ります。',
+      localOnlyExport: 'Markdown、プレーンテキスト、ポスター PNG をローカルに書き出せます。',
+      historyTitle: 'バージョン履歴',
+      historyDescription: 'ローカルのスナップショットを確認し、任意の版をマイルストーン化したり、1 クリックで戻したりできます。',
+      emptyHistory: 'まだ履歴はありません。編集を続けると自動スナップショットが作成されます。',
+      versionKindAuto: '自動スナップショット',
+      versionKindMilestone: 'マイルストーン',
+      versionKindImportBackup: 'インポート前バックアップ',
+      versionKindRollbackBackup: 'ロールバック前バックアップ',
+      versionLabelPlaceholder: 'マイルストーン名を入力',
+      saveVersionLabel: 'ラベルを保存',
+      versionLabelSaved: 'ラベルを更新しました。',
+      restoreVersion: 'この版を復元',
+      saveAsMilestone: 'マイルストーンとして保存',
+      renameMilestone: '名前変更',
+      deleteVersion: '削除',
+      cancel: 'キャンセル',
+      emptyVersionSummary: 'この版にはまだ内容がありません。',
+      exportDialogTitle: 'ポスター画像を書き出す',
+      exportDialogDescription: 'テーマとサイズを選び、1 枚または複数枚の PNG を書き出します。',
+      exportThemeLabel: 'ポスターテーマ',
+      exportThemeLight: 'ライト',
+      exportThemeDark: 'ダーク',
+      exportTemplateLabel: 'テンプレート',
+      templateXiaohongshu: '小红书風',
+      templateImageBackground: '画像背景風',
+      templateSpotify: 'Spotify風',
+      exportPresetLabel: '比率',
+      exportResolutionLabel: '解像度',
+      exportPreviewLabel: 'ライブプレビュー',
+      exportPreviewLoading: 'プレビューを生成中…',
+      exportPreviewPages: '{count} ページ',
+      previewZoomOpenLabel: 'ライブプレビューを拡大',
+      previewZoomCloseLabel: '拡大プレビューを閉じる',
+      exportHint: '現在の書き出しサイズ: {size}。このバージョンでは単一ページのポスターを書き出します。',
+      overflowWarning: '表示領域を超えた内容は、書き出した PNG では切り取られます。',
+      loadError: 'ローカルのドキュメントを読み込めませんでした。',
+      saveError: 'ローカル保存に失敗しました。',
+      versionError: 'ローカル履歴の更新に失敗しました。',
+      importError: 'ファイルを読み込めませんでした。',
+      importSuccess: 'ファイルを読み込み、直前の状態をバックアップしました。',
+      exportMarkdownSuccess: 'Markdown を書き出しました。',
+      exportTextSuccess: 'テキストを書き出しました。',
+      exportImageError: 'PNG の書き出しに失敗しました。',
+      exportImagesSuccessOne: 'PNG を書き出しました。',
+      exportImagesSuccessMany: '{count} 枚の PNG を書き出しました。',
+      shareError: '画像を共有できませんでした。',
+      shareSuccess: '画像を共有しました。',
+      shareFirstPageSuccess: '1 ページ目を共有しました。残りは PNG として書き出せます。',
+      shareFallback: 'このブラウザは画像ファイルの共有に対応していないため、1 枚目の PNG をダウンロードしました。',
+      milestoneSaved: 'マイルストーンを保存しました。',
+      restoreSuccess: '版を復元し、復元前の状態もバックアップしました。',
     },
   },
 };

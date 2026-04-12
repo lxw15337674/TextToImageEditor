@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Space_Grotesk } from 'next/font/google';
 import { hasLocale } from 'next-intl';
 import { notFound } from 'next/navigation';
+import 'react-medium-image-zoom/dist/styles.css';
 import '../globals.css';
 import { AppShellHeader } from '@/components/AppShellHeader';
 import { HtmlLangSync } from '@/components/HtmlLangSync';
