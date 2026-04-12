@@ -109,7 +109,9 @@ interface LocaleMessages {
     templateXiaohongshu: string;
     templateImageBackground: string;
     templateSpotify: string;
-    exportPresetLabel: string;
+    templateOceanQuote: string;
+    templateCalendarEssay: string;
+    templateEditorialCard: string;
     exportResolutionLabel: string;
     exportPreviewLabel: string;
     exportPreviewLoading: string;
@@ -276,9 +278,11 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportThemeDark: 'Dark',
       exportTemplateLabel: 'Template',
       templateXiaohongshu: 'Template 1',
-      templateImageBackground: 'Image Background',
-      templateSpotify: 'Spotify',
-      exportPresetLabel: 'Aspect ratio',
+      templateImageBackground: 'Template 2',
+      templateSpotify: 'Template 3',
+      templateOceanQuote: 'Template 4',
+      templateCalendarEssay: 'Template 5',
+      templateEditorialCard: 'Editorial Card',
       exportResolutionLabel: 'Resolution',
       exportPreviewLabel: 'Live preview',
       exportPreviewLoading: 'Building preview…',
@@ -443,9 +447,11 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportThemeDark: '深色',
       exportTemplateLabel: '模板',
       templateXiaohongshu: '模板 1',
-      templateImageBackground: '图片背景风格',
-      templateSpotify: 'Spotify 风格',
-      exportPresetLabel: '画布比例',
+      templateImageBackground: '模板 2',
+      templateSpotify: '模板 3',
+      templateOceanQuote: '模板 4',
+      templateCalendarEssay: '模板 5',
+      templateEditorialCard: '内容卡片',
       exportResolutionLabel: '导出分辨率',
       exportPreviewLabel: '实时预览',
       exportPreviewLoading: '正在生成预览…',
@@ -610,9 +616,11 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportThemeDark: 'Dark',
       exportTemplateLabel: 'Template',
       templateXiaohongshu: 'Plantilla 1',
-      templateImageBackground: 'Image Background',
-      templateSpotify: 'Spotify',
-      exportPresetLabel: 'Aspect ratio',
+      templateImageBackground: 'Plantilla 2',
+      templateSpotify: 'Plantilla 3',
+      templateOceanQuote: 'Plantilla 4',
+      templateCalendarEssay: 'Plantilla 5',
+      templateEditorialCard: 'Editorial Card',
       exportResolutionLabel: 'Resolution',
       exportPreviewLabel: 'Live preview',
       exportPreviewLoading: 'Building preview…',
@@ -777,9 +785,11 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportThemeDark: 'ダーク',
       exportTemplateLabel: 'テンプレート',
       templateXiaohongshu: 'テンプレート 1',
-      templateImageBackground: '画像背景風',
-      templateSpotify: 'Spotify風',
-      exportPresetLabel: '比率',
+      templateImageBackground: 'テンプレート 2',
+      templateSpotify: 'テンプレート 3',
+      templateOceanQuote: 'テンプレート 4',
+      templateCalendarEssay: 'テンプレート 5',
+      templateEditorialCard: 'Editorial Card',
       exportResolutionLabel: '解像度',
       exportPreviewLabel: 'ライブプレビュー',
       exportPreviewLoading: 'プレビューを生成中…',

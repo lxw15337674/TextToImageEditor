@@ -1,21 +1,19 @@
 'use client';
 
-import type { ContentFormat, EditorDocument, ExportPreset, PosterPage } from '@/lib/editor/types';
+import type { ContentFormat, EditorDocument, PosterPage } from '@/lib/editor/types';
 
-export const POSTER_DIMENSIONS: Record<ExportPreset, { width: number; height: number }> = {
-  '1:1': { width: 1080, height: 1080 },
-  '3:4': { width: 1080, height: 1440 },
-  '9:16': { width: 1080, height: 1920 },
-};
+export const POSTER_DIMENSIONS = {
+  width: 1080,
+  height: 1440,
+} as const;
 
 export function createDocumentSignature(
-  document: Pick<EditorDocument, 'content' | 'contentFormat' | 'exportTheme' | 'exportPreset' | 'exportTemplate'>,
+  document: Pick<EditorDocument, 'content' | 'contentFormat' | 'exportTheme' | 'exportTemplate'>,
 ) {
   return JSON.stringify({
     content: document.content,
     contentFormat: document.contentFormat,
     exportTheme: document.exportTheme,
-    exportPreset: document.exportPreset,
     exportTemplate: document.exportTemplate,
   });
 }

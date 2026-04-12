@@ -141,7 +141,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
 
   const previewContent = useDeferredValue(documentState?.content ?? '');
   const previewTheme = documentState?.exportTheme;
-  const previewPreset = documentState?.exportPreset;
   const previewTemplate = documentState?.exportTemplate;
   const contentFormat = documentState?.contentFormat ?? 'plain';
   const isPlainTextMode = contentFormat === 'plain';
@@ -218,7 +217,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   }, []);
 
   useEffect(() => {
-    if (!previewTheme || !previewPreset || !previewTemplate) {
+    if (!previewTheme || !previewTemplate) {
       return;
     }
 
@@ -229,7 +228,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
           previewContent,
           contentFormat,
           previewTheme,
-          previewPreset,
           previewTemplate,
           MAX_POSTER_HEIGHT,
         );
@@ -245,7 +243,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
           previewContent,
           contentFormat,
           previewTheme,
-          previewPreset,
           previewTemplate,
           1,
           1,
@@ -279,7 +276,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   }, [
     previewContent,
     contentFormat,
-    previewPreset,
     previewTemplate,
     previewTheme,
   ]);
@@ -609,7 +605,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
         documentState.content,
         documentState.contentFormat,
         documentState.exportTheme,
-        documentState.exportPreset,
         documentState.exportTemplate,
         MAX_POSTER_HEIGHT,
       );
@@ -621,7 +616,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
         documentState.content,
         documentState.contentFormat,
         documentState.exportTheme,
-        documentState.exportPreset,
         documentState.exportTemplate,
         1,
         1,
@@ -666,7 +660,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     );
   }
 
-  const dimensions = POSTER_DIMENSIONS[documentState.exportPreset];
+  const dimensions = POSTER_DIMENSIONS;
   const effectivePreviewHeight = previewHeight ?? dimensions.height;
   const posterPreviewScale = Math.min(1, 420 / dimensions.width);
   const selectedVersion = versions.find((version) => version.id === selectedVersionId) ?? null;
@@ -820,6 +814,9 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           <SelectItem value="xiaohongshu">{messages.templateXiaohongshu}</SelectItem>
                           <SelectItem value="image-background">{messages.templateImageBackground}</SelectItem>
                           <SelectItem value="spotify">{messages.templateSpotify}</SelectItem>
+                          <SelectItem value="ocean-quote">{messages.templateOceanQuote}</SelectItem>
+                          <SelectItem value="calendar-essay">{messages.templateCalendarEssay}</SelectItem>
+                          <SelectItem value="editorial-card">{messages.templateEditorialCard}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -843,30 +840,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 border-t border-border/60 px-4 py-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">{messages.exportPresetLabel}</label>
-                      <Select
-                        value={documentState.exportPreset}
-                        onValueChange={(value) => {
-                          const preset = value as EditorDocument['exportPreset'];
-                          handleDocumentChange('exportPreset', preset);
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={messages.exportPresetLabel} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1:1">1:1</SelectItem>
-                          <SelectItem value="3:4">3:4</SelectItem>
-                          <SelectItem value="9:16">9:16</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
                   <div className="flex flex-col gap-3 border-t border-border/60 px-4 py-4">
-                    <p className="text-sm leading-6 text-muted-foreground">{messages.exportHint.replace('{size}', `${dimensions.width}×${effectivePreviewHeight}`)}</p>
                     <div className="flex flex-wrap gap-2">
                       <Button type="button" variant="outline" className="gap-2" disabled={isBusy} onClick={() => void exportPosterImage(true)}>
                         {isBusy ? <LoaderCircle className="size-4 animate-spin" /> : <Share2 className="size-4" />}
@@ -920,7 +894,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                                 content={previewContent}
                                 contentFormat={contentFormat}
                                 theme={documentState.exportTheme}
-                                preset={documentState.exportPreset}
                                 template={documentState.exportTemplate}
                                 pageIndex={1}
                                 pageCount={1}

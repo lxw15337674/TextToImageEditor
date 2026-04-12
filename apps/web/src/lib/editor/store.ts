@@ -29,7 +29,6 @@ export function createDefaultDocument(): EditorDocument {
     content: '',
     contentFormat: 'plain',
     exportTheme: 'light',
-    exportPreset: '3:4',
     exportTemplate: 'xiaohongshu',
     updatedAt: now,
     lastSavedAt: now,
