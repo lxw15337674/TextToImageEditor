@@ -12,6 +12,9 @@ interface LocaleMessages {
     openEditor: string;
     featureLauncher: string;
     featureMenuDescription: string;
+    featureDescriptionNotes: string;
+    featureDescriptionUseCases: string;
+    featureDescriptionStarter: string;
     featureGroupCore: string;
     featureGroupMore: string;
     themeLabel: string;
@@ -226,6 +229,9 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       openEditor: 'Open Editor',
       featureLauncher: 'Features',
       featureMenuDescription: 'Jump between the main product surfaces from one place.',
+      featureDescriptionNotes: 'Manage note version history securely and turn your drafts into beautifully crafted shareable images.',
+      featureDescriptionUseCases: 'See where this editor fits best.',
+      featureDescriptionStarter: 'Browse the reusable project starter.',
       featureGroupCore: 'Core',
       featureGroupMore: 'More',
       themeLabel: 'Theme',
@@ -542,6 +548,9 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       openEditor: '打开编辑器',
       featureLauncher: '功能',
       featureMenuDescription: '把主要功能入口集中在这里，后面扩展也只需要改配置。',
+      featureDescriptionNotes: '记录并管理笔记的历史版本，一键将其转化为精美的排版分享图。',
+      featureDescriptionUseCases: '快速了解适合它的使用场景。',
+      featureDescriptionStarter: '查看这个项目的通用脚手架。',
       featureGroupCore: '核心功能',
       featureGroupMore: '更多',
       themeLabel: '主题',
@@ -852,6 +861,9 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       openEditor: 'Abrir editor',
       featureLauncher: 'Funciones',
       featureMenuDescription: 'Jump between the main product areas from one place.',
+      featureDescriptionNotes: 'Gestiona el historial de versiones de tus notas y conviértelas en hermosas imágenes para compartir.',
+      featureDescriptionUseCases: 'Revisa cuando conviene usarlo.',
+      featureDescriptionStarter: 'Explora el starter reutilizable.',
       featureGroupCore: 'Principal',
       featureGroupMore: 'Más',
       themeLabel: 'Tema',
@@ -1167,6 +1179,9 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       openEditor: 'エディタを開く',
       featureLauncher: '機能',
       featureMenuDescription: '主な機能への移動先を 1 か所にまとめています。',
+      featureDescriptionNotes: 'ノートの履歴を管理し、下書きを美しいシェア画像に変換します。',
+      featureDescriptionUseCases: '向いている利用シーンを確認できます。',
+      featureDescriptionStarter: '再利用できるスターターを見られます。',
       featureGroupCore: '主要機能',
       featureGroupMore: 'その他',
       themeLabel: 'テーマ',
