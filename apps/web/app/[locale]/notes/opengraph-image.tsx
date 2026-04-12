@@ -1,6 +1,5 @@
-import { hasLocale } from 'next-intl';
 import { getMessages } from '@/i18n/messages';
-import { routing } from '@/i18n/routing';
+import { resolveLocaleForMetadata } from '@/lib/route-locale';
 import {
   createPageSocialImage,
   SOCIAL_IMAGE_ALT,
@@ -16,20 +15,16 @@ interface OpenGraphImageProps {
   params: Promise<{ locale: string }>;
 }
 
-function resolveLocale(input: string) {
-  return hasLocale(routing.locales, input) ? input : routing.defaultLocale;
-}
-
 export default async function OpenGraphImage({ params }: OpenGraphImageProps) {
   const { locale: requestedLocale } = await params;
-  const locale = resolveLocale(requestedLocale);
+  const locale = resolveLocaleForMetadata(requestedLocale);
   const messages = getMessages(locale);
 
   return createPageSocialImage({
     locale,
     siteName: messages.common.siteName,
-    title: messages.home.metadataTitle,
-    description: messages.home.metadataDescription,
-    tags: [messages.common.siteTagline, messages.common.navNotes, messages.common.navUseCases],
+    title: messages.notes.metadataTitle,
+    description: messages.notes.metadataDescription,
+    tags: [messages.common.navNotes, messages.notes.history, messages.notes.shareImage],
   });
 }

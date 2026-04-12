@@ -19,6 +19,8 @@ export async function generateMetadata({ params }: StarterPageProps): Promise<Me
     title: messages.metadataTitle,
     description: messages.metadataDescription,
     siteName: getMessages(locale).common.siteName,
+    index: false,
+    follow: false,
   });
 }
 

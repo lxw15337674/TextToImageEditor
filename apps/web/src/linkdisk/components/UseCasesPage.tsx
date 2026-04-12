@@ -11,23 +11,9 @@ const benefitIcons = [Link2, LockKeyhole, Package] as const;
 
 export function UseCasesPage({ locale }: { locale: Locale }) {
   const copy = getUseCasesPageCopy(locale);
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: copy.faqs.map((item) => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
-    })),
-  };
 
   return (
     <AppPageContainer className="gap-8 py-8 sm:py-10 lg:gap-10">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
-
       <PagePanel className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.9fr)] lg:items-end">
         <div className="space-y-5">
           <SectionIntro

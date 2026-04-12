@@ -24,6 +24,11 @@ function normalizeLocalizedPath(pathname: string) {
   return pathname.startsWith('/') ? pathname : `/${pathname}`;
 }
 
+function buildSocialImagePath(locale: Locale, pathname: string, type: 'opengraph-image' | 'twitter-image') {
+  const localizedPath = normalizeLocalizedPath(pathname);
+  return localizedPath ? `/${locale}${localizedPath}/${type}` : `/${locale}/${type}`;
+}
+
 export function createMarketingMetadata({
   absoluteTitle = false,
   description,
@@ -38,8 +43,8 @@ export function createMarketingMetadata({
 }: CreateMarketingMetadataOptions): Metadata {
   const localizedPath = normalizeLocalizedPath(pathname);
   const absoluteCanonical = toAbsoluteUrl(`/${locale}${localizedPath}`);
-  const openGraphImageUrl = includeSocialImages ? toAbsoluteUrl(`/${locale}/opengraph-image`) : null;
-  const twitterImageUrl = includeSocialImages ? toAbsoluteUrl(`/${locale}/twitter-image`) : null;
+  const openGraphImageUrl = includeSocialImages ? toAbsoluteUrl(buildSocialImagePath(locale, pathname, 'opengraph-image')) : null;
+  const twitterImageUrl = includeSocialImages ? toAbsoluteUrl(buildSocialImagePath(locale, pathname, 'twitter-image')) : null;
   const socialImageAlt = imageAlt ?? `${siteName} social preview`;
 
   return {

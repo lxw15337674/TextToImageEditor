@@ -2,12 +2,12 @@ import type { MetadataRoute } from 'next';
 import { LOCALES } from '@/i18n/config';
 import { toAbsoluteUrl } from '@/lib/seo/site-origin';
 
-const INDEXABLE_LOCALIZED_PATHS = ['/', '/linkdisk', '/linkdisk/use-cases', '/starter', '/notes', '/notes/use-cases', '/use-cases'];
+const INDEXABLE_LOCALIZED_PATHS = ['/', '/linkdisk', '/linkdisk/use-cases', '/notes', '/notes/use-cases', '/use-cases'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const configured = process.env.SITE_LAST_MODIFIED?.trim();
-  const lastModified = configured ? new Date(configured) : new Date();
-  const resolvedLastModified = Number.isNaN(lastModified.getTime()) ? new Date() : lastModified;
+  const lastModified = configured ? new Date(configured) : null;
+  const resolvedLastModified = lastModified && !Number.isNaN(lastModified.getTime()) ? lastModified : undefined;
 
   return LOCALES.flatMap((locale) =>
     INDEXABLE_LOCALIZED_PATHS.map((pathname, index) => ({
