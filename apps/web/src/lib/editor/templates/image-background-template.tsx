@@ -1,8 +1,10 @@
 import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body';
+import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function ImageBackgroundTemplate({ content, contentFormat, width, height, theme, pageIndex, pageCount }: PosterTemplateProps) {
+export function ImageBackgroundTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
   const isDark = theme === 'dark';
+  const bodyFontSize = getPosterBodyFontSize(width, fontSizePreset);
 
   return (
     <div
@@ -70,7 +72,7 @@ export function ImageBackgroundTemplate({ content, contentFormat, width, height,
             contentFormat={contentFormat}
             theme={theme}
             color="#ffffff"
-            fontSize={width >= 1400 ? 29 : 22}
+            fontSize={bodyFontSize}
           />
         </div>
 

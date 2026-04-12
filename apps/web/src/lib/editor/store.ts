@@ -30,6 +30,7 @@ export function createDefaultDocument(): EditorDocument {
     contentFormat: 'plain',
     exportTheme: 'light',
     exportTemplate: 'xiaohongshu',
+    fontSizePreset: 'medium',
     updatedAt: now,
     lastSavedAt: now,
   };

@@ -1,7 +1,8 @@
 import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body';
+import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function EditorialCardTemplate({ content, contentFormat, width, height, theme, pageIndex, pageCount }: PosterTemplateProps) {
+export function EditorialCardTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const canvasBackground = isDark
     ? 'radial-gradient(circle at top left, rgba(120, 138, 163, 0.18), transparent 34%), linear-gradient(180deg, #11151c 0%, #1b222d 100%)'
@@ -13,7 +14,7 @@ export function EditorialCardTemplate({ content, contentFormat, width, height, t
   const cardRadius = Math.round(width * 0.04);
   const cardPaddingX = Math.round(width * 0.075);
   const cardPaddingY = Math.round(width * 0.08);
-  const bodyFontSize = width >= 1400 ? 31 : 24;
+  const bodyFontSize = getPosterBodyFontSize(width, fontSizePreset);
 
   return (
     <div

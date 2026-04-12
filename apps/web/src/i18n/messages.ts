@@ -65,7 +65,10 @@ interface LocaleMessages {
     importFile: string;
     exportMarkdown: string;
     exportText: string;
+    exportMenu: string;
+    exportHtml: string;
     exportImage: string;
+    exportJpeg: string;
     shareImage: string;
     markdownTab: string;
     editorCardTitle: string;
@@ -105,6 +108,10 @@ interface LocaleMessages {
     exportThemeLabel: string;
     exportThemeLight: string;
     exportThemeDark: string;
+    fontSizeLabel: string;
+    fontSizeSmall: string;
+    fontSizeMedium: string;
+    fontSizeLarge: string;
     exportTemplateLabel: string;
     templateXiaohongshu: string;
     templateImageBackground: string;
@@ -112,6 +119,12 @@ interface LocaleMessages {
     templateOceanQuote: string;
     templateCalendarEssay: string;
     templateEditorialCard: string;
+    templateCinemaBook: string;
+    templateCodeSnippet: string;
+    templateTicketStub: string;
+    templateZenVertical: string;
+    templateNewsFlash: string;
+    templatePolaroid: string;
     exportResolutionLabel: string;
     exportPreviewLabel: string;
     exportPreviewLoading: string;
@@ -127,7 +140,11 @@ interface LocaleMessages {
     importSuccess: string;
     exportMarkdownSuccess: string;
     exportTextSuccess: string;
+    exportHtmlSuccess: string;
+    exportJpegSuccess: string;
     exportImageError: string;
+    exportHtmlError: string;
+    exportJpegError: string;
     exportImagesSuccessOne: string;
     exportImagesSuccessMany: string;
     shareError: string;
@@ -236,7 +253,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       importFile: 'Import .md or .txt',
       exportMarkdown: 'Export Markdown',
       exportText: 'Export text',
+      exportMenu: 'Export',
+      exportHtml: 'Export HTML',
       exportImage: 'Export PNG',
+      exportJpeg: 'Export JPEG',
       shareImage: 'Share image',
       markdownTab: 'Markdown',
       editorCardTitle: 'Editor',
@@ -276,13 +296,23 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportThemeLabel: 'Poster theme',
       exportThemeLight: 'Light',
       exportThemeDark: 'Dark',
+      fontSizeLabel: 'Body size',
+      fontSizeSmall: 'Small',
+      fontSizeMedium: 'Medium',
+      fontSizeLarge: 'Large',
       exportTemplateLabel: 'Template',
-      templateXiaohongshu: 'Template 1',
-      templateImageBackground: 'Template 2',
-      templateSpotify: 'Template 3',
-      templateOceanQuote: 'Template 4',
-      templateCalendarEssay: 'Template 5',
-      templateEditorialCard: 'Editorial Card',
+      templateXiaohongshu: 'Crimson',
+      templateImageBackground: 'Lumina',
+      templateSpotify: 'Vibe',
+      templateOceanQuote: 'Azure',
+      templateCalendarEssay: 'Chronicle',
+      templateEditorialCard: 'Ink',
+      templateCinemaBook: 'Cinema',
+      templateCodeSnippet: 'Kernel',
+      templateTicketStub: 'Entry',
+      templateZenVertical: 'Zen',
+      templateNewsFlash: 'Herald',
+      templatePolaroid: 'Polaroid',
       exportResolutionLabel: 'Resolution',
       exportPreviewLabel: 'Live preview',
       exportPreviewLoading: 'Building preview…',
@@ -298,7 +328,11 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       importSuccess: 'File imported and the previous state was backed up.',
       exportMarkdownSuccess: 'Markdown file exported.',
       exportTextSuccess: 'Text file exported.',
+      exportHtmlSuccess: 'HTML file exported.',
+      exportJpegSuccess: 'JPEG image exported.',
       exportImageError: 'Could not export PNG images.',
+      exportHtmlError: 'Could not export HTML file.',
+      exportJpegError: 'Could not export JPEG image.',
       exportImagesSuccessOne: 'PNG image exported.',
       exportImagesSuccessMany: '{count} PNG images exported.',
       shareError: 'Could not share the image.',
@@ -405,7 +439,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       importFile: '导入 .md 或 .txt',
       exportMarkdown: '导出 Markdown',
       exportText: '导出纯文本',
+      exportMenu: '导出',
+      exportHtml: '导出 HTML',
       exportImage: '导出 PNG',
+      exportJpeg: '导出 JPEG',
       shareImage: '分享图片',
       markdownTab: 'Markdown',
       editorCardTitle: '编辑器',
@@ -445,13 +482,23 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportThemeLabel: '海报主题',
       exportThemeLight: '浅色',
       exportThemeDark: '深色',
+      fontSizeLabel: '正文字号',
+      fontSizeSmall: '小',
+      fontSizeMedium: '中',
+      fontSizeLarge: '大',
       exportTemplateLabel: '模板',
-      templateXiaohongshu: '模板 1',
-      templateImageBackground: '模板 2',
-      templateSpotify: '模板 3',
-      templateOceanQuote: '模板 4',
-      templateCalendarEssay: '模板 5',
-      templateEditorialCard: '内容卡片',
+      templateXiaohongshu: '赤红',
+      templateImageBackground: '映象',
+      templateSpotify: '律动',
+      templateOceanQuote: '蔚蓝',
+      templateCalendarEssay: '光阴',
+      templateEditorialCard: '素墨',
+      templateCinemaBook: '影院手册',
+      templateCodeSnippet: '代码卡片',
+      templateTicketStub: '票根',
+      templateZenVertical: '留白长页',
+      templateNewsFlash: '快讯',
+      templatePolaroid: '拍立得',
       exportResolutionLabel: '导出分辨率',
       exportPreviewLabel: '实时预览',
       exportPreviewLoading: '正在生成预览…',
@@ -467,7 +514,11 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       importSuccess: '文件已导入，导入前状态已自动备份。',
       exportMarkdownSuccess: 'Markdown 文件已导出。',
       exportTextSuccess: '纯文本文件已导出。',
+      exportHtmlSuccess: 'HTML 文件已导出。',
+      exportJpegSuccess: 'JPEG 图片已导出。',
       exportImageError: '导出 PNG 图片失败。',
+      exportHtmlError: '导出 HTML 文件失败。',
+      exportJpegError: '导出 JPEG 图片失败。',
       exportImagesSuccessOne: 'PNG 图片已导出。',
       exportImagesSuccessMany: '已导出 {count} 张 PNG 图片。',
       shareError: '分享图片失败。',
@@ -574,7 +625,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       importFile: 'Import .md or .txt',
       exportMarkdown: 'Export Markdown',
       exportText: 'Export text',
+      exportMenu: 'Export',
+      exportHtml: 'Export HTML',
       exportImage: 'Export PNG',
+      exportJpeg: 'Export JPEG',
       shareImage: 'Share image',
       markdownTab: 'Markdown',
       editorCardTitle: 'Editor',
@@ -614,6 +668,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportThemeLabel: 'Poster theme',
       exportThemeLight: 'Light',
       exportThemeDark: 'Dark',
+      fontSizeLabel: 'Body size',
+      fontSizeSmall: 'Small',
+      fontSizeMedium: 'Medium',
+      fontSizeLarge: 'Large',
       exportTemplateLabel: 'Template',
       templateXiaohongshu: 'Plantilla 1',
       templateImageBackground: 'Plantilla 2',
@@ -621,6 +679,12 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       templateOceanQuote: 'Plantilla 4',
       templateCalendarEssay: 'Plantilla 5',
       templateEditorialCard: 'Editorial Card',
+      templateCinemaBook: 'Cinema',
+      templateCodeSnippet: 'Kernel',
+      templateTicketStub: 'Entry',
+      templateZenVertical: 'Zen',
+      templateNewsFlash: 'Herald',
+      templatePolaroid: 'Polaroid',
       exportResolutionLabel: 'Resolution',
       exportPreviewLabel: 'Live preview',
       exportPreviewLoading: 'Building preview…',
@@ -636,7 +700,11 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       importSuccess: 'File imported and the previous state was backed up.',
       exportMarkdownSuccess: 'Markdown file exported.',
       exportTextSuccess: 'Text file exported.',
+      exportHtmlSuccess: 'HTML file exported.',
+      exportJpegSuccess: 'JPEG image exported.',
       exportImageError: 'Could not export PNG images.',
+      exportHtmlError: 'Could not export HTML file.',
+      exportJpegError: 'Could not export JPEG image.',
       exportImagesSuccessOne: 'PNG image exported.',
       exportImagesSuccessMany: '{count} PNG images exported.',
       shareError: 'Could not share the image.',
@@ -668,7 +736,7 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       metadataDescription: 'ローカライズ、テーマ切替、Hono、OpenAPI、D1 例を備えたクリーンな monorepo テンプレートです。',
       metadataKeywords: ['starter template', 'next.js', 'cloudflare workers', 'hono', 'd1', 'monorepo'],
       eyebrow: '多言語フルスタック スターター',
-      title: 'あとで業務コードを削ぎ落とすのではなく、最初からクリーンな土台で始める。',
+      title: 'あとで业务コードを削ぎ落とすのではなく、最初からクリーンな土台で始める。',
       description: 'このテンプレートは、本当に再利用したい層だけを残します。locale 付きルーティング、テーマ切替、共通 UI、Workers へのデプロイ、OpenAPI ドキュメント、そして最小の D1 例です。',
       primaryCta: 'Poster Editor を開く',
       secondaryCta: 'ガイドを読む',
@@ -743,7 +811,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       importFile: '.md / .txt を読み込む',
       exportMarkdown: 'Markdown を書き出す',
       exportText: 'テキストを書き出す',
+      exportMenu: '書き出す',
+      exportHtml: 'HTML を書き出す',
       exportImage: 'PNG を書き出す',
+      exportJpeg: 'JPEG を書き出す',
       shareImage: '画像を共有',
       markdownTab: 'Markdown',
       editorCardTitle: 'エディタ',
@@ -783,6 +854,10 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       exportThemeLabel: 'ポスターテーマ',
       exportThemeLight: 'ライト',
       exportThemeDark: 'ダーク',
+      fontSizeLabel: '本文サイズ',
+      fontSizeSmall: '小',
+      fontSizeMedium: '中',
+      fontSizeLarge: '大',
       exportTemplateLabel: 'テンプレート',
       templateXiaohongshu: 'テンプレート 1',
       templateImageBackground: 'テンプレート 2',
@@ -790,6 +865,12 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       templateOceanQuote: 'テンプレート 4',
       templateCalendarEssay: 'テンプレート 5',
       templateEditorialCard: 'Editorial Card',
+      templateCinemaBook: 'Cinema',
+      templateCodeSnippet: 'Kernel',
+      templateTicketStub: 'Entry',
+      templateZenVertical: 'Zen',
+      templateNewsFlash: 'Herald',
+      templatePolaroid: 'Polaroid',
       exportResolutionLabel: '解像度',
       exportPreviewLabel: 'ライブプレビュー',
       exportPreviewLoading: 'プレビューを生成中…',
@@ -802,10 +883,14 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
       saveError: 'ローカル保存に失敗しました。',
       versionError: 'ローカル履歴の更新に失敗しました。',
       importError: 'ファイルを読み込めませんでした。',
-      importSuccess: 'ファイルを読み込み、直前の状態をバックアップしました。',
+      importSuccess: 'ファイルを読み込み、直前の状态をバックアップしました。',
       exportMarkdownSuccess: 'Markdown を書き出しました。',
       exportTextSuccess: 'テキストを書き出しました。',
+      exportHtmlSuccess: 'HTML を書き出しました。',
+      exportJpegSuccess: 'JPEG を書き出しました。',
       exportImageError: 'PNG の書き出しに失敗しました。',
+      exportHtmlError: 'HTML の書き出しに失敗しました。',
+      exportJpegError: 'JPEG の書き出しに失敗しました。',
       exportImagesSuccessOne: 'PNG を書き出しました。',
       exportImagesSuccessMany: '{count} 枚の PNG を書き出しました。',
       shareError: '画像を共有できませんでした。',

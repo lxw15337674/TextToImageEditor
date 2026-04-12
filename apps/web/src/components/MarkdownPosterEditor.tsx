@@ -41,7 +41,13 @@ import {
   POSTER_DIMENSIONS,
   summarizeContent,
 } from '@/lib/editor/markdown';
-import { MAX_POSTER_HEIGHT, PosterCanvas, renderPosterBlob, resolvePosterLayout } from '@/lib/editor/poster';
+import {
+  MAX_POSTER_HEIGHT,
+  renderPosterBlob,
+  renderPosterHtml,
+  resolvePosterLayout,
+  resolvePosterPreviewLayout,
+} from '@/lib/editor/poster';
 import {
   createVersionFromDocument,
   deleteVersion,
@@ -53,7 +59,7 @@ import {
   trimAutoSnapshots,
   updateVersionLabel,
 } from '@/lib/editor/store';
-import type { ContentFormat, EditorDocument, EditorVersion, ExportTemplate, ExportTheme, SaveStatus, VersionKind } from '@/lib/editor/types';
+import type { ContentFormat, EditorDocument, EditorVersion, ExportTemplate, ExportTheme, PosterFontSize, SaveStatus, VersionKind } from '@/lib/editor/types';
 import type { Locale } from '@/i18n/config';
 import { getMessages } from '@/i18n/messages';
 import { cn } from '@/lib/utils';
@@ -64,8 +70,9 @@ const CodeMirror = dynamic(() => import('@uiw/react-codemirror'), {
 
 type MobilePane = 'editor' | 'preview';
 
-const DEFAULT_AUTO_SNAPSHOT_IDLE_MS = 15_000;
-const MIN_AUTO_SNAPSHOT_INTERVAL_MS = 120_000;
+const DOCUMENT_AUTOSAVE_IDLE_MS = 1_000;
+const AUTO_SNAPSHOT_IDLE_MS = 120_000;
+const AUTO_SNAPSHOT_ACTIVE_INTERVAL_MS = 600_000;
 
 const VERSION_KIND_STYLES: Record<VersionKind, string> = {
   auto: 'border-sky-500/30 bg-sky-500/10 text-sky-200',
@@ -112,6 +119,35 @@ function createTextDownload(filename: string, content: string, mimeType: string)
   createDownload(blob, filename);
 }
 
+async function convertBlobToJpegBlob(blob: Blob, quality = 0.92) {
+  const imageBitmap = await createImageBitmap(blob);
+  const canvas = document.createElement('canvas');
+  canvas.width = imageBitmap.width;
+  canvas.height = imageBitmap.height;
+
+  const context = canvas.getContext('2d');
+
+  if (!context) {
+    imageBitmap.close();
+    throw new Error('Canvas context unavailable.');
+  }
+
+  context.fillStyle = '#ffffff';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(imageBitmap, 0, 0);
+  imageBitmap.close();
+
+  const jpegBlob = await new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((nextBlob) => resolve(nextBlob), 'image/jpeg', quality);
+  });
+
+  if (!jpegBlob) {
+    throw new Error('JPEG conversion failed.');
+  }
+
+  return jpegBlob;
+}
+
 export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   const messages = getMessages(locale).notes;
   const { resolvedTheme } = useTheme();
@@ -142,6 +178,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   const previewContent = useDeferredValue(documentState?.content ?? '');
   const previewTheme = documentState?.exportTheme;
   const previewTemplate = documentState?.exportTemplate;
+  const previewFontSizePreset = documentState?.fontSizePreset ?? 'medium';
   const contentFormat = documentState?.contentFormat ?? 'plain';
   const isPlainTextMode = contentFormat === 'plain';
 
@@ -224,12 +261,12 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     let active = true;
     const timeout = window.setTimeout(async () => {
       try {
-        const layout = await resolvePosterLayout(
+        const layout = await resolvePosterPreviewLayout(
           previewContent,
           contentFormat,
           previewTheme,
           previewTemplate,
-          MAX_POSTER_HEIGHT,
+          previewFontSizePreset,
         );
 
         if (!active) {
@@ -244,6 +281,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
           contentFormat,
           previewTheme,
           previewTemplate,
+          previewFontSizePreset,
           1,
           1,
           layout.height,
@@ -276,6 +314,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   }, [
     previewContent,
     contentFormat,
+    previewFontSizePreset,
     previewTemplate,
     previewTheme,
   ]);
@@ -319,7 +358,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
         setSaveStatus('dirty');
         toast.error(messages.saveError);
       }
-    }, 800);
+    }, DOCUMENT_AUTOSAVE_IDLE_MS);
 
     return () => {
       window.clearTimeout(timeout);
@@ -331,45 +370,58 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
       return;
     }
 
-    const snapshotSignature = createSnapshotSignature(documentState);
+    const currentDocument = documentState;
+    const snapshotSignature = createSnapshotSignature(currentDocument);
 
     if (snapshotSignature === lastVersionSignatureRef.current) {
       return;
     }
 
-    const remainingInterval = Math.max(
-      DEFAULT_AUTO_SNAPSHOT_IDLE_MS,
-      MIN_AUTO_SNAPSHOT_INTERVAL_MS - (Date.now() - lastAutoSnapshotAtRef.current),
-    );
+    let cancelled = false;
 
-    const timeout = window.setTimeout(async () => {
-      if (!documentState.content.trim()) {
+    async function createAutoSnapshot() {
+      if (cancelled || !currentDocument.content.trim()) {
         return;
       }
 
-      const currentSignature = createSnapshotSignature(documentState);
+      const currentSignature = createSnapshotSignature(currentDocument);
 
       if (currentSignature === lastVersionSignatureRef.current) {
         return;
       }
 
       try {
-        await createVersionFromDocument(documentState, 'auto');
+        await createVersionFromDocument(currentDocument, 'auto');
         await trimAutoSnapshots();
-        const nextVersions = await listVersions(EDITOR_DOCUMENT_ID);
-        startTransition(() => setVersions(nextVersions));
         lastVersionSignatureRef.current = currentSignature;
         lastAutoSnapshotAtRef.current = Date.now();
+
+        if (isHistoryOpen) {
+          await refreshVersions();
+        }
       } catch (error) {
         console.error(error);
         toast.error(messages.versionError);
       }
-    }, remainingInterval);
+    }
+
+    const elapsedSinceLastAutoSnapshot = Date.now() - lastAutoSnapshotAtRef.current;
+    const activeDelay = Math.max(0, AUTO_SNAPSHOT_ACTIVE_INTERVAL_MS - elapsedSinceLastAutoSnapshot);
+
+    const activeTimeout = window.setTimeout(() => {
+      void createAutoSnapshot();
+    }, activeDelay);
+
+    const idleTimeout = window.setTimeout(() => {
+      void createAutoSnapshot();
+    }, AUTO_SNAPSHOT_IDLE_MS);
 
     return () => {
-      window.clearTimeout(timeout);
+      cancelled = true;
+      window.clearTimeout(activeTimeout);
+      window.clearTimeout(idleTimeout);
     };
-  }, [documentState, isHydrated, messages.versionError]);
+  }, [documentState, isHistoryOpen, isHydrated, messages.versionError]);
 
   useEffect(() => {
     function persistOnUnload() {
@@ -391,6 +443,14 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
       window.removeEventListener('beforeunload', persistOnUnload);
     };
   }, [documentState]);
+
+  useEffect(() => {
+    if (!isHistoryOpen) {
+      return;
+    }
+
+    void refreshVersions();
+  }, [isHistoryOpen]);
 
   useEffect(() => {
     if (!isHistoryOpen) {
@@ -525,6 +585,44 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     toast.success(messages.exportTextSuccess);
   }
 
+  async function handleExportHtml() {
+    if (!documentState) {
+      return;
+    }
+
+    setIsBusy(true);
+
+    try {
+      const layout = await resolvePosterLayout(
+        documentState.content,
+        documentState.contentFormat,
+        documentState.exportTheme,
+        documentState.exportTemplate,
+        documentState.fontSizePreset,
+        MAX_POSTER_HEIGHT,
+      );
+
+      const html = await renderPosterHtml(
+        documentState.content,
+        documentState.contentFormat,
+        documentState.exportTheme,
+        documentState.exportTemplate,
+        documentState.fontSizePreset,
+        1,
+        1,
+        layout.height,
+      );
+
+      createTextDownload(createTimestampedFilename('html'), html, 'text/html;charset=utf-8');
+      toast.success(messages.exportHtmlSuccess);
+    } catch (error) {
+      console.error(error);
+      toast.error(messages.exportHtmlError);
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
   async function handleRestoreVersion(version: EditorVersion) {
     if (!documentState) {
       return;
@@ -606,6 +704,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
         documentState.contentFormat,
         documentState.exportTheme,
         documentState.exportTemplate,
+        documentState.fontSizePreset,
         MAX_POSTER_HEIGHT,
       );
 
@@ -617,6 +716,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
         documentState.contentFormat,
         documentState.exportTheme,
         documentState.exportTemplate,
+        documentState.fontSizePreset,
         1,
         1,
         layout.height,
@@ -642,6 +742,48 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     } catch (error) {
       console.error(error);
       toast.error(shareInsteadOfDownload ? messages.shareError : messages.exportImageError);
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  async function exportPosterJpeg() {
+    if (!documentState) {
+      return;
+    }
+
+    setIsBusy(true);
+
+    try {
+      const layout = await resolvePosterLayout(
+        documentState.content,
+        documentState.contentFormat,
+        documentState.exportTheme,
+        documentState.exportTemplate,
+        documentState.fontSizePreset,
+        MAX_POSTER_HEIGHT,
+      );
+
+      setPreviewHeight(layout.height);
+      setIsPosterOverflowing(layout.isClipped);
+
+      const pngBlob = await renderPosterBlob(
+        documentState.content,
+        documentState.contentFormat,
+        documentState.exportTheme,
+        documentState.exportTemplate,
+        documentState.fontSizePreset,
+        1,
+        1,
+        layout.height,
+      );
+
+      const jpegBlob = await convertBlobToJpegBlob(pngBlob);
+      createDownload(jpegBlob, createTimestampedFilename('jpg'));
+      toast.success(messages.exportJpegSuccess);
+    } catch (error) {
+      console.error(error);
+      toast.error(messages.exportJpegError);
     } finally {
       setIsBusy(false);
     }
@@ -699,80 +841,102 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
 
             <div className="grid min-h-0 flex-1 xl:grid-cols-2">
               <div className={cn('flex min-h-0 flex-col xl:border-r xl:border-border/60', mobilePane === 'preview' ? 'hidden xl:flex' : 'flex')}>
-                <div className="border-b border-border/60">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="px-4 pt-4 text-sm font-medium text-muted-foreground">{messages.editorCardTitle}</div>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/70 px-3 py-1 text-sm text-muted-foreground">
-                      <span
+                <div className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/40 bg-background/60 px-5 backdrop-blur-md">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50">{messages.editorCardTitle}</span>
+                    <div className="flex items-center cursor-help" title={getSaveStatusLabel(saveStatus, messages)}>
+                      <div
                         className={cn(
-                          'size-2 rounded-full',
-                          saveStatus === 'saved' ? 'bg-emerald-400' : saveStatus === 'saving' ? 'bg-amber-400' : 'bg-sky-400',
+                          'size-2 rounded-full transition-all duration-500',
+                          saveStatus === 'saved' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 
+                          saveStatus === 'saving' ? 'bg-amber-500 animate-pulse' : 'bg-sky-500',
                         )}
                       />
-                      {getSaveStatusLabel(saveStatus, messages)}
+                      <span className="ml-2 whitespace-nowrap text-sm font-semibold tracking-normal text-muted-foreground/80">
+                        {getSaveStatusLabel(saveStatus, messages)}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3 px-4 pb-4 pt-4">
-                    <div className="inline-flex rounded-full border border-border/70 bg-background/80 p-1">
+                  <div className="flex items-center gap-2">
+                    <div className="mr-2 flex items-center rounded-lg bg-muted/40 p-1">
                       <button
                         type="button"
                         className={cn(
-                          'rounded-full px-3 py-1.5 text-sm transition-colors',
-                          isPlainTextMode ? 'text-muted-foreground' : 'bg-primary text-primary-foreground',
+                          'rounded-md px-3 py-1.5 text-sm font-bold transition-all',
+                          !isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
                         )}
                         onClick={() => handleDocumentChange('contentFormat', 'markdown')}
                         disabled={isBusy}
                       >
-                        {messages.markdownTab}
+                        MD
                       </button>
                       <button
                         type="button"
                         className={cn(
-                          'rounded-full px-3 py-1.5 text-sm transition-colors',
-                          isPlainTextMode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground',
+                          'rounded-md px-3 py-1.5 text-sm font-bold transition-all',
+                          isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
                         )}
                         onClick={() => handleDocumentChange('contentFormat', 'plain')}
                         disabled={isBusy}
                       >
-                        {messages.plainTab}
+                        TXT
                       </button>
                     </div>
-                    <Button type="button" variant="outline" className="gap-2" onClick={handleUndo} disabled={!canUndo || isBusy}>
-                      <Undo2 className="size-4" />
-                      {messages.undo}
-                    </Button>
-                    <Button type="button" variant="outline" className="gap-2" onClick={handleRedo} disabled={!canRedo || isBusy}>
-                      <Redo2 className="size-4" />
-                      {messages.redo}
-                    </Button>
-                    <Button type="button" variant="outline" className="gap-2" onClick={() => void handleCreateMilestone()} disabled={isBusy}>
-                      <RotateCcw className="size-4" />
-                      {messages.saveMilestone}
-                    </Button>
-                    <Button type="button" variant="outline" className="gap-2" onClick={() => setIsHistoryOpen(true)} disabled={isBusy}>
-                      <History className="size-4" />
-                      {messages.history}
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button type="button" variant="outline" className="gap-2" disabled={isBusy}>
-                          <Import className="size-4" />
-                          {messages.fileMenu}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        <DropdownMenuLabel>{messages.fileMenu}</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => fileInputRef.current?.click()}>{messages.importFile}</DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={handleExportMarkdown}>{messages.exportMarkdown}</DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleExportPlainText}>{messages.exportText}</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+
+                    <div className="flex items-center">
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="size-9 text-muted-foreground hover:text-foreground hover:bg-muted/50" 
+                        onClick={handleUndo} 
+                        disabled={!canUndo || isBusy}
+                      >
+                        <Undo2 className="size-[18px]" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="size-9 text-muted-foreground hover:text-foreground hover:bg-muted/50" 
+                        onClick={handleRedo} 
+                        disabled={!canRedo || isBusy}
+                      >
+                        <Redo2 className="size-[18px]" />
+                      </Button>
+                      
+                      <Separator orientation="vertical" className="mx-1.5 h-5 opacity-20" />
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="size-9 hover:bg-muted/50" disabled={isBusy}>
+                            {isBusy ? <LoaderCircle className="size-[18px] animate-spin" /> : <Import className="size-[18px] rotate-90" />}
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56 p-2">
+                          <DropdownMenuLabel className="px-3 py-2 text-sm uppercase tracking-[0.12em] opacity-60">{messages.history}</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => void handleCreateMilestone()} className="gap-2.5 px-3 py-2.5 text-sm">
+                            <RotateCcw className="size-[18px] opacity-70" /> {messages.saveMilestone}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setIsHistoryOpen(true)} className="gap-2.5 px-3 py-2.5 text-sm">
+                            <History className="size-[18px] opacity-70" /> {messages.history}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator className="opacity-50" />
+                          <DropdownMenuLabel className="px-3 py-2 text-sm uppercase tracking-[0.12em] opacity-60">{messages.fileMenu}</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 text-sm">
+                            <Import className="size-[18px] opacity-70" /> {messages.importFile}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={handleExportMarkdown} className="gap-2.5 px-3 py-2.5 text-sm">
+                            <Download className="size-[18px] opacity-70" /> {messages.exportMarkdown}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={handleExportPlainText} className="gap-2.5 px-3 py-2.5 text-sm">
+                            <Download className="size-[18px] opacity-70" /> {messages.exportText}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </div>
 
-                <div className="border-b border-border/60 px-4 py-3 text-sm font-medium text-muted-foreground">{messages.editorBodyLabel}</div>
                 <div className="markdown-editor min-h-[16rem] flex-1 overflow-y-auto xl:min-h-0">
                   <CodeMirror
                     value={documentState.content}
@@ -799,120 +963,161 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                 </div>
               </div>
 
-              <div className={cn('flex min-h-0 flex-col', mobilePane === 'editor' ? 'hidden xl:flex' : 'flex')}>
-                <div className="border-b border-border/60">
-                  <div className="px-4 pt-4 text-sm font-medium text-muted-foreground">{messages.previewCardTitle}</div>
+              <div className={cn('flex min-h-0 flex-col overflow-y-auto', mobilePane === 'editor' ? 'hidden xl:flex' : 'flex')}>
+                <div className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border/40 bg-background/60 px-5 backdrop-blur-md">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50">{messages.previewCardTitle}</span>
+                    <span className="text-sm font-semibold tabular-nums text-muted-foreground/60">
+                      {dimensions.width}×{effectivePreviewHeight}
+                    </span>
+                  </div>
 
-                  <div className="grid gap-4 px-4 pb-4 pt-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">{messages.exportTemplateLabel}</label>
+                  <div className="flex items-center gap-2">
+                    <Button 
+                      type="button" 
+                      variant="ghost" 
+                      size="sm"
+                        className="h-10 gap-2 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground" 
+                      disabled={isBusy} 
+                      onClick={() => void exportPosterImage(true)}
+                    >
+                        {isBusy ? <LoaderCircle className="size-[18px] animate-spin" /> : <Share2 className="size-[18px]" />}
+                      <span className="hidden sm:inline">{messages.shareImage}</span>
+                    </Button>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          type="button" 
+                          variant="ghost"
+                          size="sm"
+                            className="h-10 gap-2 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground" 
+                          disabled={isBusy}
+                        >
+                            {isBusy ? <LoaderCircle className="size-[18px] animate-spin" /> : <Download className="size-[18px]" />}
+                          <span className="hidden sm:inline">{messages.exportMenu}</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-52 p-2">
+                          <DropdownMenuLabel className="px-3 py-2 text-sm uppercase tracking-[0.12em] opacity-60">{messages.exportMenu}</DropdownMenuLabel>
+                          <DropdownMenuItem onClick={() => void exportPosterImage(false)} className="gap-2.5 px-3 py-2.5 text-sm">
+                          {messages.exportImage}
+                        </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => void exportPosterJpeg()} className="gap-2.5 px-3 py-2.5 text-sm">
+                          {messages.exportJpeg}
+                        </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => void handleExportHtml()} className="gap-2.5 px-3 py-2.5 text-sm">
+                          {messages.exportHtml}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+
+                <div className="border-b border-border/60 bg-muted/5">
+                  <div className="grid gap-x-8 gap-y-5 px-5 py-5 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground/80">{messages.exportTemplateLabel}</label>
                       <Select value={documentState.exportTemplate} onValueChange={(value) => handleDocumentChange('exportTemplate', value as ExportTemplate)}>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-11 rounded-lg border-border/60 bg-background/50 text-sm">
                           <SelectValue placeholder={messages.exportTemplateLabel} />
                         </SelectTrigger>
                         <SelectContent>
+                          <SelectItem value="calendar-essay">{messages.templateCalendarEssay}</SelectItem>
                           <SelectItem value="xiaohongshu">{messages.templateXiaohongshu}</SelectItem>
                           <SelectItem value="image-background">{messages.templateImageBackground}</SelectItem>
                           <SelectItem value="spotify">{messages.templateSpotify}</SelectItem>
                           <SelectItem value="ocean-quote">{messages.templateOceanQuote}</SelectItem>
-                          <SelectItem value="calendar-essay">{messages.templateCalendarEssay}</SelectItem>
                           <SelectItem value="editorial-card">{messages.templateEditorialCard}</SelectItem>
+                          <SelectItem value="cinema-book">{messages.templateCinemaBook}</SelectItem>
+                          <SelectItem value="code-snippet">{messages.templateCodeSnippet}</SelectItem>
+                          <SelectItem value="ticket-stub">{messages.templateTicketStub}</SelectItem>
+                          <SelectItem value="zen-vertical">{messages.templateZenVertical}</SelectItem>
+                          <SelectItem value="news-flash">{messages.templateNewsFlash}</SelectItem>
+                          <SelectItem value="polaroid">{messages.templatePolaroid}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
-                    <div className="space-y-3">
-                      <div className="text-sm font-medium">{messages.exportThemeLabel}</div>
+                    <div className="space-y-1.5">
+                      <div className="text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground/80">{messages.exportThemeLabel}</div>
                       <RadioGroup
                         value={documentState.exportTheme}
                         onValueChange={(value) => handleDocumentChange('exportTheme', value as ExportTheme)}
-                        className="grid gap-3 sm:grid-cols-2"
+                        className="flex gap-2"
                       >
-                        <label className="flex items-center gap-3 rounded-2xl border border-border/70 bg-background/70 px-4 py-3 text-sm">
-                          <RadioGroupItem value="light" id="export-theme-light" />
+                        <label className={cn(
+                          "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border/60 bg-background/50 px-3 py-2.5 text-sm font-medium transition-all",
+                          documentState.exportTheme === 'light' ? "border-primary/40 bg-primary/5 text-primary" : "hover:bg-accent/50"
+                        )}>
+                          <RadioGroupItem value="light" id="export-theme-light" className="sr-only" />
                           {messages.exportThemeLight}
                         </label>
-                        <label className="flex items-center gap-3 rounded-2xl border border-border/70 bg-background/70 px-4 py-3 text-sm">
-                          <RadioGroupItem value="dark" id="export-theme-dark" />
+                        <label className={cn(
+                          "flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border/60 bg-background/50 px-3 py-2.5 text-sm font-medium transition-all",
+                          documentState.exportTheme === 'dark' ? "border-primary/40 bg-primary/5 text-primary" : "hover:bg-accent/50"
+                        )}>
+                          <RadioGroupItem value="dark" id="export-theme-dark" className="sr-only" />
                           {messages.exportThemeDark}
                         </label>
                       </RadioGroup>
                     </div>
-                  </div>
 
-                  <div className="flex flex-col gap-3 border-t border-border/60 px-4 py-4">
-                    <div className="flex flex-wrap gap-2">
-                      <Button type="button" variant="outline" className="gap-2" disabled={isBusy} onClick={() => void exportPosterImage(true)}>
-                        {isBusy ? <LoaderCircle className="size-4 animate-spin" /> : <Share2 className="size-4" />}
-                        {messages.shareImage}
-                      </Button>
-                      <Button type="button" className="gap-2" disabled={isBusy} onClick={() => void exportPosterImage(false)}>
-                        {isBusy ? <LoaderCircle className="size-4 animate-spin" /> : <Download className="size-4" />}
-                        {messages.exportImage}
-                      </Button>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground/80">{messages.fontSizeLabel}</label>
+                      <Select value={documentState.fontSizePreset} onValueChange={(value) => handleDocumentChange('fontSizePreset', value as PosterFontSize)}>
+                        <SelectTrigger className="h-11 rounded-lg border-border/60 bg-background/50 text-sm">
+                          <SelectValue placeholder={messages.fontSizeLabel} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="small">{messages.fontSizeSmall}</SelectItem>
+                          <SelectItem value="medium">{messages.fontSizeMedium}</SelectItem>
+                          <SelectItem value="large">{messages.fontSizeLarge}</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 </div>
 
-                <div className="min-h-0 flex-1 overflow-y-auto bg-background/30">
-                  <div className="flex min-h-full flex-col gap-0">
+                <div className="bg-background/30">
+                  <div className="flex flex-col gap-0">
                     <div className="w-full border-b border-border/60 bg-background/70 shadow-sm">
-                      <div className="flex items-center justify-between gap-3 px-4 py-3 text-sm text-muted-foreground">
+                      <div className="flex items-center justify-between gap-3 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
                         <span>{messages.exportPreviewLabel}</span>
-                        <span>{dimensions.width}×{effectivePreviewHeight}</span>
                       </div>
 
-                      <Zoom
-                        a11yNameButtonUnzoom={messages.previewZoomCloseLabel}
-                        a11yNameButtonZoom={messages.previewZoomOpenLabel}
-                        classDialog="poster-preview-zoom-dialog"
-                        isDisabled={!previewZoomUrl}
-                        zoomMargin={24}
-                      >
-                        <div
-                          className={cn(
-                            'relative overflow-auto bg-muted/30',
-                            previewZoomUrl ? 'cursor-zoom-in' : 'cursor-default',
-                          )}
-                        >
+                      <div className="overflow-auto bg-muted/30">
+                        {previewZoomUrl ? (
+                          <Zoom
+                            a11yNameButtonUnzoom={messages.previewZoomCloseLabel}
+                            a11yNameButtonZoom={messages.previewZoomOpenLabel}
+                            classDialog="poster-preview-zoom-dialog"
+                            zoomMargin={24}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              alt={messages.exportPreviewLabel}
+                              className="mx-auto block cursor-zoom-in shadow-lg"
+                              draggable={false}
+                              src={previewZoomUrl}
+                              style={{
+                                width: dimensions.width * posterPreviewScale,
+                                height: effectivePreviewHeight * posterPreviewScale,
+                              }}
+                            />
+                          </Zoom>
+                        ) : (
                           <div
-                            className="mx-auto"
+                            className="mx-auto flex items-center justify-center text-sm text-muted-foreground"
                             style={{
                               width: dimensions.width * posterPreviewScale,
                               height: effectivePreviewHeight * posterPreviewScale,
                             }}
                           >
-                            <div
-                              style={{
-                                transform: `scale(${posterPreviewScale})`,
-                                transformOrigin: 'top left',
-                                width: dimensions.width,
-                                height: effectivePreviewHeight,
-                              }}
-                            >
-                              <PosterCanvas
-                                content={previewContent}
-                                contentFormat={contentFormat}
-                                theme={documentState.exportTheme}
-                                template={documentState.exportTemplate}
-                                pageIndex={1}
-                                pageCount={1}
-                                heightOverride={effectivePreviewHeight}
-                              />
-                            </div>
+                            {messages.exportPreviewLoading}
                           </div>
-
-                          {previewZoomUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              alt={messages.exportPreviewLabel}
-                              className="absolute inset-0 h-full w-full rounded-[1.5rem] object-fill opacity-0"
-                              draggable={false}
-                              src={previewZoomUrl}
-                            />
-                          ) : null}
-                        </div>
-                      </Zoom>
+                        )}
+                      </div>
                     </div>
 
                     {isPosterOverflowing ? (

@@ -8,13 +8,14 @@ export const POSTER_DIMENSIONS = {
 } as const;
 
 export function createDocumentSignature(
-  document: Pick<EditorDocument, 'content' | 'contentFormat' | 'exportTheme' | 'exportTemplate'>,
+  document: Pick<EditorDocument, 'content' | 'contentFormat' | 'exportTheme' | 'exportTemplate' | 'fontSizePreset'>,
 ) {
   return JSON.stringify({
     content: document.content,
     contentFormat: document.contentFormat,
     exportTheme: document.exportTheme,
     exportTemplate: document.exportTemplate,
+    fontSizePreset: document.fontSizePreset,
   });
 }
 
@@ -83,7 +84,7 @@ function formatFileTimestamp(date = new Date()) {
   return `${year}${month}${day}-${hours}${minutes}${seconds}`;
 }
 
-export function createTimestampedFilename(extension: 'md' | 'txt' | 'png', prefix = 'poster') {
+export function createTimestampedFilename(extension: 'md' | 'txt' | 'png' | 'jpg' | 'html', prefix = 'poster') {
   return `${prefix}-${formatFileTimestamp()}.${extension}`;
 }
 

@@ -1,4 +1,4 @@
-import type { ContentFormat, ExportTheme } from '@/lib/editor/types';
+import type { ContentFormat, ExportTheme, PosterFontSize } from '@/lib/editor/types';
 
 export interface PosterTemplateProps {
   content: string;
@@ -7,6 +7,7 @@ export interface PosterTemplateProps {
   width: number;
   height: number;
   theme: ExportTheme;
+  fontSizePreset: PosterFontSize;
   pageIndex: number;
   pageCount: number;
 }

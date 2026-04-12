@@ -1,7 +1,8 @@
 import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body';
+import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function OceanQuoteTemplate({ blocks, contentFormat, width, height, theme }: PosterTemplateProps) {
+export function OceanQuoteTemplate({ blocks, contentFormat, width, height, theme, fontSizePreset }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const normalizedBlocks = blocks.map((block) => block.trim()).filter(Boolean);
   const lastBlock = normalizedBlocks[normalizedBlocks.length - 1] ?? '';
@@ -11,7 +12,7 @@ export function OceanQuoteTemplate({ blocks, contentFormat, width, height, theme
   const sourceLine = hasSourceLine ? lastBlock : '';
 
   const heroHeight = 640;
-  const bodyFontSize = width >= 1400 ? 48 : 35;
+  const bodyFontSize = getPosterBodyFontSize(width, fontSizePreset);
   const canvasBg = isDark ? '#ecebed' : '#f0eff1';
   const bodyColor = '#242934';
   const mutedColor = '#5f6674';

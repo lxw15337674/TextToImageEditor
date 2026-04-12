@@ -9,13 +9,20 @@ import { ImageBackgroundTemplate } from '@/lib/editor/templates/image-background
 import { OceanQuoteTemplate } from '@/lib/editor/templates/ocean-quote-template';
 import { SpotifyTemplate } from '@/lib/editor/templates/spotify-template';
 import { XiaohongshuTemplate } from '@/lib/editor/templates/xiaohongshu-template';
-import type { ContentFormat, ExportTemplate, ExportTheme } from '@/lib/editor/types';
+import { CinemaBookTemplate } from '@/lib/editor/templates/cinema-book-template';
+import { CodeSnippetTemplate } from '@/lib/editor/templates/code-snippet-template';
+import { TicketStubTemplate } from '@/lib/editor/templates/ticket-stub-template';
+import { ZenVerticalTemplate } from '@/lib/editor/templates/zen-vertical-template';
+import { NewsFlashTemplate } from '@/lib/editor/templates/news-flash-template';
+import { PolaroidTemplate } from '@/lib/editor/templates/polaroid-template';
+import type { ContentFormat, ExportTemplate, ExportTheme, PosterFontSize } from '@/lib/editor/types';
 
 interface PosterCanvasProps {
   content: string;
   contentFormat: ContentFormat;
   theme: ExportTheme;
   template: ExportTemplate;
+  fontSizePreset: PosterFontSize;
   pageIndex: number;
   pageCount: number;
   heightOverride?: number;
@@ -43,24 +50,60 @@ function createHost() {
   return host;
 }
 
-export function PosterCanvas({ content, contentFormat, theme, template, pageIndex, pageCount, heightOverride }: PosterCanvasProps) {
+function buildPosterHtmlDocument(innerHtml: string) {
+  return [
+    '<!doctype html>',
+    '<html lang="en">',
+    '<head>',
+    '<meta charset="utf-8" />',
+    '<meta name="viewport" content="width=device-width, initial-scale=1" />',
+    '<title>Poster Export</title>',
+    '<style>',
+    'html, body { margin: 0; padding: 0; background: #f3f4f6; }',
+    'body { min-height: 100vh; display: flex; align-items: flex-start; justify-content: center; padding: 24px; box-sizing: border-box; }',
+    'img { max-width: 100%; }',
+    'a { color: inherit; }',
+    '</style>',
+    '</head>',
+    '<body>',
+    innerHtml,
+    '</body>',
+    '</html>',
+  ].join('');
+}
+
+export function PosterCanvas({ content, contentFormat, theme, template, fontSizePreset, pageIndex, pageCount, heightOverride }: PosterCanvasProps) {
   const width = POSTER_WIDTH;
   const height = heightOverride ?? POSTER_BASE_HEIGHT;
   const blocks = splitContentBlocks(content, contentFormat);
 
+  const props = { content, contentFormat, blocks, width, height, theme, fontSizePreset, pageIndex, pageCount };
+
   switch (template) {
     case 'editorial-card':
-      return <EditorialCardTemplate content={content} contentFormat={contentFormat} blocks={blocks} width={width} height={height} theme={theme} pageIndex={pageIndex} pageCount={pageCount} />;
+      return <EditorialCardTemplate {...props} />;
     case 'image-background':
-      return <ImageBackgroundTemplate content={content} contentFormat={contentFormat} blocks={blocks} width={width} height={height} theme={theme} pageIndex={pageIndex} pageCount={pageCount} />;
+      return <ImageBackgroundTemplate {...props} />;
     case 'spotify':
-      return <SpotifyTemplate content={content} contentFormat={contentFormat} blocks={blocks} width={width} height={height} theme={theme} pageIndex={pageIndex} pageCount={pageCount} />;
+      return <SpotifyTemplate {...props} />;
     case 'ocean-quote':
-      return <OceanQuoteTemplate content={content} contentFormat={contentFormat} blocks={blocks} width={width} height={height} theme={theme} pageIndex={pageIndex} pageCount={pageCount} />;
+      return <OceanQuoteTemplate {...props} />;
     case 'calendar-essay':
-      return <CalendarEssayTemplate content={content} contentFormat={contentFormat} blocks={blocks} width={width} height={height} theme={theme} pageIndex={pageIndex} pageCount={pageCount} />;
+      return <CalendarEssayTemplate {...props} />;
+    case 'cinema-book':
+      return <CinemaBookTemplate {...props} />;
+    case 'code-snippet':
+      return <CodeSnippetTemplate {...props} />;
+    case 'ticket-stub':
+      return <TicketStubTemplate {...props} />;
+    case 'zen-vertical':
+      return <ZenVerticalTemplate {...props} />;
+    case 'news-flash':
+      return <NewsFlashTemplate {...props} />;
+    case 'polaroid':
+      return <PolaroidTemplate {...props} />;
     default:
-      return <XiaohongshuTemplate content={content} contentFormat={contentFormat} blocks={blocks} width={width} height={height} theme={theme} pageIndex={pageIndex} pageCount={pageCount} />;
+      return <XiaohongshuTemplate {...props} />;
   }
 }
 
@@ -69,6 +112,7 @@ async function posterFits(
   contentFormat: ContentFormat,
   theme: ExportTheme,
   template: ExportTemplate,
+  fontSizePreset: PosterFontSize,
   heightOverride?: number,
 ) {
   const host = createHost();
@@ -80,6 +124,7 @@ async function posterFits(
       contentFormat={contentFormat}
       theme={theme}
       template={template}
+      fontSizePreset={fontSizePreset}
       pageIndex={1}
       pageCount={1}
       heightOverride={heightOverride}
@@ -102,11 +147,12 @@ export async function resolvePosterLayout(
   contentFormat: ContentFormat,
   theme: ExportTheme,
   template: ExportTemplate,
+  fontSizePreset: PosterFontSize,
   maxHeight = MAX_POSTER_HEIGHT,
 ) {
   const safeMaxHeight = Math.max(POSTER_BASE_HEIGHT, maxHeight);
 
-  if (await posterFits(content, contentFormat, theme, template, POSTER_BASE_HEIGHT)) {
+  if (await posterFits(content, contentFormat, theme, template, fontSizePreset, POSTER_BASE_HEIGHT)) {
     return {
       height: POSTER_BASE_HEIGHT,
       isClipped: false,
@@ -116,7 +162,7 @@ export async function resolvePosterLayout(
   const step = 240;
 
   for (let nextHeight = POSTER_BASE_HEIGHT + step; nextHeight <= safeMaxHeight; nextHeight += step) {
-    if (await posterFits(content, contentFormat, theme, template, nextHeight)) {
+    if (await posterFits(content, contentFormat, theme, template, fontSizePreset, nextHeight)) {
       return {
         height: nextHeight,
         isClipped: false,
@@ -130,11 +176,23 @@ export async function resolvePosterLayout(
   };
 }
 
+export async function resolvePosterPreviewLayout(
+  content: string,
+  contentFormat: ContentFormat,
+  theme: ExportTheme,
+  template: ExportTemplate,
+  fontSizePreset: PosterFontSize,
+) {
+  // Preview uses a smaller height limit for performance and UX
+  return resolvePosterLayout(content, contentFormat, theme, template, fontSizePreset, 2000);
+}
+
 export async function paginateMarkdownForPoster(
   content: string,
   contentFormat: ContentFormat,
   theme: ExportTheme,
   template: ExportTemplate,
+  fontSizePreset: PosterFontSize,
 ) {
   const blocks = splitContentBlocks(content, contentFormat);
 
@@ -148,7 +206,7 @@ export async function paginateMarkdownForPoster(
   for (const block of blocks) {
     const candidate = [...currentBlocks, block].join('\n\n');
 
-    if (await posterFits(candidate, contentFormat, theme, template)) {
+    if (await posterFits(candidate, contentFormat, theme, template, fontSizePreset)) {
       currentBlocks.push(block);
       continue;
     }
@@ -163,7 +221,7 @@ export async function paginateMarkdownForPoster(
     for (const segment of splitBlocks) {
       const segmentCandidate = [...nextBlocks, segment].join('\n\n');
 
-      if (await posterFits(segmentCandidate, contentFormat, theme, template)) {
+      if (await posterFits(segmentCandidate, contentFormat, theme, template, fontSizePreset)) {
         nextBlocks.push(segment);
         continue;
       }
@@ -190,11 +248,12 @@ export async function renderPosterBlob(
   contentFormat: ContentFormat,
   theme: ExportTheme,
   template: ExportTemplate,
+  fontSizePreset: PosterFontSize,
   pageIndex: number,
   pageCount: number,
   heightOverride?: number,
 ) {
-  const resolvedHeight = heightOverride ?? (await resolvePosterLayout(content, contentFormat, theme, template)).height;
+  const resolvedHeight = heightOverride ?? (await resolvePosterLayout(content, contentFormat, theme, template, fontSizePreset)).height;
   const host = createHost();
   const root = createRoot(host);
 
@@ -204,6 +263,7 @@ export async function renderPosterBlob(
       contentFormat={contentFormat}
       theme={theme}
       template={template}
+      fontSizePreset={fontSizePreset}
       pageIndex={pageIndex}
       pageCount={pageCount}
       heightOverride={resolvedHeight}
@@ -227,4 +287,48 @@ export async function renderPosterBlob(
   host.remove();
 
   return blob;
+}
+
+export async function renderPosterHtml(
+  content: string,
+  contentFormat: ContentFormat,
+  theme: ExportTheme,
+  template: ExportTemplate,
+  fontSizePreset: PosterFontSize,
+  pageIndex: number,
+  pageCount: number,
+  heightOverride?: number,
+) {
+  const resolvedHeight = heightOverride ?? (await resolvePosterLayout(content, contentFormat, theme, template, fontSizePreset)).height;
+  const host = createHost();
+  const root = createRoot(host);
+
+  root.render(
+    <PosterCanvas
+      content={content}
+      contentFormat={contentFormat}
+      theme={theme}
+      template={template}
+      fontSizePreset={fontSizePreset}
+      pageIndex={pageIndex}
+      pageCount={pageCount}
+      heightOverride={resolvedHeight}
+    />,
+  );
+  await waitForPaint();
+
+  const posterRoot = host.querySelector<HTMLElement>('[data-poster-root]');
+
+  if (!posterRoot) {
+    root.unmount();
+    host.remove();
+    throw new Error('Poster render failed.');
+  }
+
+  const html = buildPosterHtmlDocument(posterRoot.outerHTML);
+
+  root.unmount();
+  host.remove();
+
+  return html;
 }

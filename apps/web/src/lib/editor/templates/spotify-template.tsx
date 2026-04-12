@@ -1,8 +1,10 @@
 import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body';
+import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function SpotifyTemplate({ content, contentFormat, width, height, theme, pageIndex, pageCount }: PosterTemplateProps) {
+export function SpotifyTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
   const isDark = theme === 'dark';
+  const bodyFontSize = getPosterBodyFontSize(width, fontSizePreset);
 
   return (
     <div
@@ -50,7 +52,7 @@ export function SpotifyTemplate({ content, contentFormat, width, height, theme, 
             contentFormat={contentFormat}
             theme={theme}
             color="#111827"
-            fontSize={width >= 1400 ? 32 : 24}
+            fontSize={bodyFontSize}
             centered
           />
         </div>

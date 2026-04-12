@@ -1,8 +1,10 @@
 import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body';
+import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
-export function XiaohongshuTemplate({ content, contentFormat, width, height, theme, pageIndex, pageCount }: PosterTemplateProps) {
+export function XiaohongshuTemplate({ content, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
   const isDark = theme === 'dark';
+  const bodyFontSize = getPosterBodyFontSize(width, fontSizePreset);
 
   return (
     <div
@@ -71,7 +73,7 @@ export function XiaohongshuTemplate({ content, contentFormat, width, height, the
               contentFormat={contentFormat}
               theme={theme}
               color={isDark ? '#e5e7eb' : '#111827'}
-              fontSize={width >= 1400 ? 29 : 22}
+              fontSize={bodyFontSize}
             />
           </div>
 

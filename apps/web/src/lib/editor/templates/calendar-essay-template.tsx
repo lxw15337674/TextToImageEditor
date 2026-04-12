@@ -1,4 +1,5 @@
 import { PosterMarkdownBody } from '@/lib/editor/templates/poster-markdown-body';
+import { getPosterBodyFontSize } from '@/lib/editor/templates/template-typography';
 import type { PosterTemplateProps } from '@/lib/editor/templates/template-types';
 
 function splitCalendarEssaySections(blocks: string[]) {
@@ -43,7 +44,7 @@ function splitCalendarEssaySections(blocks: string[]) {
   };
 }
 
-export function CalendarEssayTemplate({ blocks, contentFormat, width, height, theme, pageIndex, pageCount }: PosterTemplateProps) {
+export function CalendarEssayTemplate({ blocks, contentFormat, width, height, theme, fontSizePreset, pageIndex, pageCount }: PosterTemplateProps) {
   const isDark = theme === 'dark';
   const { bodyBlocks, footerLines } = splitCalendarEssaySections(blocks);
   const bodyContent = bodyBlocks.join('\n\n');
@@ -61,7 +62,7 @@ export function CalendarEssayTemplate({ blocks, contentFormat, width, height, th
   const mutedTextColor = isDark ? '#d5cfc9' : '#4a413d';
   const subtleTextColor = isDark ? '#a59d97' : '#9a9a9a';
   const dividerColor = isDark ? 'rgba(242, 236, 230, 0.24)' : 'rgba(40, 33, 28, 0.22)';
-  const bodyFontSize = width >= 1400 ? 42 : 31;
+  const bodyFontSize = getPosterBodyFontSize(width, fontSizePreset);
 
   return (
     <div
