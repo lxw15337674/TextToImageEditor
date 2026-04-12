@@ -1,10 +1,7 @@
 import type { Metadata } from 'next';
-import { hasLocale } from 'next-intl';
-import { notFound } from 'next/navigation';
 import { SeoJsonLd } from '@/linkdisk/components/SeoJsonLd';
 import { UseCasesPage } from '@/linkdisk/components/UseCasesPage';
-import type { Locale } from '@/i18n/config';
-import { routing } from '@/i18n/routing';
+import { resolveRouteLocale } from '@/lib/route-locale';
 import {
   buildUseCasesPageSeoGraph,
   createUseCasesPageMetadata
@@ -14,24 +11,16 @@ interface UseCasesRoutePageProps {
   params: Promise<{ locale: string }>;
 }
 
-function resolveLocale(locale: string): Locale {
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
-
-  return locale;
-}
-
 export async function generateMetadata({ params }: UseCasesRoutePageProps): Promise<Metadata> {
   const { locale: requestedLocale } = await params;
-  const locale = resolveLocale(requestedLocale);
+  const locale = resolveRouteLocale(requestedLocale);
 
   return createUseCasesPageMetadata(locale);
 }
 
 export default async function UseCasesRoutePage({ params }: UseCasesRoutePageProps) {
   const { locale: requestedLocale } = await params;
-  const locale = resolveLocale(requestedLocale);
+  const locale = resolveRouteLocale(requestedLocale);
 
   return (
     <>

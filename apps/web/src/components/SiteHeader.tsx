@@ -15,14 +15,13 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { LOCALES, type Locale, stripLocalePrefix, withLocalePrefix } from '@/i18n/config';
+import { LOCALES, type Locale, stripLocalePrefix } from '@/i18n/config';
 import { getMessages } from '@/i18n/messages';
 import {
-  flattenSiteFeatureGroups,
-  getSiteFeatureGroups,
   isSiteFeatureActive,
   type SiteFeatureItem,
 } from '@/lib/site-features';
+import { getSiteHeaderConfig } from '@/lib/site-header';
 import { cn } from '@/lib/utils';
 
 function renderFeatureLink(item: SiteFeatureItem, barePath: string, compact = false) {
@@ -72,60 +71,190 @@ function renderFeatureLink(item: SiteFeatureItem, barePath: string, compact = fa
   );
 }
 
+function HeaderBrand({ href, label, mobile = false }: { href: string; label: string; mobile?: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        'min-w-0 truncate text-sm font-medium text-foreground transition-colors hover:text-primary',
+        mobile ? 'flex-1 md:hidden' : 'hidden shrink-0 md:block',
+      )}
+    >
+      {label}
+    </Link>
+  );
+}
+
+function HeaderActionButton({
+  barePath,
+  item,
+  primary = false,
+}: {
+  barePath: string;
+  item: SiteFeatureItem;
+  primary?: boolean;
+}) {
+  const isActive = isSiteFeatureActive(item, barePath);
+  const variant = isActive ? 'default' : 'outline';
+  const className = cn(isActive ? 'pointer-events-none' : undefined, primary ? 'gap-2' : undefined);
+
+  if (item.external) {
+    return (
+      <Button type="button" size="sm" variant={variant} asChild>
+        <a href={item.href} target="_blank" rel="noreferrer" className={className}>
+          {item.label}
+          {primary ? <ArrowUpRight data-icon="inline-end" /> : null}
+        </a>
+      </Button>
+    );
+  }
+
+  return (
+    <Button type="button" size="sm" variant={variant} asChild>
+      <Link href={item.href} className={className}>
+        {item.label}
+        {primary ? <ArrowUpRight data-icon="inline-end" /> : null}
+      </Link>
+    </Button>
+  );
+}
+
+function HeaderFeatureLauncher({
+  barePath,
+  featureGroups,
+  messages,
+}: {
+  barePath: string;
+  featureGroups: ReturnType<typeof getSiteHeaderConfig>['launcherGroups'];
+  messages: ReturnType<typeof getMessages>['common'];
+}) {
+  const showGroupLabel = featureGroups.length > 1;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button type="button" size="sm" variant="outline">
+          <LayoutGrid data-icon="inline-start" />
+          {messages.featureLauncher}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-[36rem] max-w-[calc(100vw-2rem)] p-4">
+        <div className="flex flex-col gap-4">
+          <div className="px-1">
+            <p className="text-sm font-medium text-foreground">{messages.featureLauncher}</p>
+          </div>
+          {featureGroups.map((group) => (
+            <div key={group.id} className="flex flex-col gap-3">
+              {showGroupLabel ? (
+                <p className="px-1 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{group.label}</p>
+              ) : null}
+              <div className="grid gap-3 sm:grid-cols-2">{group.items.map((item) => renderFeatureLink(item, barePath))}</div>
+            </div>
+          ))}
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function HeaderMobileNavigation({
+  barePath,
+  featureGroups,
+  locale,
+  messages,
+  quickActions,
+}: {
+  barePath: string;
+  featureGroups: ReturnType<typeof getSiteHeaderConfig>['launcherGroups'];
+  locale: Locale;
+  messages: ReturnType<typeof getMessages>['common'];
+  quickActions: ReturnType<typeof getSiteHeaderConfig>['quickActions'];
+}) {
+  const showGroupLabel = featureGroups.length > 1;
+
+  return (
+    <Sheet>
+      <SheetTrigger asChild>
+        <Button type="button" size="icon" variant="outline">
+          <Menu className="size-4" />
+          <span className="sr-only">{messages.mobileMenuOpenLabel}</span>
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="right" className="w-[min(20rem,100vw-1rem)] border-border/70 bg-card px-4">
+        <SheetHeader>
+          <SheetTitle>{messages.siteName}</SheetTitle>
+          <SheetDescription>{messages.mobileMenuDescription}</SheetDescription>
+        </SheetHeader>
+        <div className="mt-6 flex flex-col gap-3">
+          {quickActions.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {quickActions.map((item) => renderFeatureLink(item, barePath, true))}
+            </div>
+          ) : null}
+
+          <div className="flex flex-col gap-3">
+            <div>
+              <p className="text-sm font-medium text-foreground">{messages.featureLauncher}</p>
+            </div>
+            {featureGroups.map((group) => (
+              <div key={group.id} className="flex flex-col gap-2">
+                {showGroupLabel ? (
+                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{group.label}</p>
+                ) : null}
+                <div className="flex flex-col gap-2">{group.items.map((item) => renderFeatureLink(item, barePath, true))}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col gap-3 rounded-lg border border-border/70 bg-background/70 px-3 py-3">
+            {LOCALES.length > 1 ? (
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm text-muted-foreground">{messages.languageLabel}</span>
+                <div className="min-w-0 flex-1">
+                  <LanguageSwitcher locale={locale} fullWidth />
+                </div>
+              </div>
+            ) : null}
+
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-muted-foreground">{messages.themeLabel}</span>
+              <ModeToggle
+                toggleLabel={messages.themeLabel}
+                themeLightLabel={messages.themeLight}
+                themeDarkLabel={messages.themeDark}
+                themeSystemLabel={messages.themeSystem}
+              />
+            </div>
+          </div>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 export function SiteHeader({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const messages = getMessages(locale).common;
   const barePath = stripLocalePrefix(pathname ?? '/');
-  const featureGroups = getSiteFeatureGroups(locale);
-  const featureItems = flattenSiteFeatureGroups(featureGroups);
-  const editorFeature = featureItems.find((item) => item.pin === 'left');
-  const pinnedRightFeatures = featureItems.filter((item) => item.pin === 'right');
+  const headerConfig = getSiteHeaderConfig(locale);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur-xl">
       <div className="mx-auto h-14 w-full max-w-[92rem] px-4 sm:px-6 lg:px-8">
         <div className="flex h-full min-w-0 items-center gap-2">
-          <Link
-            href={withLocalePrefix('/', locale)}
-            className="min-w-0 flex-1 truncate text-sm font-medium text-foreground md:hidden"
-          >
-            {messages.siteName}
-          </Link>
+          <HeaderBrand href={headerConfig.brand.href} label={headerConfig.brand.label} mobile />
 
           <div className="hidden min-w-0 items-center gap-2 md:flex">
-            <Link href={withLocalePrefix('/', locale)} className="shrink-0 text-sm font-medium text-foreground">
-              {messages.siteName}
-            </Link>
-            {editorFeature ? (
-              <Button
-                type="button"
-                size="sm"
-                variant={isSiteFeatureActive(editorFeature, barePath) ? 'default' : 'outline'}
-                asChild
-              >
-                <Link
-                  href={editorFeature.href}
-                  className={cn(isSiteFeatureActive(editorFeature, barePath) ? 'pointer-events-none gap-2' : 'gap-2')}
-                >
-                  {editorFeature.label}
-                  <ArrowUpRight data-icon="inline-end" />
-                </Link>
-              </Button>
+            <HeaderBrand href={headerConfig.brand.href} label={headerConfig.brand.label} />
+            {headerConfig.primaryAction ? (
+              <HeaderActionButton barePath={barePath} item={headerConfig.primaryAction} primary />
             ) : null}
           </div>
 
           <div className="ml-auto hidden items-center gap-2 md:flex">
-            {pinnedRightFeatures.map((item) => {
-              const isActive = isSiteFeatureActive(item, barePath);
-
-              return (
-                <Button key={item.id} type="button" size="sm" variant={isActive ? 'default' : 'outline'} asChild>
-                  <Link href={item.href} className={cn(isActive ? 'pointer-events-none' : undefined)}>
-                    {item.label}
-                  </Link>
-                </Button>
-              );
-            })}
+            {headerConfig.quickActions.map((item) => (
+              <HeaderActionButton key={item.id} barePath={barePath} item={item} />
+            ))}
             <LanguageSwitcher locale={locale} />
             <ModeToggle
               toggleLabel={messages.themeLabel}
@@ -133,88 +262,17 @@ export function SiteHeader({ locale }: { locale: Locale }) {
               themeDarkLabel={messages.themeDark}
               themeSystemLabel={messages.themeSystem}
             />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button type="button" size="sm" variant="outline">
-                  <LayoutGrid data-icon="inline-start" />
-                  {messages.featureLauncher}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[36rem] max-w-[calc(100vw-2rem)] p-4">
-                <div className="flex flex-col gap-4">
-                  <div className="space-y-1 px-1">
-                    <p className="text-sm font-medium text-foreground">{messages.featureLauncher}</p>
-                    <p className="text-sm leading-6 text-muted-foreground">{messages.featureMenuDescription}</p>
-                  </div>
-                  {featureGroups.map((group) => (
-                    <div key={group.id} className="flex flex-col gap-3">
-                      <p className="px-1 text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                        {group.label}
-                      </p>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        {group.items.map((item) => renderFeatureLink(item, barePath))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <HeaderFeatureLauncher barePath={barePath} featureGroups={headerConfig.launcherGroups} messages={messages} />
           </div>
 
           <div className="ml-auto md:hidden">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button type="button" size="icon" variant="outline">
-                  <Menu className="size-4" />
-                  <span className="sr-only">{messages.mobileMenuOpenLabel}</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[min(20rem,100vw-1rem)] border-border/70 bg-card px-4">
-                <SheetHeader>
-                  <SheetTitle>{messages.siteName}</SheetTitle>
-                  <SheetDescription>{messages.mobileMenuDescription}</SheetDescription>
-                </SheetHeader>
-                <div className="mt-6 flex flex-col gap-3">
-                  <div className="flex flex-col gap-3">
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-foreground">{messages.featureLauncher}</p>
-                      <p className="text-sm leading-6 text-muted-foreground">{messages.featureMenuDescription}</p>
-                    </div>
-                    {featureGroups.map((group) => (
-                      <div key={group.id} className="flex flex-col gap-2">
-                        <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                          {group.label}
-                        </p>
-                        <div className="flex flex-col gap-2">
-                          {group.items.map((item) => renderFeatureLink(item, barePath, true))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-col gap-3 rounded-lg border border-border/70 bg-background/70 px-3 py-3">
-                    {LOCALES.length > 1 ? (
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="text-sm text-muted-foreground">{messages.languageLabel}</span>
-                        <div className="min-w-0 flex-1">
-                          <LanguageSwitcher locale={locale} fullWidth />
-                        </div>
-                      </div>
-                    ) : null}
-
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm text-muted-foreground">{messages.themeLabel}</span>
-                      <ModeToggle
-                        toggleLabel={messages.themeLabel}
-                        themeLightLabel={messages.themeLight}
-                        themeDarkLabel={messages.themeDark}
-                        themeSystemLabel={messages.themeSystem}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <HeaderMobileNavigation
+              barePath={barePath}
+              featureGroups={headerConfig.launcherGroups}
+              locale={locale}
+              messages={messages}
+              quickActions={headerConfig.quickActions}
+            />
           </div>
         </div>
       </div>

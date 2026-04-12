@@ -3,6 +3,7 @@ import { ArrowRight, History, ImageUp, LockKeyhole } from 'lucide-react';
 import type { Locale } from '@/i18n/config';
 import { withLocalePrefix } from '@/i18n/config';
 import { getMessages } from '@/i18n/messages';
+import { AppPageContainer, PagePanel, SectionIntro } from '@/components/app-page-shell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,23 +19,18 @@ export function StarterHomePage({ locale }: StarterHomePageProps) {
   const messages = getMessages(locale).home;
 
   return (
-    <main className="mx-auto flex w-full max-w-[92rem] flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-10 lg:gap-10 lg:px-8">
+    <AppPageContainer className="gap-8 py-8 sm:py-10 lg:gap-10">
       <section className="space-y-5">
-        <div className="space-y-3">
-          <Badge variant="outline" className="rounded-full px-3 py-1 text-xs uppercase tracking-[0.24em]">
-            {messages.eyebrow}
-          </Badge>
-        </div>
-        <div className="space-y-3">
-          <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-            {messages.title}
-          </h1>
-          <p className="max-w-3xl text-base leading-7 text-muted-foreground sm:text-lg">{messages.description}</p>
-        </div>
+        <SectionIntro
+          eyebrow={messages.eyebrow}
+          title={<h1 className="max-w-4xl text-balance text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">{messages.title}</h1>}
+          description={messages.description}
+          descriptionClassName="max-w-3xl"
+        />
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <Card className="border-border/70 bg-card/80 md:col-span-2">
+        <PagePanel as="div" className="border-border/70 bg-card/80 md:col-span-2">
           <CardHeader className="space-y-5 p-6 sm:p-7">
             <div className="flex flex-wrap gap-2">
               {messages.primaryCardTags.map((tag) => (
@@ -58,9 +54,9 @@ export function StarterHomePage({ locale }: StarterHomePageProps) {
               </Button>
             </div>
           </CardHeader>
-        </Card>
+        </PagePanel>
 
-        <Card className="border-border/70 bg-card/70">
+        <PagePanel as="div" className="border-border/70 bg-card/70">
           <CardHeader className="h-full justify-between space-y-8 p-6">
             <div className="space-y-3">
               <Badge variant="outline" className="w-fit rounded-full px-3 py-1 text-xs uppercase tracking-[0.2em]">
@@ -72,13 +68,13 @@ export function StarterHomePage({ locale }: StarterHomePageProps) {
               </div>
             </div>
             <Button asChild variant="outline" className="w-fit gap-2">
-              <Link href={withLocalePrefix('/use-cases', locale)}>
+              <Link href={withLocalePrefix('/notes/use-cases', locale)}>
                 {messages.secondaryCardCta}
                 <ArrowRight className="size-4" />
               </Link>
             </Button>
           </CardHeader>
-        </Card>
+        </PagePanel>
 
         {messages.detailCards.map((item, index) => {
           const Icon = detailIcons[index % detailIcons.length] ?? History;
@@ -98,6 +94,6 @@ export function StarterHomePage({ locale }: StarterHomePageProps) {
           );
         })}
       </section>
-    </main>
+    </AppPageContainer>
   );
 }

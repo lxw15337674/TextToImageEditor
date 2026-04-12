@@ -35,7 +35,7 @@ export function getSiteFeatureGroups(locale: Locale): SiteFeatureGroup[] {
     {
       id: 'editor',
       label: messages.common.openEditor,
-      description: messages.home.primaryCardDescription,
+      description: messages.common.featureDescriptionNotes,
       href: withLocalePrefix('/notes', locale),
       icon: FileText,
       group: 'core',
@@ -45,7 +45,7 @@ export function getSiteFeatureGroups(locale: Locale): SiteFeatureGroup[] {
     {
       id: 'use-cases',
       label: messages.common.navUseCases,
-      description: messages.home.secondaryCardDescription,
+      description: messages.common.featureDescriptionUseCases,
       href: withLocalePrefix('/use-cases', locale),
       icon: Layers3,
       group: 'core',
@@ -55,7 +55,7 @@ export function getSiteFeatureGroups(locale: Locale): SiteFeatureGroup[] {
     {
       id: 'starter',
       label: messages.common.navStarter,
-      description: messages.starter.metadataDescription,
+      description: messages.common.featureDescriptionStarter,
       href: withLocalePrefix('/starter', locale),
       icon: BookOpenText,
       group: 'more',
@@ -65,7 +65,7 @@ export function getSiteFeatureGroups(locale: Locale): SiteFeatureGroup[] {
     {
       id: 'linkdisk',
       label: linkDiskMessages.common.siteName,
-      description: linkDiskMessages.home.metadataDescription,
+      description: linkDiskMessages.common.featureDescriptionHome,
       href: withLocalePrefix('/linkdisk', locale),
       icon: Link2,
       group: 'more',
@@ -91,5 +91,9 @@ export function flattenSiteFeatureGroups(groups: SiteFeatureGroup[]): SiteFeatur
 }
 
 export function isSiteFeatureActive(item: SiteFeatureItem, barePath: string) {
+  if (item.id === 'use-cases') {
+    return barePath === item.match || barePath.endsWith('/use-cases');
+  }
+
   return barePath === item.match || barePath.startsWith(`${item.match}/`);
 }

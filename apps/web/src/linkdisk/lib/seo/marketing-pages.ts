@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import type { Locale } from '@/i18n/config';
 import { getHtmlLang } from '@/i18n/locale-meta';
-import { buildLocaleAlternates } from '@/lib/seo/locale-alternates';
+import { createMarketingMetadata } from '@/lib/seo/marketing-metadata';
 import { toAbsoluteUrl } from '@/lib/seo/site-origin';
 
 export const LINKDISK_BASE_PATH = '/linkdisk';
@@ -15,19 +15,31 @@ interface MarketingPageFaq {
 }
 
 interface UseCasesPageCopy {
+  ctaDescription: string;
+  ctaPrimary: string;
+  ctaSecondary: string;
+  ctaTitle: string;
   benefits: Array<{
     description: string;
     title: string;
   }>;
   description: string;
+  eyebrow: string;
+  faqDescription: string;
   faqTitle: string;
   faqs: MarketingPageFaq[];
   metadataDescription: string;
   metadataTitle: string;
+  primaryCta: string;
+  problemDescription: string;
+  problemTitle: string;
+  scenariosDescription: string;
   scenarios: Array<{
     description: string;
     title: string;
   }>;
+  secondaryCta: string;
+  strengthsDescription: string;
   scenariosTitle: string;
   strengthsTitle: string;
   title: string;
@@ -44,10 +56,18 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
     metadataTitle: 'Why LinkDisk: Anonymous Sharing, Flexible Controls, Large Attachments',
     metadataDescription:
       'See why LinkDisk fits anonymous text and file sharing: no sign-in required, flexible share settings, and support for larger attachments.',
+    eyebrow: 'Anonymous sharing workflow',
     title: 'Explore LinkDisk use cases',
     description:
       'LinkDisk works well when you want to share text or files quickly without login, keep control over how the link is opened, and send larger attachments in the same share.',
+    primaryCta: 'Open LinkDisk',
+    secondaryCta: 'See use cases',
+    problemTitle: 'Built for fast sharing without account friction',
+    problemDescription:
+      'Instead of forcing every share into a login flow or a plain link, LinkDisk gives you one place to send text, files, and access rules together.',
     strengthsTitle: 'Why people use LinkDisk',
+    strengthsDescription:
+      'These strengths matter when you need a share flow that is quick to create but still controlled once it leaves your hands.',
     benefits: [
       {
         title: 'No sign-in required',
@@ -63,6 +83,7 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
       },
     ],
     scenariosTitle: 'Common situations',
+    scenariosDescription: 'LinkDisk fits short-lived sharing workflows where speed, control, and attachments need to work together.',
     scenarios: [
       {
         title: 'Move content between devices',
@@ -86,6 +107,7 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
       },
     ],
     faqTitle: 'FAQ',
+    faqDescription: 'The core questions people usually ask before using LinkDisk for real sharing workflows.',
     faqs: [
       {
         question: 'Do I need an account to create a share?',
@@ -112,15 +134,27 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
         answer: 'Yes. LinkDisk is suitable for larger attachments as well as short text sharing.',
       },
     ],
+    ctaTitle: 'Share quickly without giving up control',
+    ctaDescription:
+      'Start with one share link for text and files, then add passwords, expiry, and view limits only when the situation calls for them.',
+    ctaPrimary: 'Open LinkDisk',
+    ctaSecondary: 'Jump to FAQ',
   },
   zh: {
     metadataTitle: '为什么用 LinkDisk：匿名分享、灵活设置、支持大附件',
     metadataDescription:
       '了解 LinkDisk 为什么适合匿名分享文本和文件：无需登录即可发送，支持密码、过期时间、访问次数等设置，也适合发送较大的附件。',
+    eyebrow: '匿名分享工作流',
     title: '使用场景',
     description:
       'LinkDisk 适合临时分享文本和文件。你不需要登录，就可以直接生成分享链接；也可以按需要设置密码、过期时间、访问次数等规则，并支持带上大附件一起发送。',
+    primaryCta: '打开 LinkDisk',
+    secondaryCta: '查看使用场景',
+    problemTitle: '为“快速分享但仍要可控”而设计',
+    problemDescription:
+      '它不是只能发一个裸链接，也不是必须先登录再走完流程。LinkDisk 把文本、附件和访问规则放进同一条分享链路里。',
     strengthsTitle: '为什么这些分享场景更适合 LinkDisk',
+    strengthsDescription: '当你既想发得快，又不想把内容完全失控地丢出去时，这些能力会更有价值。',
     benefits: [
       {
         title: '不用登录，发起来更快',
@@ -136,6 +170,7 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
       },
     ],
     scenariosTitle: '常见使用场景',
+    scenariosDescription: '适合短期分享、跨设备传递、外部协作，以及需要同时处理文本、附件和访问控制的场景。',
     scenarios: [
       {
         title: '跨设备传内容',
@@ -155,6 +190,7 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
       },
     ],
     faqTitle: '常见问题',
+    faqDescription: '这是在把 LinkDisk 用到真实分享流程之前，最常被问到的几个问题。',
     faqs: [
       {
         question: '需要注册账号才能使用吗？',
@@ -185,15 +221,27 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
         answer: '支持。除了文本和小文件，也适合分享较大的附件内容。',
       },
     ],
+    ctaTitle: '先把内容快速发出去，再决定限制规则',
+    ctaDescription: '同一条分享既能承载文本和附件，也能按需要补上密码、过期时间和访问次数控制。',
+    ctaPrimary: '打开 LinkDisk',
+    ctaSecondary: '跳到常见问题',
   },
   es: {
     metadataTitle: 'Por que LinkDisk: compartidos anonimos, controles flexibles y adjuntos grandes',
     metadataDescription:
       'Descubre por que LinkDisk encaja para compartir texto y archivos sin login, con controles flexibles y soporte para adjuntos mas grandes.',
+    eyebrow: 'Flujo de compartidos anonimos',
     title: 'Casos de uso',
     description:
       'LinkDisk sirve para compartir texto y archivos de forma rapida. No hace falta iniciar sesion, puedes controlar como se abre cada compartido y tambien enviar adjuntos mas grandes.',
+    primaryCta: 'Abrir LinkDisk',
+    secondaryCta: 'Ver casos de uso',
+    problemTitle: 'Pensado para compartir rapido sin friccion de cuenta',
+    problemDescription:
+      'En lugar de obligarte a pasar por un login o mandar un enlace sin control, LinkDisk te deja compartir texto, archivos y reglas de acceso en el mismo flujo.',
     strengthsTitle: 'Por que usar LinkDisk',
+    strengthsDescription:
+      'Estas ventajas importan cuando necesitas compartir rapido pero sin perder el control una vez que el enlace ya esta fuera.',
     benefits: [
       {
         title: 'Sin login obligatorio',
@@ -209,6 +257,7 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
       },
     ],
     scenariosTitle: 'Situaciones comunes',
+    scenariosDescription: 'Encaja en flujos de compartido temporales donde velocidad, control y adjuntos deben funcionar juntos.',
     scenarios: [
       {
         title: 'Mover contenido entre dispositivos',
@@ -232,6 +281,7 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
       },
     ],
     faqTitle: 'Preguntas frecuentes',
+    faqDescription: 'Las preguntas principales que suelen aparecer antes de usar LinkDisk en un flujo real de compartidos.',
     faqs: [
       {
         question: 'Necesito una cuenta para crear un compartido?',
@@ -258,15 +308,27 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
         answer: 'Si. LinkDisk tambien encaja para adjuntos mas grandes.',
       },
     ],
+    ctaTitle: 'Comparte rapido sin renunciar al control',
+    ctaDescription:
+      'Empieza con un solo compartido para texto y archivos, y anade contrasena, expiracion o limite de vistas solo cuando el caso lo pida.',
+    ctaPrimary: 'Abrir LinkDisk',
+    ctaSecondary: 'Ir a FAQ',
   },
   ja: {
     metadataTitle: 'なぜ LinkDisk か：匿名共有、柔軟な設定、大きめ添付',
     metadataDescription:
       'LinkDisk が匿名でのテキスト・ファイル共有に向く理由を確認できます。ログイン不要、柔軟な共有設定、大きめ添付に対応します。',
+    eyebrow: '匿名共有ワークフロー',
     title: '利用シーン',
     description:
       'LinkDisk はテキストやファイルをすばやく共有したいときに向いています。ログイン不要で共有でき、共有ごとに公開方法を調整でき、大きめの添付ファイルにも対応します。',
+    primaryCta: 'LinkDisk を開く',
+    secondaryCta: '利用シーンを見る',
+    problemTitle: 'アカウント前提にしない高速共有向け',
+    problemDescription:
+      'ログイン必須のフローや無制限のただのリンクではなく、LinkDisk は本文、添付、公開ルールを同じ共有にまとめられます。',
     strengthsTitle: 'LinkDisk が使いやすい理由',
+    strengthsDescription: '素早く共有したい一方で、リンクを渡した後の公開条件もきちんと管理したい場面で役立ちます。',
     benefits: [
       {
         title: 'ログインなしですぐ共有',
@@ -282,6 +344,7 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
       },
     ],
     scenariosTitle: 'よくある利用シーン',
+    scenariosDescription: '速度、公開制御、添付ファイルを同時に扱いたい短期共有のワークフローに向いています。',
     scenarios: [
       {
         title: '端末間で内容を渡す',
@@ -305,6 +368,7 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
       },
     ],
     faqTitle: 'FAQ',
+    faqDescription: 'LinkDisk を実際の共有フローで使う前によく確認される基本的な質問をまとめています。',
     faqs: [
       {
         question: '共有を作るのにアカウントは必要ですか？',
@@ -331,6 +395,11 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
         answer: 'はい。LinkDisk は大きめの添付共有にも向いています。',
       },
     ],
+    ctaTitle: 'まずは素早く共有し、必要ならあとから制御する',
+    ctaDescription:
+      '本文と添付を 1 つの共有にまとめ、必要な場面だけパスワード、有効期限、閲覧回数制限を追加できます。',
+    ctaPrimary: 'LinkDisk を開く',
+    ctaSecondary: 'FAQ へ移動',
   },
 };
 
@@ -340,32 +409,14 @@ export function getUseCasesPageCopy(locale: Locale) {
 
 export function createUseCasesPageMetadata(locale: Locale): Metadata {
   const copy = getUseCasesPageCopy(locale);
-  const absoluteCanonical = toAbsoluteUrl(`/${locale}${LINKDISK_USE_CASES_PATH}`);
 
-  return {
+  return createMarketingMetadata({
+    locale,
+    pathname: LINKDISK_USE_CASES_PATH,
     title: copy.metadataTitle,
     description: copy.metadataDescription,
-    alternates: {
-      canonical: absoluteCanonical,
-      languages: buildLocaleAlternates(LINKDISK_USE_CASES_PATH),
-    },
-    openGraph: {
-      type: 'website',
-      url: absoluteCanonical,
-      title: copy.metadataTitle,
-      description: copy.metadataDescription,
-      siteName: 'LinkDisk',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: copy.metadataTitle,
-      description: copy.metadataDescription,
-    },
-    robots: {
-      index: true,
-      follow: true,
-    },
-  };
+    siteName: 'LinkDisk',
+  });
 }
 
 export function buildHomeSeoGraph(locale: Locale) {

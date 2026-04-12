@@ -1,7 +1,5 @@
-import type { Metadata } from 'next';
 import { Space_Grotesk } from 'next/font/google';
-import { hasLocale } from 'next-intl';
-import { notFound } from 'next/navigation';
+import type { Metadata } from 'next';
 import 'react-medium-image-zoom/dist/styles.css';
 import '../globals.css';
 import { AppShellHeader } from '@/components/AppShellHeader';
@@ -9,11 +7,10 @@ import { HtmlLangSync } from '@/components/HtmlLangSync';
 import { QueryProvider } from '@/components/query-provider';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
-import { DEFAULT_LOCALE } from '@/i18n/config';
 import { LOCALES } from '@/i18n/config';
 import { getMessages } from '@/i18n/messages';
 import { getHtmlLang } from '@/i18n/locale-meta';
-import { routing } from '@/i18n/routing';
+import { resolveLocaleForMetadata, resolveRouteLocale } from '@/lib/route-locale';
 import { getSiteOrigin } from '@/lib/seo/site-origin';
 
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], display: 'swap' });
@@ -24,18 +21,6 @@ export const dynamicParams = false;
 interface LocaleLayoutProps {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
-}
-
-function resolveLocale(locale: string) {
-  if (!hasLocale(routing.locales, locale)) {
-    notFound();
-  }
-
-  return locale;
-}
-
-function resolveLocaleForMetadata(locale: string) {
-  return hasLocale(routing.locales, locale) ? locale : DEFAULT_LOCALE;
 }
 
 function GoogleAnalyticsScript({ gaId }: { gaId: string }) {
@@ -86,7 +71,7 @@ export async function generateMetadata({ params }: LocaleLayoutProps): Promise<M
 
 export default async function LocaleLayout({ children, params }: LocaleLayoutProps) {
   const { locale: requestedLocale } = await params;
-  const locale = resolveLocale(requestedLocale);
+  const locale = resolveRouteLocale(requestedLocale);
   const gaId =
     process.env.NODE_ENV === 'production'
       ? process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim()

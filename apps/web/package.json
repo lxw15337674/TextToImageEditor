@@ -8,7 +8,8 @@
     "start": "vinext start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "check": "pnpm run lint && pnpm run build",
+    "i18n:check": "tsx ./scripts/check-i18n.ts",
+    "check": "pnpm run lint && pnpm run typecheck && pnpm run i18n:check && pnpm run build",
     "deploy:cloudflare": "npx wrangler deploy --config dist/server/wrangler.json --name cf-template-web",
     "deploy:cloudflare:preview": "npx wrangler deploy --dry-run --config dist/server/wrangler.json --name cf-template-web"
   },

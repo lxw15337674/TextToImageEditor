@@ -1,5 +1,6 @@
 import type { Locale } from '@/i18n/config';
 import { getMessages } from '@/i18n/messages';
+import { AppPageContainer, SectionIntro } from '@/components/app-page-shell';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface StarterGuidePageProps {
@@ -10,10 +11,13 @@ export function StarterGuidePage({ locale }: StarterGuidePageProps) {
   const messages = getMessages(locale).starter;
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-10 sm:px-6 lg:px-8">
+    <AppPageContainer width="narrow" className="gap-6 py-10">
       <section className="space-y-3">
-        <h1 className="text-4xl font-semibold tracking-tight">{messages.title}</h1>
-        <p className="max-w-3xl text-base leading-7 text-muted-foreground">{messages.description}</p>
+        <SectionIntro
+          title={<h1 className="text-4xl font-semibold tracking-tight">{messages.title}</h1>}
+          description={messages.description}
+          descriptionClassName="max-w-3xl text-base"
+        />
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
@@ -59,6 +63,6 @@ export function StarterGuidePage({ locale }: StarterGuidePageProps) {
           ))}
         </CardContent>
       </Card>
-    </main>
+    </AppPageContainer>
   );
 }

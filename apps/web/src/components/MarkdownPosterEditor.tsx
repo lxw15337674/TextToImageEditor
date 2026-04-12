@@ -540,7 +540,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     }
 
     try {
-      await createVersionFromDocument(documentState, 'milestone', createManualMilestoneLabel());
+      await createVersionFromDocument(documentState, 'milestone', createManualMilestoneLabel(messages.milestoneLabelPrefix, locale));
       lastVersionSignatureRef.current = createSnapshotSignature(documentState);
       await refreshVersions();
       toast.success(messages.milestoneSaved);
@@ -659,7 +659,10 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
 
   async function handleDuplicateAsMilestone(version: EditorVersion) {
     try {
-      await duplicateVersionAsMilestone(version, version.label ?? createManualMilestoneLabel());
+      await duplicateVersionAsMilestone(
+        version,
+        version.label ?? createManualMilestoneLabel(messages.milestoneLabelPrefix, locale),
+      );
       await refreshVersions();
       toast.success(messages.milestoneSaved);
     } catch (error) {
@@ -903,70 +906,8 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                 )}
               >
                 <div className="sticky top-0 z-20 flex flex-col gap-3 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:h-14 xl:flex-row xl:items-center xl:justify-between xl:gap-4 xl:rounded-tl-[calc(var(--radius)-1px)] xl:px-5 xl:py-0">
-                  <div className="flex min-w-0 items-center justify-between gap-3">
-                    <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50">{messages.editorCardTitle}</span>
-                    <div className="flex items-center cursor-help" title={getSaveStatusLabel(saveStatus, messages)}>
-                      <div
-                        className={cn(
-                          'size-2 rounded-full transition-all duration-500',
-                          saveStatus === 'saved' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 
-                          saveStatus === 'saving' ? 'bg-amber-500 animate-pulse' : 'bg-sky-500',
-                        )}
-                      />
-                      <span className="ml-2 truncate whitespace-nowrap text-sm font-semibold tracking-normal text-muted-foreground/80">
-                        {getSaveStatusLabel(saveStatus, messages)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex w-full flex-col gap-2 xl:w-auto xl:flex-row xl:flex-nowrap xl:items-center">
-                    <div className="flex items-center rounded-xl border border-border/60 bg-muted/30 p-1 xl:mr-1 xl:rounded-lg xl:border-0 xl:bg-muted/40">
-                      <button
-                        type="button"
-                        className={cn(
-                          'rounded-md px-3 py-1.5 text-sm font-bold transition-all',
-                          isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
-                        )}
-                        onClick={() => handleDocumentChange('contentFormat', 'plain')}
-                        disabled={isBusy}
-                      >
-                        TXT
-                      </button>
-                      <button
-                        type="button"
-                        className={cn(
-                          'rounded-md px-3 py-1.5 text-sm font-bold transition-all',
-                          !isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
-                        )}
-                        onClick={() => handleDocumentChange('contentFormat', 'markdown')}
-                        disabled={isBusy}
-                      >
-                        MD
-                      </button>
-                    </div>
-
-                    <div className="flex min-w-0 items-center gap-1 overflow-x-auto pb-1 xl:flex-none xl:overflow-visible xl:pb-0">
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent" 
-                        onClick={handleUndo} 
-                        disabled={!canUndo || isBusy}
-                      >
-                        <Undo2 className="size-[18px]" data-icon="inline-start" />
-                        <span className="hidden lg:inline">{messages.undo}</span>
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent" 
-                        onClick={handleRedo} 
-                        disabled={!canRedo || isBusy}
-                      >
-                        <Redo2 className="size-[18px]" data-icon="inline-start" />
-                        <span className="hidden lg:inline">{messages.redo}</span>
-                      </Button>
-
+                  <div className="flex min-w-0 items-center justify-start gap-2 max-w-full overflow-x-auto [&::-webkit-scrollbar]:hidden pb-1 sm:pb-0">
+                    <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50 shrink-0 mr-2">{messages.editorCardTitle}</span>
                       <Separator orientation="vertical" className="mx-1 hidden h-5 opacity-20 sm:block" />
 
                       <Button
@@ -1020,7 +961,69 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
+                                        <div className="flex items-center cursor-help ml-auto pl-2 shrink-0" title={getSaveStatusLabel(saveStatus, messages)}>
+                      <div
+                        className={cn(
+                          'size-2 rounded-full transition-all duration-500',
+                          saveStatus === 'saved' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 
+                          saveStatus === 'saving' ? 'bg-amber-500 animate-pulse' : 'bg-sky-500',
+                        )}
+                      />
+                      <span className="ml-2 truncate whitespace-nowrap text-sm font-semibold tracking-normal text-muted-foreground/80">
+                        {getSaveStatusLabel(saveStatus, messages)}
+                      </span>
                     </div>
+                  </div>
+
+                  <div className="flex w-full flex-col gap-2 xl:w-auto xl:flex-row xl:flex-nowrap xl:items-center">
+                    <div className="flex items-center rounded-xl border border-border/60 bg-muted/30 p-1 xl:mr-1 xl:rounded-lg xl:border-0 xl:bg-muted/40">
+                      <button
+                        type="button"
+                        className={cn(
+                          'rounded-md px-3 py-1.5 text-sm font-bold transition-all',
+                          isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                        )}
+                        onClick={() => handleDocumentChange('contentFormat', 'plain')}
+                        disabled={isBusy}
+                      >
+                        TXT
+                      </button>
+                      <button
+                        type="button"
+                        className={cn(
+                          'rounded-md px-3 py-1.5 text-sm font-bold transition-all',
+                          !isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                        )}
+                        onClick={() => handleDocumentChange('contentFormat', 'markdown')}
+                        disabled={isBusy}
+                      >
+                        MD
+                      </button>
+                    </div>
+
+                    <div className="flex min-w-0 items-center gap-1 overflow-x-auto pb-1 xl:flex-none xl:overflow-visible xl:pb-0">
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-9 w-9 shrink-0 rounded-xl border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground xl:rounded-md xl:border-transparent" 
+                        onClick={handleUndo} 
+                        disabled={!canUndo || isBusy}
+                        title={messages.undo}
+                      >
+                        <Undo2 className="size-[18px]" />
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        className="h-9 w-9 shrink-0 rounded-xl border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground xl:rounded-md xl:border-transparent" 
+                        onClick={handleRedo} 
+                        disabled={!canRedo || isBusy}
+                        title={messages.redo}
+                      >
+                        <Redo2 className="size-[18px]" />
+                      </Button>
+
+</div>
                   </div>
                 </div>
 
@@ -1232,7 +1235,9 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           <span className={cn('rounded-full border px-2 py-0.5 text-[11px] font-medium', VERSION_KIND_STYLES[version.kind])}>
                             {getVersionKindLabel(version.kind, messages)}
                           </span>
-                          <span className="truncate text-[11px] tabular-nums text-muted-foreground">{formatTimestamp(version.createdAt)}</span>
+                          <span className="truncate text-[11px] tabular-nums text-muted-foreground">
+                            {formatTimestamp(version.createdAt, locale)}
+                          </span>
                         </div>
 
                         <div className="mt-2 truncate text-sm font-medium text-foreground">
@@ -1257,7 +1262,9 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                     <div className="truncate text-sm font-medium text-foreground">
                       {selectedVersion.label || getVersionKindLabel(selectedVersion.kind, messages)}
                     </div>
-                    <div className="mt-1 text-xs tabular-nums text-muted-foreground">{formatTimestamp(selectedVersion.createdAt)}</div>
+                    <div className="mt-1 text-xs tabular-nums text-muted-foreground">
+                      {formatTimestamp(selectedVersion.createdAt, locale)}
+                    </div>
                   </div>
 
                   {editingLabelId === selectedVersion.id ? (

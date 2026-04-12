@@ -22,8 +22,8 @@ export function createSnapshotSignature(document: Pick<EditorDocument, 'content'
   return document.content;
 }
 
-export function formatTimestamp(value: number) {
-  return new Intl.DateTimeFormat(undefined, {
+export function formatTimestamp(value: number, locale?: string) {
+  return new Intl.DateTimeFormat(locale, {
     year: 'numeric',
     month: 'short',
     day: '2-digit',
@@ -205,8 +205,8 @@ export function createPosterPageFilename(index: number) {
   return `poster-${formatFileTimestamp()}-${String(index).padStart(3, '0')}.png`;
 }
 
-export function createManualMilestoneLabel() {
-  return `Milestone ${formatTimestamp(Date.now())}`;
+export function createManualMilestoneLabel(prefix: string, locale?: string) {
+  return `${prefix} ${formatTimestamp(Date.now(), locale)}`;
 }
 
 export function normalizeImportedDocument(
