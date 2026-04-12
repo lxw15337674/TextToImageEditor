@@ -3,17 +3,20 @@
 import { createRoot } from 'react-dom/client';
 import { domToBlob } from 'modern-screenshot';
 import { POSTER_DIMENSIONS, splitContentBlocks, splitOversizedBlock } from '@/lib/editor/markdown';
-import type { ContentFormat, ExportResolution, ExportTemplate, ExportTheme } from '@/lib/editor/types';
+import type { ContentFormat, ExportPreset, ExportTemplate, ExportTheme } from '@/lib/editor/types';
 
 interface PosterCanvasProps {
   content: string;
   contentFormat: ContentFormat;
   theme: ExportTheme;
-  resolution: ExportResolution;
+  preset: ExportPreset;
   template: ExportTemplate;
   pageIndex: number;
   pageCount: number;
+  heightOverride?: number;
 }
+
+export const MAX_POSTER_HEIGHT = 12_000;
 
 function waitForPaint() {
   return new Promise<void>((resolve) => {
@@ -92,6 +95,48 @@ function renderParagraphs(blocks: string[], color: string, fontSize: number, cen
   );
 }
 
+function splitCalendarEssaySections(blocks: string[]) {
+  const normalizedBlocks = blocks.map((block) => block.trim()).filter(Boolean);
+
+  if (normalizedBlocks.length <= 1) {
+    return {
+      bodyBlocks: normalizedBlocks,
+      footerLines: [] as string[],
+    };
+  }
+
+  const footerLines: string[] = [];
+
+  for (let index = normalizedBlocks.length - 1; index >= 0 && footerLines.length < 3; index -= 1) {
+    const candidate = normalizedBlocks[index]?.replace(/\n+/g, ' ').trim() ?? '';
+
+    if (!candidate) {
+      break;
+    }
+
+    const isTooLong = candidate.length > 20;
+    const looksLikeBodyText = /[。！？；：,.!?;:]/.test(candidate);
+
+    if (isTooLong || looksLikeBodyText) {
+      break;
+    }
+
+    footerLines.unshift(candidate);
+  }
+
+  if (footerLines.length === 0 || footerLines.length >= normalizedBlocks.length) {
+    return {
+      bodyBlocks: normalizedBlocks,
+      footerLines: [] as string[],
+    };
+  }
+
+  return {
+    bodyBlocks: normalizedBlocks.slice(0, normalizedBlocks.length - footerLines.length),
+    footerLines,
+  };
+}
+
 function XiaohongshuTemplate({
   blocks,
   width,
@@ -108,6 +153,22 @@ function XiaohongshuTemplate({
   pageCount: number;
 }) {
   const isDark = theme === 'dark';
+  const { bodyBlocks, footerLines } = splitCalendarEssaySections(blocks);
+  const date = new Date();
+  const day = String(date.getDate());
+  const monthYear = new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    year: 'numeric',
+  }).format(date).toUpperCase();
+  const weekday = new Intl.DateTimeFormat('zh-CN', {
+    weekday: 'long',
+  }).format(date);
+
+  const baseTextColor = isDark ? '#f2ece6' : '#2e241d';
+  const mutedTextColor = isDark ? '#d5cfc9' : '#4a413d';
+  const subtleTextColor = isDark ? '#a59d97' : '#9a9a9a';
+  const dividerColor = isDark ? 'rgba(242, 236, 230, 0.24)' : 'rgba(40, 33, 28, 0.22)';
+  const bodyFontSize = width >= 1400 ? 42 : 31;
 
   return (
     <div
@@ -115,81 +176,127 @@ function XiaohongshuTemplate({
       style={{
         width,
         height,
-        padding: Math.round(width * 0.04),
+        padding: `${Math.round(width * 0.085)}px ${Math.round(width * 0.09)}px ${Math.round(width * 0.072)}px`,
         display: 'flex',
         flexDirection: 'column',
-        gap: Math.round(width * 0.028),
-        background: isDark ? '#111827' : '#f8fafc',
-        color: isDark ? '#f9fafb' : '#111827',
-        fontFamily: 'Space Grotesk, system-ui, sans-serif',
+        gap: Math.round(width * 0.032),
+        background: isDark ? '#171413' : '#ededed',
+        color: baseTextColor,
+        fontFamily: 'Source Han Serif SC, Noto Serif SC, Songti SC, STSong, serif',
       }}
     >
       <div
         style={{
-          position: 'relative',
-          flex: 1,
-          overflow: 'hidden',
-          borderRadius: Math.round(width * 0.032),
-          background: isDark
-            ? 'linear-gradient(180deg, rgba(30,41,59,1) 0%, rgba(15,23,42,1) 100%)'
-            : 'linear-gradient(180deg, rgba(255,255,255,1) 0%, rgba(241,245,249,1) 100%)',
-          padding: Math.round(width * 0.05),
-          boxShadow: isDark ? '0 25px 60px rgba(2, 6, 23, 0.45)' : '0 25px 60px rgba(15, 23, 42, 0.12)',
-          border: isDark ? '1px solid rgba(148, 163, 184, 0.14)' : '1px solid rgba(148, 163, 184, 0.22)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          marginTop: Math.round(height * 0.016),
+          gap: Math.round(width * 0.005),
         }}
       >
         <div
           style={{
-            position: 'absolute',
-            inset: 0,
-            background: isDark
-              ? 'radial-gradient(circle at top left, rgba(59,130,246,0.18), transparent 38%), radial-gradient(circle at bottom right, rgba(236,72,153,0.12), transparent 30%)'
-              : 'radial-gradient(circle at top left, rgba(248,113,113,0.12), transparent 30%), radial-gradient(circle at bottom right, rgba(59,130,246,0.10), transparent 34%)',
+            fontFamily: 'Space Grotesk, system-ui, sans-serif',
+            fontSize: Math.round(width * 0.19),
+            lineHeight: 0.95,
+            letterSpacing: '-0.05em',
+            fontWeight: 700,
+            color: baseTextColor,
           }}
-        />
-
-        <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginBottom: Math.round(width * 0.028),
-              fontSize: Math.round(width * 0.023),
-              opacity: 0.78,
-            }}
-          >
-            <span>Local draft</span>
-            <span>{new Date().toISOString().slice(0, 10)}</span>
-          </div>
-
-          <div
-            data-poster-body
-            style={{
-              flex: 1,
-              overflow: 'hidden',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            {renderParagraphs(blocks, isDark ? '#e5e7eb' : '#111827', width >= 1400 ? 29 : 22)}
-          </div>
-
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginTop: Math.round(width * 0.032),
-              fontSize: Math.round(width * 0.024),
-              opacity: 0.78,
-            }}
-          >
-            <span>Markdown Poster</span>
-            <span>
-              {pageIndex}/{pageCount}
-            </span>
-          </div>
+        >
+          {day}
+        </div>
+        <div
+          style={{
+            fontFamily: 'Space Grotesk, system-ui, sans-serif',
+            fontSize: Math.round(width * 0.062),
+            lineHeight: 1.1,
+            letterSpacing: '0.02em',
+            fontWeight: 700,
+            color: baseTextColor,
+          }}
+        >
+          {monthYear}
+        </div>
+        <div
+          style={{
+            fontSize: Math.round(width * 0.047),
+            fontWeight: 600,
+            lineHeight: 1.25,
+            color: mutedTextColor,
+          }}
+        >
+          {weekday}
         </div>
       </div>
+
+      <div
+        style={{
+          alignSelf: 'center',
+          width: Math.round(width * 0.14),
+          height: 2,
+          background: dividerColor,
+          marginTop: Math.round(height * 0.006),
+          marginBottom: Math.round(height * 0.018),
+        }}
+      />
+
+      <div
+        data-poster-body
+        style={{
+          flex: 1,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start',
+        }}
+      >
+        {renderParagraphs(bodyBlocks, baseTextColor, bodyFontSize)}
+      </div>
+
+      {footerLines.length > 0 ? (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: Math.round(width * 0.004),
+            textAlign: 'center',
+            paddingTop: Math.round(height * 0.008),
+          }}
+        >
+          {footerLines.map((line, index) => (
+            <p
+              key={`${line}-${index}`}
+              style={{
+                margin: 0,
+                fontSize: Math.round(width * 0.057),
+                lineHeight: 1.35,
+                fontWeight: index === 0 ? 600 : 500,
+                color: index === footerLines.length - 1 ? subtleTextColor : mutedTextColor,
+              }}
+            >
+              {line}
+            </p>
+          ))}
+        </div>
+      ) : null}
+
+      {pageCount > 1 ? (
+        <div
+          style={{
+            alignSelf: 'center',
+            marginTop: Math.round(height * 0.004),
+            fontFamily: 'Space Grotesk, system-ui, sans-serif',
+            fontSize: Math.round(width * 0.03),
+            color: subtleTextColor,
+          }}
+        >
+          {pageIndex}/{pageCount}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -358,8 +465,9 @@ function SpotifyTemplate({
   );
 }
 
-export function PosterCanvas({ content, contentFormat, theme, resolution, template, pageIndex, pageCount }: PosterCanvasProps) {
-  const { width, height } = POSTER_DIMENSIONS[resolution];
+export function PosterCanvas({ content, contentFormat, theme, preset, template, pageIndex, pageCount, heightOverride }: PosterCanvasProps) {
+  const { width, height: defaultHeight } = POSTER_DIMENSIONS[preset];
+  const height = heightOverride ?? defaultHeight;
   const blocks = createTextBlocks(content, contentFormat);
 
   switch (template) {
@@ -372,12 +480,28 @@ export function PosterCanvas({ content, contentFormat, theme, resolution, templa
   }
 }
 
-async function posterFits(content: string, contentFormat: ContentFormat, theme: ExportTheme, resolution: ExportResolution, template: ExportTemplate) {
+async function posterFits(
+  content: string,
+  contentFormat: ContentFormat,
+  theme: ExportTheme,
+  preset: ExportPreset,
+  template: ExportTemplate,
+  heightOverride?: number,
+) {
   const host = createHost();
   const root = createRoot(host);
 
   root.render(
-    <PosterCanvas content={content} contentFormat={contentFormat} theme={theme} resolution={resolution} template={template} pageIndex={1} pageCount={1} />,
+    <PosterCanvas
+      content={content}
+      contentFormat={contentFormat}
+      theme={theme}
+      preset={preset}
+      template={template}
+      pageIndex={1}
+      pageCount={1}
+      heightOverride={heightOverride}
+    />,
   );
   await waitForPaint();
 
@@ -390,11 +514,46 @@ async function posterFits(content: string, contentFormat: ContentFormat, theme: 
   return fits;
 }
 
+export async function resolvePosterLayout(
+  content: string,
+  contentFormat: ContentFormat,
+  theme: ExportTheme,
+  preset: ExportPreset,
+  template: ExportTemplate,
+  maxHeight = MAX_POSTER_HEIGHT,
+) {
+  const { height: minHeight } = POSTER_DIMENSIONS[preset];
+  const safeMaxHeight = Math.max(minHeight, maxHeight);
+
+  if (await posterFits(content, contentFormat, theme, preset, template, minHeight)) {
+    return {
+      height: minHeight,
+      isClipped: false,
+    };
+  }
+
+  const step = 240;
+
+  for (let nextHeight = minHeight + step; nextHeight <= safeMaxHeight; nextHeight += step) {
+    if (await posterFits(content, contentFormat, theme, preset, template, nextHeight)) {
+      return {
+        height: nextHeight,
+        isClipped: false,
+      };
+    }
+  }
+
+  return {
+    height: safeMaxHeight,
+    isClipped: true,
+  };
+}
+
 export async function paginateMarkdownForPoster(
   content: string,
   contentFormat: ContentFormat,
   theme: ExportTheme,
-  resolution: ExportResolution,
+  preset: ExportPreset,
   template: ExportTemplate,
 ) {
   const blocks = splitContentBlocks(content, contentFormat);
@@ -409,7 +568,7 @@ export async function paginateMarkdownForPoster(
   for (const block of blocks) {
     const candidate = [...currentBlocks, block].join('\n\n');
 
-    if (await posterFits(candidate, contentFormat, theme, resolution, template)) {
+    if (await posterFits(candidate, contentFormat, theme, preset, template)) {
       currentBlocks.push(block);
       continue;
     }
@@ -424,7 +583,7 @@ export async function paginateMarkdownForPoster(
     for (const segment of splitBlocks) {
       const segmentCandidate = [...nextBlocks, segment].join('\n\n');
 
-      if (await posterFits(segmentCandidate, contentFormat, theme, resolution, template)) {
+      if (await posterFits(segmentCandidate, contentFormat, theme, preset, template)) {
         nextBlocks.push(segment);
         continue;
       }
@@ -450,11 +609,13 @@ export async function renderPosterBlob(
   content: string,
   contentFormat: ContentFormat,
   theme: ExportTheme,
-  resolution: ExportResolution,
+  preset: ExportPreset,
   template: ExportTemplate,
   pageIndex: number,
   pageCount: number,
+  heightOverride?: number,
 ) {
+  const resolvedHeight = heightOverride ?? (await resolvePosterLayout(content, contentFormat, theme, preset, template)).height;
   const host = createHost();
   const root = createRoot(host);
 
@@ -463,10 +624,11 @@ export async function renderPosterBlob(
       content={content}
       contentFormat={contentFormat}
       theme={theme}
-      resolution={resolution}
+      preset={preset}
       template={template}
       pageIndex={pageIndex}
       pageCount={pageCount}
+      heightOverride={resolvedHeight}
     />,
   );
   await waitForPaint();

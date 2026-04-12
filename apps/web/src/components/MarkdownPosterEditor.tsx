@@ -39,10 +39,9 @@ import {
   parseMarkdownImport,
   parsePlainTextImport,
   POSTER_DIMENSIONS,
-  PRESET_RESOLUTIONS,
   summarizeContent,
 } from '@/lib/editor/markdown';
-import { PosterCanvas, renderPosterBlob } from '@/lib/editor/poster';
+import { MAX_POSTER_HEIGHT, PosterCanvas, renderPosterBlob, resolvePosterLayout } from '@/lib/editor/poster';
 import {
   createVersionFromDocument,
   deleteVersion,
@@ -54,7 +53,7 @@ import {
   trimAutoSnapshots,
   updateVersionLabel,
 } from '@/lib/editor/store';
-import type { ContentFormat, EditorDocument, EditorVersion, ExportResolution, ExportTemplate, ExportTheme, SaveStatus, VersionKind } from '@/lib/editor/types';
+import type { ContentFormat, EditorDocument, EditorVersion, ExportTemplate, ExportTheme, SaveStatus, VersionKind } from '@/lib/editor/types';
 import type { Locale } from '@/i18n/config';
 import { getMessages } from '@/i18n/messages';
 import { cn } from '@/lib/utils';
@@ -118,7 +117,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   const { resolvedTheme } = useTheme();
   const editorViewRef = useRef<EditorView | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const previewFrameRef = useRef<HTMLDivElement | null>(null);
   const previewZoomUrlRef = useRef<string | null>(null);
   const lastPersistedSignatureRef = useRef('');
   const lastVersionSignatureRef = useRef('');
@@ -138,11 +136,12 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   const [editingLabelId, setEditingLabelId] = useState<string | null>(null);
   const [editingLabelValue, setEditingLabelValue] = useState('');
   const [isPosterOverflowing, setIsPosterOverflowing] = useState(false);
+  const [previewHeight, setPreviewHeight] = useState<number | null>(null);
   const [previewZoomUrl, setPreviewZoomUrl] = useState<string | null>(null);
 
   const previewContent = useDeferredValue(documentState?.content ?? '');
   const previewTheme = documentState?.exportTheme;
-  const previewResolution = documentState?.exportResolution;
+  const previewPreset = documentState?.exportPreset;
   const previewTemplate = documentState?.exportTemplate;
   const contentFormat = documentState?.contentFormat ?? 'plain';
   const isPlainTextMode = contentFormat === 'plain';
@@ -219,21 +218,38 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   }, []);
 
   useEffect(() => {
-    if (!previewTheme || !previewResolution || !previewTemplate) {
+    if (!previewTheme || !previewPreset || !previewTemplate) {
       return;
     }
 
     let active = true;
     const timeout = window.setTimeout(async () => {
       try {
+        const layout = await resolvePosterLayout(
+          previewContent,
+          contentFormat,
+          previewTheme,
+          previewPreset,
+          previewTemplate,
+          MAX_POSTER_HEIGHT,
+        );
+
+        if (!active) {
+          return;
+        }
+
+        setPreviewHeight(layout.height);
+        setIsPosterOverflowing(layout.isClipped);
+
         const blob = await renderPosterBlob(
           previewContent,
           contentFormat,
           previewTheme,
-          previewResolution,
+          previewPreset,
           previewTemplate,
           1,
           1,
+          layout.height,
         );
         const nextUrl = URL.createObjectURL(blob);
 
@@ -263,7 +279,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   }, [
     previewContent,
     contentFormat,
-    previewResolution,
+    previewPreset,
     previewTemplate,
     previewTheme,
   ]);
@@ -379,38 +395,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
       window.removeEventListener('beforeunload', persistOnUnload);
     };
   }, [documentState]);
-
-  useEffect(() => {
-    let frameA = 0;
-    let frameB = 0;
-
-    const measureOverflow = () => {
-      const body = previewFrameRef.current?.querySelector<HTMLElement>('[data-poster-body]');
-      setIsPosterOverflowing(body ? body.scrollHeight > body.clientHeight + 1 : false);
-    };
-
-    const scheduleMeasure = () => {
-      frameA = window.requestAnimationFrame(() => {
-        frameB = window.requestAnimationFrame(measureOverflow);
-      });
-    };
-
-    scheduleMeasure();
-    window.addEventListener('resize', scheduleMeasure);
-
-    return () => {
-      window.cancelAnimationFrame(frameA);
-      window.cancelAnimationFrame(frameB);
-      window.removeEventListener('resize', scheduleMeasure);
-    };
-  }, [
-    mobilePane,
-    previewContent,
-    contentFormat,
-    documentState?.exportResolution,
-    documentState?.exportTemplate,
-    documentState?.exportTheme,
-  ]);
 
   useEffect(() => {
     if (!isHistoryOpen) {
@@ -621,14 +605,27 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     setIsBusy(true);
 
     try {
+      const layout = await resolvePosterLayout(
+        documentState.content,
+        documentState.contentFormat,
+        documentState.exportTheme,
+        documentState.exportPreset,
+        documentState.exportTemplate,
+        MAX_POSTER_HEIGHT,
+      );
+
+      setPreviewHeight(layout.height);
+      setIsPosterOverflowing(layout.isClipped);
+
       const blob = await renderPosterBlob(
         documentState.content,
         documentState.contentFormat,
         documentState.exportTheme,
-        documentState.exportResolution,
+        documentState.exportPreset,
         documentState.exportTemplate,
         1,
         1,
+        layout.height,
       );
 
       const file = new File([blob], createTimestampedFilename('png'), { type: 'image/png' });
@@ -669,8 +666,8 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     );
   }
 
-  const resolutionOptions = PRESET_RESOLUTIONS[documentState.exportPreset];
-  const dimensions = POSTER_DIMENSIONS[documentState.exportResolution];
+  const dimensions = POSTER_DIMENSIONS[documentState.exportPreset];
+  const effectivePreviewHeight = previewHeight ?? dimensions.height;
   const posterPreviewScale = Math.min(1, 420 / dimensions.width);
   const selectedVersion = versions.find((version) => version.id === selectedVersionId) ?? null;
 
@@ -846,19 +843,14 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                     </div>
                   </div>
 
-                  <div className="grid gap-4 border-t border-border/60 px-4 py-4 sm:grid-cols-2">
+                  <div className="grid gap-4 border-t border-border/60 px-4 py-4">
                     <div className="space-y-2">
                       <label className="text-sm font-medium">{messages.exportPresetLabel}</label>
                       <Select
                         value={documentState.exportPreset}
                         onValueChange={(value) => {
                           const preset = value as EditorDocument['exportPreset'];
-                          const nextResolution = PRESET_RESOLUTIONS[preset][0];
                           handleDocumentChange('exportPreset', preset);
-
-                          if (nextResolution) {
-                            handleDocumentChange('exportResolution', nextResolution);
-                          }
                         }}
                       >
                         <SelectTrigger>
@@ -871,26 +863,10 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                         </SelectContent>
                       </Select>
                     </div>
-
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">{messages.exportResolutionLabel}</label>
-                      <Select value={documentState.exportResolution} onValueChange={(value) => handleDocumentChange('exportResolution', value as ExportResolution)}>
-                        <SelectTrigger>
-                          <SelectValue placeholder={messages.exportResolutionLabel} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {resolutionOptions.map((resolution) => (
-                            <SelectItem key={resolution} value={resolution}>
-                              {resolution}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
                   </div>
 
                   <div className="flex flex-col gap-3 border-t border-border/60 px-4 py-4">
-                    <p className="text-sm leading-6 text-muted-foreground">{messages.exportHint.replace('{size}', `${dimensions.width}×${dimensions.height}`)}</p>
+                    <p className="text-sm leading-6 text-muted-foreground">{messages.exportHint.replace('{size}', `${dimensions.width}×${effectivePreviewHeight}`)}</p>
                     <div className="flex flex-wrap gap-2">
                       <Button type="button" variant="outline" className="gap-2" disabled={isBusy} onClick={() => void exportPosterImage(true)}>
                         {isBusy ? <LoaderCircle className="size-4 animate-spin" /> : <Share2 className="size-4" />}
@@ -909,7 +885,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                     <div className="w-full border-b border-border/60 bg-background/70 shadow-sm">
                       <div className="flex items-center justify-between gap-3 px-4 py-3 text-sm text-muted-foreground">
                         <span>{messages.exportPreviewLabel}</span>
-                        <span>{dimensions.width}×{dimensions.height}</span>
+                        <span>{dimensions.width}×{effectivePreviewHeight}</span>
                       </div>
 
                       <Zoom
@@ -929,26 +905,26 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                             className="mx-auto"
                             style={{
                               width: dimensions.width * posterPreviewScale,
-                              height: dimensions.height * posterPreviewScale,
+                              height: effectivePreviewHeight * posterPreviewScale,
                             }}
                           >
                             <div
-                              ref={previewFrameRef}
                               style={{
                                 transform: `scale(${posterPreviewScale})`,
                                 transformOrigin: 'top left',
                                 width: dimensions.width,
-                                height: dimensions.height,
+                                height: effectivePreviewHeight,
                               }}
                             >
                               <PosterCanvas
                                 content={previewContent}
                                 contentFormat={contentFormat}
                                 theme={documentState.exportTheme}
-                                resolution={documentState.exportResolution}
+                                preset={documentState.exportPreset}
                                 template={documentState.exportTemplate}
                                 pageIndex={1}
                                 pageCount={1}
+                                heightOverride={effectivePreviewHeight}
                               />
                             </div>
                           </div>

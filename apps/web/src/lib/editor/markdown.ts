@@ -1,30 +1,21 @@
 'use client';
 
-import type { ContentFormat, EditorDocument, ExportPreset, ExportResolution, PosterPage } from '@/lib/editor/types';
+import type { ContentFormat, EditorDocument, ExportPreset, PosterPage } from '@/lib/editor/types';
 
-export const POSTER_DIMENSIONS: Record<ExportResolution, { width: number; height: number; preset: ExportPreset }> = {
-  '1080x1080': { width: 1080, height: 1080, preset: '1:1' },
-  '1080x1440': { width: 1080, height: 1440, preset: '3:4' },
-  '1440x1920': { width: 1440, height: 1920, preset: '3:4' },
-  '1080x1920': { width: 1080, height: 1920, preset: '9:16' },
-  '1440x2560': { width: 1440, height: 2560, preset: '9:16' },
-};
-
-export const PRESET_RESOLUTIONS: Record<ExportPreset, ExportResolution[]> = {
-  '1:1': ['1080x1080'],
-  '3:4': ['1080x1440', '1440x1920'],
-  '9:16': ['1080x1920', '1440x2560'],
+export const POSTER_DIMENSIONS: Record<ExportPreset, { width: number; height: number }> = {
+  '1:1': { width: 1080, height: 1080 },
+  '3:4': { width: 1080, height: 1440 },
+  '9:16': { width: 1080, height: 1920 },
 };
 
 export function createDocumentSignature(
-  document: Pick<EditorDocument, 'content' | 'contentFormat' | 'exportTheme' | 'exportPreset' | 'exportResolution' | 'exportTemplate'>,
+  document: Pick<EditorDocument, 'content' | 'contentFormat' | 'exportTheme' | 'exportPreset' | 'exportTemplate'>,
 ) {
   return JSON.stringify({
     content: document.content,
     contentFormat: document.contentFormat,
     exportTheme: document.exportTheme,
     exportPreset: document.exportPreset,
-    exportResolution: document.exportResolution,
     exportTemplate: document.exportTemplate,
   });
 }
