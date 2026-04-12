@@ -6,8 +6,10 @@ interface LocaleMessages {
     siteTagline: string;
     siteDescription: string;
     navHome: string;
+    navUseCases: string;
     navStarter: string;
     navNotes: string;
+    openEditor: string;
     themeLabel: string;
     themeLight: string;
     themeDark: string;
@@ -23,12 +25,14 @@ interface LocaleMessages {
     eyebrow: string;
     title: string;
     description: string;
-    primaryCta: string;
-    secondaryCta: string;
-    stackTitle: string;
-    stackDescription: string;
-    stackItems: string[];
-    featureItems: Array<{
+    primaryCardTitle: string;
+    primaryCardDescription: string;
+    primaryCardCta: string;
+    primaryCardTags: string[];
+    secondaryCardTitle: string;
+    secondaryCardDescription: string;
+    secondaryCardCta: string;
+    detailCards: Array<{
       title: string;
       description: string;
     }>;
@@ -47,6 +51,47 @@ interface LocaleMessages {
     checklistTitle: string;
     checklistDescription: string;
     checklist: string[];
+  };
+  useCases: {
+    metadataTitle: string;
+    metadataDescription: string;
+    eyebrow: string;
+    title: string;
+    description: string;
+    primaryCta: string;
+    secondaryCta: string;
+    proofItems: Array<{
+      title: string;
+      description: string;
+    }>;
+    problemTitle: string;
+    problemDescription: string;
+    valueItems: Array<{
+      title: string;
+      description: string;
+    }>;
+    useCasesTitle: string;
+    useCasesDescription: string;
+    useCaseItems: Array<{
+      title: string;
+      description: string;
+    }>;
+    comparisonTitle: string;
+    comparisonDescription: string;
+    comparisonItems: Array<{
+      title: string;
+      description: string;
+    }>;
+    faqTitle: string;
+    faqDescription: string;
+    faqs: Array<{
+      question: string;
+      answer: string;
+    }>;
+    ctaTitle: string;
+    ctaDescription: string;
+    ctaPrimary: string;
+    ctaSecondary: string;
   };
   notes: {
     metadataTitle: string;
@@ -167,53 +212,52 @@ interface LocaleMessages {
 const MESSAGES: Record<Locale, LocaleMessages> = {
   en: {
     common: {
-      siteName: 'CF Monorepo Template',
+      siteName: 'MintyHub',
       siteTagline: 'A reusable monorepo for localized full-stack apps.',
       siteDescription: 'Localized Next.js frontend and Cloudflare Worker API template.',
       navHome: 'Home',
+      navUseCases: 'Use Cases',
       navStarter: 'Starter Guide',
       navNotes: 'Poster Editor',
+      openEditor: 'Open Editor',
       themeLabel: 'Theme',
       themeLight: 'Light',
       themeDark: 'Dark',
       themeSystem: 'System',
       languageLabel: 'Language',
       mobileMenuOpenLabel: 'Open navigation menu',
-      mobileMenuDescription: 'Browse the core starter pages and switch language or theme.',
+      mobileMenuDescription: 'Open the editor, browse use cases, and switch language or theme.',
     },
     home: {
-      metadataTitle: 'CF Monorepo Template',
-      metadataDescription: 'A clean monorepo starter with localization, theme switching, Hono, OpenAPI docs, and D1 example routes.',
-      metadataKeywords: ['starter template', 'next.js', 'cloudflare workers', 'hono', 'd1', 'monorepo'],
-      eyebrow: 'Localized Full-Stack Starter',
-      title: 'Start from a clean baseline instead of carving business logic out later.',
-      description: 'This template keeps the shell that matters: routing by locale, theme switching, shared UI primitives, Cloudflare Worker deployment, OpenAPI docs, and one minimal D1-backed example.',
-      primaryCta: 'Open Poster Editor',
-      secondaryCta: 'Read Starter Guide',
-      stackTitle: 'What stays in the template',
-      stackDescription: 'The project keeps the infrastructure layer and removes product-specific workflows.',
-      stackItems: [
-        'Next.js app router with locale-prefixed routes',
-        'Theme switcher and reusable UI primitives',
-        'Hono API with OpenAPI JSON and Scalar docs',
-        'A local-first Markdown editor with poster export',
-      ],
-      featureItems: [
+      metadataTitle: 'A text editor where your writing does not get lost',
+      metadataDescription:
+        'Local-first writing editor with autosave, version history, restore, and share-image export.',
+      metadataKeywords: ['writing editor', 'autosave notes', 'version history editor', 'local-first editor', 'share image'],
+      eyebrow: 'Local-first writing workspace',
+      title: 'Write without wondering whether the text will still be there later.',
+      description:
+        'This editor keeps drafts, notes, and evolving copy in one local-first workspace with autosave, version history, and share-image export.',
+      primaryCardTitle: 'Open the editor',
+      primaryCardDescription:
+        'Start writing in plain text or Markdown, keep autosave running, and restore earlier versions when you need to.',
+      primaryCardCta: 'Open Editor',
+      primaryCardTags: ['Autosave', 'Version history', 'Local-first'],
+      secondaryCardTitle: 'Explore use cases',
+      secondaryCardDescription:
+        'See how the workflow fits article drafts, notes, social captions, campaign copy, and polished share images.',
+      secondaryCardCta: 'Use Cases',
+      detailCards: [
         {
-          title: 'Localized shell',
-          description: 'Route structure, language switching, and SEO primitives are already wired up.',
+          title: 'Version history',
+          description: 'Automatic snapshots and milestones give you clear restore points before and after major edits.',
         },
         {
-          title: 'Intentional UI base',
-          description: 'Theme support and a practical component layer stay available for future features.',
+          title: 'Local-first',
+          description: 'Your draft stays in this browser unless you explicitly export it.',
         },
         {
-          title: 'Worker-ready API',
-          description: 'The backend keeps Hono middleware, OpenAPI docs, and Cloudflare-friendly defaults.',
-        },
-        {
-          title: 'Minimal data example',
-          description: 'The editor route shows how to turn the starter shell into a real local-first product.',
+          title: 'Share image export',
+          description: 'Turn finished writing into a polished image without rebuilding the content somewhere else.',
         },
       ],
     },
@@ -243,6 +287,125 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         'Replace the sample editor copy and keep the reusable shell.',
         'Add auth, background jobs, or storage only when a product need exists.',
       ],
+    },
+    useCases: {
+      metadataTitle: 'A text editor where your writing does not get lost',
+      metadataDescription:
+        'Write drafts, notes, and social copy with autosave, version history, local-first protection, and share-image export.',
+      eyebrow: 'Local-first writing editor',
+      title: 'A text editor where your writing does not get lost',
+      description:
+        'Write drafts, notes, and social copy in one place. Autosave protects your latest changes, version history lets you roll back, and share-image export turns finished writing into a polished visual.',
+      primaryCta: 'Open the editor',
+      secondaryCta: 'See use cases',
+      proofItems: [
+        {
+          title: 'Autosave in the browser',
+          description: 'Your current draft is stored locally while you write.',
+        },
+        {
+          title: 'Recoverable version history',
+          description: 'Automatic snapshots and milestones help you restore earlier states.',
+        },
+        {
+          title: 'Share-image export',
+          description: 'Turn finished writing into a polished graphic without moving to another tool.',
+        },
+      ],
+      problemTitle: 'Built for writing that changes often',
+      problemDescription:
+        'Most text boxes are disposable. This editor is built for work that gets revised, rescued, and published without losing the writing itself.',
+      valueItems: [
+        {
+          title: 'Autosave without account friction',
+          description: 'You can start writing immediately and still keep the latest state on this device.',
+        },
+        {
+          title: 'Version history you can actually use',
+          description: 'Automatic snapshots and manual milestones give you a practical rollback path.',
+        },
+        {
+          title: 'Plain text and Markdown in one workspace',
+          description: 'Use simple text for speed or switch to Markdown when structure matters.',
+        },
+        {
+          title: 'From draft to share image',
+          description: 'When the wording is ready, export the same content as a polished share image.',
+        },
+      ],
+      useCasesTitle: 'Common use cases',
+      useCasesDescription: 'The workflow fits writing that moves through many revisions before it gets shared.',
+      useCaseItems: [
+        {
+          title: 'Draft articles and long-form writing',
+          description: 'Keep early versions, cut sections safely, and return to previous drafts when the structure changes.',
+        },
+        {
+          title: 'Organize notes and research',
+          description: 'Capture rough thinking first, then clean it up later without worrying about accidental loss.',
+        },
+        {
+          title: 'Iterate on social captions and campaign copy',
+          description: 'Try multiple versions, save milestones, and export the final wording as a visual asset.',
+        },
+        {
+          title: 'Track milestone revisions',
+          description: 'Save clear checkpoints before major rewrites so you can compare or restore them later.',
+        },
+        {
+          title: 'Export polished share images',
+          description: 'Turn selected content into a consistent visual output without rebuilding it in a design tool.',
+        },
+        {
+          title: 'Keep a reliable local writing workspace',
+          description: 'Use it as a durable drafting surface for writing that should stay close to you and easy to recover.',
+        },
+      ],
+      comparisonTitle: 'How it differs from ordinary editors',
+      comparisonDescription: 'This is not just another input field or a template-only image generator.',
+      comparisonItems: [
+        {
+          title: 'More durable than a basic text box',
+          description: 'Autosave and version recovery reduce the cost of mistakes, refreshes, and abandoned revisions.',
+        },
+        {
+          title: 'More focused than a general note app',
+          description: 'Plain text, Markdown, history, and export sit in one direct workflow instead of being spread across features.',
+        },
+        {
+          title: 'More practical than design-first tools',
+          description: 'You write first, refine the wording, and only then export a share image from the same source.',
+        },
+      ],
+      faqTitle: 'FAQ',
+      faqDescription: 'The core questions people usually ask before trusting a writing tool with real work.',
+      faqs: [
+        {
+          question: 'Does it save automatically?',
+          answer: 'Yes. The current draft is saved locally in your browser while you write.',
+        },
+        {
+          question: 'Can I restore an earlier version?',
+          answer: 'Yes. Version history keeps automatic snapshots and manual milestones that you can restore later.',
+        },
+        {
+          question: 'Do I need to upload my writing to a server?',
+          answer: 'No. The editor is local-first by default, so your draft stays in this browser unless you export it yourself.',
+        },
+        {
+          question: 'Does it support both Markdown and plain text?',
+          answer: 'Yes. You can switch between Markdown and plain text depending on how much structure you want.',
+        },
+        {
+          question: 'Can I export the final result as an image?',
+          answer: 'Yes. Once the writing is ready, you can export it as a share image.',
+        },
+      ],
+      ctaTitle: 'Write first. Decide how to share later.',
+      ctaDescription:
+        'Keep your draft safe while it evolves, then export it when the wording is ready for publishing or sharing.',
+      ctaPrimary: 'Start writing',
+      ctaSecondary: 'Jump to FAQ',
     },
     notes: {
       metadataTitle: 'Markdown Poster Editor',
@@ -361,53 +524,49 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
   },
   zh: {
     common: {
-      siteName: 'CF Monorepo Template',
+      siteName: 'MintyHub',
       siteTagline: '适合本地化全栈项目的通用 monorepo 模板。',
       siteDescription: '内置多语言 Next.js 前端和 Cloudflare Worker API 模板。',
       navHome: '首页',
+      navUseCases: '适用场景',
       navStarter: '模板说明',
       navNotes: '海报编辑器',
+      openEditor: '打开编辑器',
       themeLabel: '主题',
       themeLight: '浅色',
       themeDark: '深色',
       themeSystem: '跟随系统',
       languageLabel: '语言',
       mobileMenuOpenLabel: '打开导航菜单',
-      mobileMenuDescription: '浏览模板核心页面，并切换语言和主题。',
+      mobileMenuDescription: '打开编辑器、查看适用场景，并切换语言和主题。',
     },
     home: {
-      metadataTitle: 'CF Monorepo Template',
-      metadataDescription: '一个干净的 monorepo 模板，保留多语言、主题切换、Hono、OpenAPI 文档和 D1 示例接口。',
-      metadataKeywords: ['模板项目', 'next.js', 'cloudflare workers', 'hono', 'd1', 'monorepo'],
-      eyebrow: '本地化全栈模板',
-      title: '从干净的基础层开始，而不是以后再一点点剥离业务代码。',
-      description: '这个模板只保留真正有复用价值的部分：按 locale 的路由、多主题、通用 UI、Cloudflare Worker 部署、OpenAPI 文档，以及一个最小 D1 示例。',
-      primaryCta: '打开海报编辑器',
-      secondaryCta: '查看模板说明',
-      stackTitle: '模板保留内容',
-      stackDescription: '保留基础设施，移除产品特定流程。',
-      stackItems: [
-        '带 locale 前缀的 Next.js App Router',
-        '主题切换和可复用 UI primitives',
-        '带 OpenAPI JSON 与 Scalar 文档的 Hono API',
-        '本地优先的 Markdown 编辑器与海报导出',
-      ],
-      featureItems: [
+      metadataTitle: '文字不会轻易丢失的文本编辑器',
+      metadataDescription: '本地优先的文字编辑器，支持自动保存、历史版本、恢复和分享图导出。',
+      metadataKeywords: ['文本编辑器', '自动保存', '历史版本', '本地优先', '分享图'],
+      eyebrow: '本地优先写作空间',
+      title: '写字的时候，不用再担心内容会不会一转身就没了。',
+      description:
+        '这是一个面向持续写作的本地优先编辑器，适合草稿、笔记和反复修改的内容，自动保存、历史版本和分享图导出都在同一个界面里。',
+      primaryCardTitle: '打开编辑器',
+      primaryCardDescription: '支持纯文本和 Markdown，自动保存当前内容，并在需要时恢复到之前的版本。',
+      primaryCardCta: '进入编辑器',
+      primaryCardTags: ['自动保存', '历史版本', '本地优先'],
+      secondaryCardTitle: '查看适用场景',
+      secondaryCardDescription: '看看它如何用于文章草稿、笔记整理、社交文案迭代，以及最终导出分享图。',
+      secondaryCardCta: '适用场景',
+      detailCards: [
         {
-          title: '多语言壳层',
-          description: '路由结构、语言切换和 SEO 基础能力已经接好。',
+          title: '历史版本',
+          description: '自动快照和手动里程碑一起工作，方便你在大改前后随时恢复。',
         },
         {
-          title: '可继续扩展的 UI 基座',
-          description: '保留主题能力和组件层，后续可以直接叠加业务页面。',
+          title: '本地优先',
+          description: '除非你主动导出，否则内容默认只保存在当前浏览器里。',
         },
         {
-          title: '可部署的 Worker API',
-          description: '后端保留了 Hono 中间件、OpenAPI 文档和 Cloudflare 友好的默认配置。',
-        },
-        {
-          title: '最小数据闭环',
-          description: '编辑器路由展示了如何把模板壳层变成一个真正的本地优先产品。',
+          title: '分享图导出',
+          description: '内容写稳之后，直接从同一份文字生成风格化分享图。',
         },
       ],
     },
@@ -437,6 +596,122 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         '替换示例文案，并保留这套可复用的产品壳层。',
         '只有在产品确实需要时，再引入鉴权、后台任务或对象存储。',
       ],
+    },
+    useCases: {
+      metadataTitle: '文字不会轻易丢失的文本编辑器',
+      metadataDescription: '适合草稿、笔记和内容迭代的本地优先文本编辑器，支持自动保存、历史版本、回滚和分享图导出。',
+      eyebrow: '本地优先文本编辑器',
+      title: '文字不会轻易丢失的文本编辑器',
+      description:
+        '适合写草稿、整理笔记和反复修改内容。自动保存保住最新内容，历史版本支持回看和恢复，最后还能导出成分享图。',
+      primaryCta: '打开编辑器',
+      secondaryCta: '查看适用场景',
+      proofItems: [
+        {
+          title: '浏览器内自动保存',
+          description: '你写下的最新内容会持续保存在当前设备里。',
+        },
+        {
+          title: '可恢复的版本记录',
+          description: '自动快照和手动里程碑都可以回看，也可以直接恢复。',
+        },
+        {
+          title: '支持导出分享图',
+          description: '内容定稿后，可以直接导出成风格化图片，不用再搬去别的工具。',
+        },
+      ],
+      problemTitle: '适合会反复修改的写作流程',
+      problemDescription: '很多输入框只是一次性容器。这个编辑器更适合真正要反复修改、对比和恢复的写作过程。',
+      valueItems: [
+        {
+          title: '不用注册也能自动保存',
+          description: '打开就能写，同时保留当前设备上的最新状态。',
+        },
+        {
+          title: '真正可用的历史版本',
+          description: '自动快照和手动里程碑都能形成清晰的回滚路径。',
+        },
+        {
+          title: '纯文本和 Markdown 一体化',
+          description: '想快速起草就用纯文本，需要结构时再切到 Markdown。',
+        },
+        {
+          title: '从写作直接到分享图',
+          description: '内容成熟之后，直接用同一份文本生成分享图，不需要重复排版。',
+        },
+      ],
+      useCasesTitle: '常见使用场景',
+      useCasesDescription: '这套流程尤其适合要经历多轮修改、最后再输出的内容工作。',
+      useCaseItems: [
+        {
+          title: '写文章草稿和长文本',
+          description: '先搭结构，再反复调整段落，过程中保留关键版本，避免越改越乱。',
+        },
+        {
+          title: '整理笔记和研究摘要',
+          description: '先把想法记下来，后面再清洗重组，不必担心误删后找不回来。',
+        },
+        {
+          title: '迭代社交内容和文案',
+          description: '尝试多个版本，保留节点，最后把定稿内容导出为可直接分享的图片。',
+        },
+        {
+          title: '记录阶段性里程碑',
+          description: '大改之前先存一个版本，后续可以对比，也能一键恢复。',
+        },
+        {
+          title: '导出统一风格的分享图',
+          description: '把最终文本直接转成视觉输出，减少在设计工具里重复搬运内容。',
+        },
+        {
+          title: '作为稳定的本地写作空间',
+          description: '把它当成一个更可靠的写作界面，用来承接那些你不想轻易丢掉的文字。',
+        },
+      ],
+      comparisonTitle: '它和普通编辑器有什么不同',
+      comparisonDescription: '它不只是一个输入框，也不只是一个做图片的模板工具。',
+      comparisonItems: [
+        {
+          title: '比普通文本框更稳',
+          description: '自动保存和版本恢复降低了误操作、刷新或中断带来的损失。',
+        },
+        {
+          title: '比泛笔记工具更聚焦',
+          description: '纯文本、Markdown、版本记录和导出放在一条直接的写作链路里。',
+        },
+        {
+          title: '比设计优先工具更实用',
+          description: '先把文字写稳，再从同一份内容导出分享图，而不是反过来做排版。',
+        },
+      ],
+      faqTitle: '常见问题',
+      faqDescription: '在真正把写作交给这个工具之前，人们通常会先关心这些问题。',
+      faqs: [
+        {
+          question: '会自动保存吗？',
+          answer: '会。当前草稿会在你编辑时自动保存在浏览器本地。',
+        },
+        {
+          question: '可以恢复旧版本吗？',
+          answer: '可以。版本记录会保留自动快照和手动里程碑，后续都能恢复。',
+        },
+        {
+          question: '需要把内容上传到服务器吗？',
+          answer: '不需要。它默认是本地优先，除非你主动导出，否则内容只留在当前浏览器里。',
+        },
+        {
+          question: '支持 Markdown 和纯文本吗？',
+          answer: '支持。你可以根据写作阶段，自由切换 Markdown 和纯文本。',
+        },
+        {
+          question: '最后能导出成图片吗？',
+          answer: '可以。内容定稿之后，可以直接导出成分享图。',
+        },
+      ],
+      ctaTitle: '先把文字稳稳写下来，再决定怎么分享',
+      ctaDescription: '先保护内容本身，再处理排版和发布，这样整个写作过程会更轻、更稳。',
+      ctaPrimary: '开始写作',
+      ctaSecondary: '跳到常见问题',
     },
     notes: {
       metadataTitle: 'Markdown 海报编辑器',
@@ -555,53 +830,52 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
   },
   es: {
     common: {
-      siteName: 'CF Monorepo Template',
+      siteName: 'MintyHub',
       siteTagline: 'Monorepo reutilizable para aplicaciones full-stack con localización.',
       siteDescription: 'Plantilla con frontend Next.js localizado y API Worker de Cloudflare.',
       navHome: 'Inicio',
+      navUseCases: 'Casos de uso',
       navStarter: 'Guía',
       navNotes: 'Poster Editor',
+      openEditor: 'Abrir editor',
       themeLabel: 'Tema',
       themeLight: 'Claro',
       themeDark: 'Oscuro',
       themeSystem: 'Sistema',
       languageLabel: 'Idioma',
       mobileMenuOpenLabel: 'Abrir menú de navegación',
-      mobileMenuDescription: 'Explora las páginas base y cambia idioma o tema.',
+      mobileMenuDescription: 'Abre el editor, revisa los casos de uso y cambia idioma o tema.',
     },
     home: {
-      metadataTitle: 'CF Monorepo Template',
-      metadataDescription: 'Plantilla limpia con localización, cambio de tema, Hono, OpenAPI y rutas de ejemplo con D1.',
-      metadataKeywords: ['plantilla', 'next.js', 'cloudflare workers', 'hono', 'd1', 'monorepo'],
-      eyebrow: 'Starter full-stack localizado',
-      title: 'Empieza desde una base limpia en lugar de extraer lógica de negocio más tarde.',
-      description: 'La plantilla conserva solo lo útil para futuros proyectos: rutas por locale, cambio de tema, UI reutilizable, despliegue en Workers, documentación OpenAPI y un ejemplo mínimo con D1.',
-      primaryCta: 'Open Poster Editor',
-      secondaryCta: 'Leer la guía',
-      stackTitle: 'Qué permanece',
-      stackDescription: 'Se conserva la infraestructura y se elimina la lógica específica del producto.',
-      stackItems: [
-        'Next.js App Router con rutas por locale',
-        'Cambio de tema y componentes reutilizables',
-        'API Hono con OpenAPI JSON y docs de Scalar',
-        'A local-first Markdown editor with poster export',
-      ],
-      featureItems: [
+      metadataTitle: 'An editor where your writing does not get lost',
+      metadataDescription:
+        'Editor local-first with autosave, version history, restore, and share-image export.',
+      metadataKeywords: ['editor de texto', 'autoguardado', 'historial de versiones', 'local-first', 'imagen para compartir'],
+      eyebrow: 'Espacio de escritura local-first',
+      title: 'Escribe sin preguntarte si el texto seguirá ahí después.',
+      description:
+        'Un editor pensado para borradores, notas y texto en revisión, con autoguardado, historial de versiones y exportación a imagen en un mismo flujo.',
+      primaryCardTitle: 'Abrir el editor',
+      primaryCardDescription:
+        'Empieza en texto plano o Markdown, conserva el estado actual automáticamente y vuelve a versiones anteriores cuando haga falta.',
+      primaryCardCta: 'Abrir editor',
+      primaryCardTags: ['Autoguardado', 'Historial', 'Local-first'],
+      secondaryCardTitle: 'Ver casos de uso',
+      secondaryCardDescription:
+        'Descubre cómo encaja en borradores de artículos, notas, captions sociales y exportación visual.',
+      secondaryCardCta: 'Casos de uso',
+      detailCards: [
         {
-          title: 'Base localizada',
-          description: 'La estructura de rutas, el cambio de idioma y el SEO ya están conectados.',
+          title: 'Historial de versiones',
+          description: 'Snapshots automáticos y hitos manuales te permiten restaurar cambios con claridad.',
         },
         {
-          title: 'UI lista para crecer',
-          description: 'El soporte de tema y la capa de componentes siguen disponibles para nuevas funciones.',
+          title: 'Local-first',
+          description: 'El borrador permanece en este navegador salvo que decidas exportarlo.',
         },
         {
-          title: 'API lista para Workers',
-          description: 'El backend conserva middleware útil, documentación OpenAPI y defaults razonables.',
-        },
-        {
-          title: 'Ejemplo de datos mínimo',
-          description: 'The editor route shows how to turn the starter shell into a real local-first product.',
+          title: 'Exportación a imagen',
+          description: 'Convierte el texto final en una imagen pulida sin reconstruirlo en otra herramienta.',
         },
       ],
     },
@@ -631,6 +905,124 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         'Replace the sample copy and keep the reusable shell.',
         'Añade auth, jobs o storage solo cuando el producto lo necesite.',
       ],
+    },
+    useCases: {
+      metadataTitle: 'A writing editor where your text does not get lost',
+      metadataDescription:
+        'Local-first writing editor with autosave, version history, rollback, and share-image export for drafts, notes, and social copy.',
+      eyebrow: 'Editor local-first',
+      title: 'A writing editor where your text does not get lost',
+      description:
+        'Use it for drafts, notes, and evolving copy. Autosave protects the latest state, version history lets you restore changes, and image export helps you share the final result.',
+      primaryCta: 'Open editor',
+      secondaryCta: 'View use cases',
+      proofItems: [
+        {
+          title: 'Autosave in browser',
+          description: 'Your latest draft stays on this device while you write.',
+        },
+        {
+          title: 'Version history',
+          description: 'Automatic snapshots and milestones give you a reliable recovery path.',
+        },
+        {
+          title: 'Share-image export',
+          description: 'Export finished writing as an image without rebuilding it elsewhere.',
+        },
+      ],
+      problemTitle: 'Made for writing that keeps changing',
+      problemDescription:
+        'Instead of treating writing like disposable input, this editor is built for revision, recovery, and final output.',
+      valueItems: [
+        {
+          title: 'Autosave without friction',
+          description: 'Start writing immediately and keep the current state locally.',
+        },
+        {
+          title: 'Useful version recovery',
+          description: 'Save milestones, compare edits, and restore earlier versions when needed.',
+        },
+        {
+          title: 'Plain text and Markdown',
+          description: 'Draft quickly in plain text or switch to Markdown when structure matters.',
+        },
+        {
+          title: 'Write once, export later',
+          description: 'Turn the same writing into a polished share image when it is ready.',
+        },
+      ],
+      useCasesTitle: 'Common use cases',
+      useCasesDescription: 'Useful for writing workflows that move through many iterations before publishing.',
+      useCaseItems: [
+        {
+          title: 'Article drafts',
+          description: 'Keep stable checkpoints while long-form structure keeps changing.',
+        },
+        {
+          title: 'Notes and research',
+          description: 'Capture rough ideas first and clean them up later without losing them.',
+        },
+        {
+          title: 'Social captions and campaign copy',
+          description: 'Test variations, keep milestones, and export the final wording as an image.',
+        },
+        {
+          title: 'Milestone tracking',
+          description: 'Save important versions before major rewrites and restore them if needed.',
+        },
+        {
+          title: 'Share-image creation',
+          description: 'Generate visual output directly from finished text.',
+        },
+        {
+          title: 'Reliable local workspace',
+          description: 'Keep important writing close to you and easy to recover.',
+        },
+      ],
+      comparisonTitle: 'How it differs from ordinary tools',
+      comparisonDescription: 'It is not only a text field and not only an image template tool.',
+      comparisonItems: [
+        {
+          title: 'Safer than a basic editor',
+          description: 'Autosave and history reduce the damage from refreshes or mistakes.',
+        },
+        {
+          title: 'More focused than a broad note app',
+          description: 'Writing, history, and export stay in one direct workflow.',
+        },
+        {
+          title: 'More practical than design-first apps',
+          description: 'You finish the writing first, then export from the same source.',
+        },
+      ],
+      faqTitle: 'FAQ',
+      faqDescription: 'The main questions people ask before trusting a writing tool.',
+      faqs: [
+        {
+          question: 'Does it save automatically?',
+          answer: 'Yes. Your current draft is saved locally in the browser.',
+        },
+        {
+          question: 'Can I restore older versions?',
+          answer: 'Yes. Automatic snapshots and milestones can be restored later.',
+        },
+        {
+          question: 'Do I need to upload my text?',
+          answer: 'No. The editor is local-first unless you choose to export.',
+        },
+        {
+          question: 'Does it support Markdown and plain text?',
+          answer: 'Yes. You can switch between both modes.',
+        },
+        {
+          question: 'Can I export an image?',
+          answer: 'Yes. Final writing can be exported as a share image.',
+        },
+      ],
+      ctaTitle: 'Keep the writing safe first',
+      ctaDescription: 'Protect the text while it evolves, then decide how to publish or share it.',
+      ctaPrimary: 'Start writing',
+      ctaSecondary: 'Jump to FAQ',
     },
     notes: {
       metadataTitle: 'Markdown Poster Editor',
@@ -749,53 +1141,52 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
   },
   ja: {
     common: {
-      siteName: 'CF Monorepo Template',
+      siteName: 'MintyHub',
       siteTagline: '多言語対応のフルスタック開発向けに再利用できる monorepo テンプレートです。',
       siteDescription: '多言語 Next.js フロントエンドと Cloudflare Worker API を備えたテンプレートです。',
       navHome: 'ホーム',
+      navUseCases: '利用シーン',
       navStarter: 'ガイド',
       navNotes: 'Poster Editor',
+      openEditor: 'エディタを開く',
       themeLabel: 'テーマ',
       themeLight: 'ライト',
       themeDark: 'ダーク',
       themeSystem: 'システム',
       languageLabel: '言語',
       mobileMenuOpenLabel: 'ナビゲーションメニューを開く',
-      mobileMenuDescription: 'テンプレートの主要ページを確認し、言語とテーマを切り替えます。',
+      mobileMenuDescription: 'エディタを開き、利用シーンを確認し、言語とテーマを切り替えます。',
     },
     home: {
-      metadataTitle: 'CF Monorepo Template',
-      metadataDescription: 'ローカライズ、テーマ切替、Hono、OpenAPI、D1 例を備えたクリーンな monorepo テンプレートです。',
-      metadataKeywords: ['starter template', 'next.js', 'cloudflare workers', 'hono', 'd1', 'monorepo'],
-      eyebrow: '多言語フルスタック スターター',
-      title: 'あとで业务コードを削ぎ落とすのではなく、最初からクリーンな土台で始める。',
-      description: 'このテンプレートは、本当に再利用したい層だけを残します。locale 付きルーティング、テーマ切替、共通 UI、Workers へのデプロイ、OpenAPI ドキュメント、そして最小の D1 例です。',
-      primaryCta: 'Poster Editor を開く',
-      secondaryCta: 'ガイドを読む',
-      stackTitle: 'テンプレートに残すもの',
-      stackDescription: 'インフラ層だけを保持し、製品固有のワークフローは削除します。',
-      stackItems: [
-        'locale プレフィックス付きの Next.js App Router',
-        'テーマ切替と再利用可能な UI primitives',
-        'OpenAPI JSON と Scalar docs を備えた Hono API',
-        'ポスター画像を書き出せるローカルファーストの Markdown エディタ',
-      ],
-      featureItems: [
+      metadataTitle: '書いた内容が消えにくいテキストエディタ',
+      metadataDescription:
+        'ローカルファーストで、自動保存、履歴、復元、共有画像の書き出しに対応したテキストエディタです。',
+      metadataKeywords: ['テキストエディタ', '自動保存', '履歴', 'ローカルファースト', '共有画像'],
+      eyebrow: 'ローカルファーストの執筆環境',
+      title: '書いたあとで、内容が残っているかを気にしなくていい。',
+      description:
+        '下書き、メモ、推敲中の文章を 1 つの場所で扱えるエディタです。自動保存、履歴、共有画像への書き出しまでつながっています。',
+      primaryCardTitle: 'エディタを開く',
+      primaryCardDescription:
+        'プレーンテキストでも Markdown でも始められ、現在の状態は自動保存され、必要なら前の版へ戻れます。',
+      primaryCardCta: 'エディタを開く',
+      primaryCardTags: ['自動保存', '履歴', 'ローカルファースト'],
+      secondaryCardTitle: '利用シーンを見る',
+      secondaryCardDescription:
+        '記事の下書き、メモ、SNS 向けコピー、共有画像の書き出しまで、具体的な使い方を確認できます。',
+      secondaryCardCta: '利用シーン',
+      detailCards: [
         {
-          title: '多言語シェル',
-          description: 'ルーティング、言語切替、SEO の基本機能が最初から接続されています。',
+          title: '履歴管理',
+          description: '自動スナップショットと手動マイルストーンで、戻りたい地点を残せます。',
         },
         {
-          title: '拡張しやすい UI ベース',
-          description: 'テーマ機能とコンポーネント層をそのまま新しい機能に活かせます。',
+          title: 'ローカルファースト',
+          description: '書いた内容は、明示的に書き出すまでこのブラウザ内に残ります。',
         },
         {
-          title: 'Worker 向け API',
-          description: 'バックエンドには Hono ミドルウェア、OpenAPI ドキュメント、Cloudflare 向けの妥当な初期設定が残ります。',
-        },
-        {
-          title: '最小のデータ例',
-          description: 'エディタルートは、スターターのシェルをローカルファーストな実製品へ変える流れを示します。',
+          title: '共有画像',
+          description: '仕上がった文章を、別のツールへ移さずに画像として出力できます。',
         },
       ],
     },
@@ -825,6 +1216,124 @@ const MESSAGES: Record<Locale, LocaleMessages> = {
         'サンプル文言を置き換えつつ、再利用できるシェルを維持する。',
         '認証、バックグラウンド処理、ストレージは必要になってから追加する。',
       ],
+    },
+    useCases: {
+      metadataTitle: '書いた内容が消えにくいテキストエディタ',
+      metadataDescription:
+        '下書き、メモ、文章の推敲に向いたローカルファーストのエディタ。自動保存、履歴、復元、共有画像の書き出しに対応しています。',
+      eyebrow: 'ローカルファーストエディタ',
+      title: '書いた内容が消えにくいテキストエディタ',
+      description:
+        '下書き、メモ、SNS 用の文章を 1 か所で扱えます。自動保存で最新の状態を守り、履歴で過去の版に戻せて、仕上がったら共有画像として書き出せます。',
+      primaryCta: 'エディタを開く',
+      secondaryCta: '利用シーンを見る',
+      proofItems: [
+        {
+          title: 'ブラウザ内で自動保存',
+          description: '書いている内容はこの端末にローカル保存されます。',
+        },
+        {
+          title: '復元できる履歴',
+          description: '自動スナップショットと手動マイルストーンから以前の状態を戻せます。',
+        },
+        {
+          title: '共有画像として書き出し',
+          description: '完成した文章を別ツールなしで画像化できます。',
+        },
+      ],
+      problemTitle: '何度も書き直す作業に向いています',
+      problemDescription:
+        '使い捨ての入力欄ではなく、推敲、比較、復元まで含めた実務的なライティングの流れを前提にしています。',
+      valueItems: [
+        {
+          title: '登録なしでも自動保存',
+          description: 'すぐに書き始められて、最新状態はローカルに残ります。',
+        },
+        {
+          title: '実用的な版管理',
+          description: '自動保存と手動保存の両方で、戻りやすい編集履歴を作れます。',
+        },
+        {
+          title: 'プレーンテキストと Markdown',
+          description: '素早く下書きしたい時はプレーンテキスト、構造化したい時は Markdown を使えます。',
+        },
+        {
+          title: '書いてから共有画像へ',
+          description: '本文を固めたあと、同じ内容から共有画像を書き出せます。',
+        },
+      ],
+      useCasesTitle: '主な利用シーン',
+      useCasesDescription: '何度も修正しながら最後に共有するタイプの文章に向いています。',
+      useCaseItems: [
+        {
+          title: '記事の下書き',
+          description: '構成を変えながらも、重要な版を残しておけます。',
+        },
+        {
+          title: 'メモや調査ノート',
+          description: '粗いアイデアを先に残し、あとから整理できます。',
+        },
+        {
+          title: 'SNS 用キャプションやコピー',
+          description: '複数案を試し、最終版を画像として書き出せます。',
+        },
+        {
+          title: '節目ごとの保存',
+          description: '大きな修正前に版を固定し、必要ならすぐ戻せます。',
+        },
+        {
+          title: '共有画像の作成',
+          description: '仕上げた文章をそのまま視覚的なアウトプットに変えられます。',
+        },
+        {
+          title: '信頼できるローカル作業場',
+          description: '失いたくない文章を手元で扱いやすく保てます。',
+        },
+      ],
+      comparisonTitle: '一般的なツールとの違い',
+      comparisonDescription: '単なる入力欄でも、画像テンプレート専用ツールでもありません。',
+      comparisonItems: [
+        {
+          title: '普通の入力欄より安全',
+          description: '自動保存と履歴復元で、更新や操作ミスのダメージを減らせます。',
+        },
+        {
+          title: '汎用ノートアプリより集中しやすい',
+          description: '執筆、履歴、書き出しが 1 つの流れにまとまっています。',
+        },
+        {
+          title: 'デザイン先行ツールより実務的',
+          description: 'まず文章を固め、その後に同じ内容から画像を書き出します。',
+        },
+      ],
+      faqTitle: 'FAQ',
+      faqDescription: '実際に使い始める前によく確認される点をまとめています。',
+      faqs: [
+        {
+          question: '自動保存されますか？',
+          answer: 'はい。編集中の内容はブラウザ内に自動保存されます。',
+        },
+        {
+          question: '以前の版に戻せますか？',
+          answer: 'はい。自動スナップショットと手動マイルストーンを復元できます。',
+        },
+        {
+          question: '文章をサーバーにアップロードする必要はありますか？',
+          answer: 'いいえ。基本はローカルファーストで、書き出す時だけ外に出します。',
+        },
+        {
+          question: 'Markdown とプレーンテキストの両方に対応していますか？',
+          answer: 'はい。書き方に合わせて切り替えられます。',
+        },
+        {
+          question: '最終結果を画像として書き出せますか？',
+          answer: 'はい。完成した文章を共有画像として書き出せます。',
+        },
+      ],
+      ctaTitle: 'まずは文章を安全に書くことから',
+      ctaDescription: '内容が固まるまでは文章を守り、共有や公開はそのあとで決められます。',
+      ctaPrimary: '書き始める',
+      ctaSecondary: 'FAQ へ移動',
     },
     notes: {
       metadataTitle: 'Markdown Poster Editor',

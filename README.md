@@ -1,4 +1,4 @@
-# CF Monorepo Template
+# tools
 
 Cloudflare-oriented pnpm monorepo template for building a localized web app and a Worker API from the same codebase.
 

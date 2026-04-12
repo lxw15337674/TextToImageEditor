@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu } from 'lucide-react';
+import { ArrowUpRight, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -22,11 +22,10 @@ export function SiteHeader({ locale }: { locale: Locale }) {
   const pathname = usePathname();
   const messages = getMessages(locale).common;
   const barePath = stripLocalePrefix(pathname ?? '/');
-  const navItems = [
-    { href: withLocalePrefix('/', locale), label: messages.navHome, match: '/' },
-    { href: withLocalePrefix('/starter', locale), label: messages.navStarter, match: '/starter' },
-    { href: withLocalePrefix('/notes', locale), label: messages.navNotes, match: '/notes' },
-  ];
+  const useCasesHref = withLocalePrefix('/use-cases', locale);
+  const notesHref = withLocalePrefix('/notes', locale);
+  const isUseCasesActive = barePath.startsWith('/use-cases');
+  const isEditorActive = barePath.startsWith('/notes');
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur-xl">
@@ -39,20 +38,24 @@ export function SiteHeader({ locale }: { locale: Locale }) {
             {messages.siteName}
           </Link>
 
-          <nav className="hidden items-center gap-2 md:flex">
-            {navItems.map((item) => {
-              const isActive = item.match === '/' ? barePath === '/' : barePath.startsWith(item.match);
-              return (
-                <Button key={item.href} type="button" size="sm" variant={isActive ? 'default' : 'outline'} asChild>
-                  <Link href={item.href} className={cn(isActive ? 'pointer-events-none' : undefined)}>
-                    {item.label}
-                  </Link>
-                </Button>
-              );
-            })}
-          </nav>
+          <div className="hidden min-w-0 items-center gap-2 md:flex">
+            <Link href={withLocalePrefix('/', locale)} className="shrink-0 text-sm font-medium text-foreground">
+              {messages.siteName}
+            </Link>
+            <Button type="button" size="sm" variant={isEditorActive ? 'default' : 'outline'} asChild>
+              <Link href={notesHref} className={cn(isEditorActive ? 'pointer-events-none gap-2' : 'gap-2')}>
+                {messages.openEditor}
+                <ArrowUpRight className="size-4" />
+              </Link>
+            </Button>
+          </div>
 
           <div className="ml-auto hidden items-center gap-2 md:flex">
+            <Button type="button" size="sm" variant={isUseCasesActive ? 'default' : 'outline'} asChild>
+              <Link href={useCasesHref} className={cn(isUseCasesActive ? 'pointer-events-none' : undefined)}>
+                {messages.navUseCases}
+              </Link>
+            </Button>
             <LanguageSwitcher locale={locale} />
             <ModeToggle
               toggleLabel={messages.themeLabel}
@@ -76,22 +79,28 @@ export function SiteHeader({ locale }: { locale: Locale }) {
                   <SheetDescription>{messages.mobileMenuDescription}</SheetDescription>
                 </SheetHeader>
                 <div className="mt-6 flex flex-col gap-3">
-                  {navItems.map((item) => {
-                    const isActive = item.match === '/' ? barePath === '/' : barePath.startsWith(item.match);
-                    return (
-                      <Button
-                        key={item.href}
-                        type="button"
-                        variant={isActive ? 'default' : 'outline'}
-                        className="w-full justify-start"
-                        asChild
-                      >
-                        <Link href={item.href} className={cn(isActive ? 'pointer-events-none' : undefined)}>
-                          {item.label}
-                        </Link>
-                      </Button>
-                    );
-                  })}
+                  <Button
+                    type="button"
+                    variant={isEditorActive ? 'default' : 'outline'}
+                    className="w-full justify-start"
+                    asChild
+                  >
+                    <Link href={notesHref} className={cn(isEditorActive ? 'pointer-events-none gap-2' : 'gap-2')}>
+                      {messages.openEditor}
+                      <ArrowUpRight className="size-4" />
+                    </Link>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant={isUseCasesActive ? 'default' : 'outline'}
+                    className="w-full justify-start"
+                    asChild
+                  >
+                    <Link href={useCasesHref} className={cn(isUseCasesActive ? 'pointer-events-none' : undefined)}>
+                      {messages.navUseCases}
+                    </Link>
+                  </Button>
 
                   <div className="flex flex-col gap-3 rounded-lg border border-border/70 bg-background/70 px-3 py-3">
                     {LOCALES.length > 1 ? (

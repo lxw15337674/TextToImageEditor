@@ -3,7 +3,7 @@ import { hasLocale } from 'next-intl';
 import { getMessages } from '@/i18n/messages';
 import { routing } from '@/i18n/routing';
 
-export const alt = 'CF Monorepo Template social preview';
+export const alt = 'MintyHub social preview';
 export const size = {
   width: 1200,
   height: 630,

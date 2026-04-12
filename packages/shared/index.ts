@@ -1,5 +1,5 @@
 export const SCAFFOLD_INFO = Object.freeze({
-  name: 'CF Monorepo Template',
+  name: 'tools',
   version: '0.1.0',
 } as const)
 

@@ -902,8 +902,8 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                   mobilePane === 'preview' ? 'hidden xl:flex' : 'flex',
                 )}
               >
-                <div className="sticky top-0 z-20 flex flex-wrap items-start justify-between gap-3 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:h-14 xl:flex-nowrap xl:items-center xl:rounded-tl-[calc(var(--radius)-1px)] xl:px-5 xl:py-0">
-                  <div className="flex min-w-0 items-center gap-3">
+                <div className="sticky top-0 z-20 flex flex-col gap-3 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:h-14 xl:flex-row xl:items-center xl:justify-between xl:gap-4 xl:rounded-tl-[calc(var(--radius)-1px)] xl:px-5 xl:py-0">
+                  <div className="flex min-w-0 items-center justify-between gap-3">
                     <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50">{messages.editorCardTitle}</span>
                     <div className="flex items-center cursor-help" title={getSaveStatusLabel(saveStatus, messages)}>
                       <div
@@ -919,8 +919,8 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                     </div>
                   </div>
 
-                  <div className="flex w-full flex-wrap items-center gap-2 xl:w-auto xl:flex-nowrap">
-                    <div className="mr-0 flex items-center rounded-lg bg-muted/40 p-1 xl:mr-1">
+                  <div className="flex w-full flex-col gap-2 xl:w-auto xl:flex-row xl:flex-nowrap xl:items-center">
+                    <div className="flex items-center rounded-xl border border-border/60 bg-muted/30 p-1 xl:mr-1 xl:rounded-lg xl:border-0 xl:bg-muted/40">
                       <button
                         type="button"
                         className={cn(
@@ -945,11 +945,11 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                       </button>
                     </div>
 
-                    <div className="flex flex-1 flex-wrap items-center gap-1 sm:flex-nowrap xl:flex-none">
+                    <div className="flex min-w-0 items-center gap-1 overflow-x-auto pb-1 xl:flex-none xl:overflow-visible xl:pb-0">
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="h-9 gap-2 px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3" 
+                        className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent" 
                         onClick={handleUndo} 
                         disabled={!canUndo || isBusy}
                       >
@@ -959,7 +959,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                       <Button 
                         variant="ghost" 
                         size="sm"
-                        className="h-9 gap-2 px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3" 
+                        className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent" 
                         onClick={handleRedo} 
                         disabled={!canRedo || isBusy}
                       >
@@ -967,13 +967,13 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                         <span className="hidden lg:inline">{messages.redo}</span>
                       </Button>
 
-                      <Separator orientation="vertical" className="mx-1 h-5 opacity-20" />
+                      <Separator orientation="vertical" className="mx-1 hidden h-5 opacity-20 sm:block" />
 
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-9 gap-2 px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3"
+                        className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent"
                         onClick={() => setIsHistoryOpen(true)}
                         disabled={isBusy}
                       >
@@ -986,7 +986,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-9 gap-2 px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3"
+                            className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent"
                             disabled={isBusy}
                           >
                             {isBusy ? (
@@ -1024,7 +1024,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                   </div>
                 </div>
 
-                <div className="markdown-editor min-h-[52svh] flex-1 overflow-y-auto xl:min-h-0">
+                <div className="markdown-editor h-[calc(100svh-15rem)] min-h-[24rem] max-h-[72svh] flex-1 overflow-y-auto xl:h-auto xl:min-h-0 xl:max-h-none">
                   <CodeMirror
                     value={documentState.content}
                     theme={resolvedTheme === 'dark' ? oneDark : 'light'}
@@ -1056,8 +1056,8 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                   mobilePane === 'editor' ? 'hidden xl:flex' : 'flex',
                 )}
               >
-                <div className="sticky top-0 z-20 flex flex-wrap items-start justify-between gap-3 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:h-14 xl:flex-nowrap xl:items-center xl:rounded-tr-[calc(var(--radius)-1px)] xl:px-5 xl:py-0">
-                  <div className="flex min-w-0 items-center gap-3">
+                <div className="sticky top-0 z-20 flex flex-col gap-3 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:h-14 xl:flex-row xl:items-center xl:justify-between xl:gap-4 xl:rounded-tr-[calc(var(--radius)-1px)] xl:px-5 xl:py-0">
+                  <div className="flex min-w-0 items-center justify-between gap-3">
                     <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50">{messages.previewCardTitle}</span>
                     <span className="truncate text-sm font-semibold tabular-nums text-muted-foreground/60">
                       {dimensions.width}×{effectivePreviewHeight}
@@ -1069,7 +1069,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                       type="button" 
                       variant="ghost" 
                       size="sm"
-                        className="h-10 flex-1 gap-2 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:flex-none" 
+                        className="h-10 flex-1 gap-2 rounded-xl border border-border/60 bg-muted/20 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:flex-none sm:rounded-md sm:border-transparent sm:bg-transparent" 
                       disabled={isBusy} 
                       onClick={() => void exportPosterImage(true)}
                     >
@@ -1083,7 +1083,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           type="button" 
                           variant="ghost"
                           size="sm"
-                            className="h-10 flex-1 gap-2 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:flex-none" 
+                            className="h-10 flex-1 gap-2 rounded-xl border border-border/60 bg-muted/20 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:flex-none sm:rounded-md sm:border-transparent sm:bg-transparent" 
                           disabled={isBusy}
                         >
                             {isBusy ? <LoaderCircle className="size-[18px] animate-spin" /> : <Download className="size-[18px]" />}
@@ -1107,8 +1107,8 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                 </div>
 
                 <div className="border-b border-border/60 bg-muted/5">
-                  <div className="grid gap-4 px-3 py-4 sm:px-4 xl:grid-cols-2 xl:gap-x-8 xl:gap-y-5 xl:px-5 xl:py-5">
-                    <div className="space-y-1.5">
+                  <div className="grid gap-3 px-3 py-4 sm:px-4 xl:grid-cols-2 xl:gap-x-8 xl:gap-y-5 xl:px-5 xl:py-5">
+                    <div className="space-y-2 rounded-2xl border border-border/60 bg-background/50 p-3 xl:rounded-none xl:border-0 xl:bg-transparent xl:p-0">
                       <label className="text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground/80">{messages.exportTemplateLabel}</label>
                       <TemplateSelector
                         options={templateOptions}
@@ -1121,7 +1121,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                       />
                     </div>
 
-                    <div className="space-y-1.5">
+                    <div className="space-y-2 rounded-2xl border border-border/60 bg-background/50 p-3 xl:rounded-none xl:border-0 xl:bg-transparent xl:p-0">
                       <label className="text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground/80">{messages.fontSizeLabel}</label>
                       <Select value={documentState.fontSizePreset} onValueChange={(value) => handleDocumentChange('fontSizePreset', value as PosterFontSize)}>
                         <SelectTrigger className="h-11 rounded-lg border-border/60 bg-background/50 text-sm">
@@ -1137,14 +1137,14 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                   </div>
                 </div>
 
-                <div className="bg-background/30">
-                  <div className="flex flex-col gap-0">
-                    <div className="w-full border-b border-border/60 bg-background/70 shadow-sm">
+                <div className="bg-background/30 px-3 py-4 sm:px-4 xl:px-0 xl:py-0">
+                  <div className="flex flex-col gap-0 overflow-hidden rounded-[1.25rem] border border-border/60 bg-background/70 shadow-sm xl:rounded-none xl:border-x-0 xl:border-b-0 xl:border-t-0 xl:bg-transparent xl:shadow-none">
+                    <div className="w-full border-b border-border/60 bg-background/80 shadow-sm xl:bg-background/70">
                       <div className="flex items-center justify-between gap-3 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
                         <span>{messages.exportPreviewLabel}</span>
                       </div>
 
-                      <div className="overflow-auto bg-muted/30">
+                      <div className="overflow-auto bg-muted/20 px-3 py-3 sm:px-4 sm:py-4 xl:bg-muted/30 xl:px-0 xl:py-0">
                         {previewZoomUrl ? (
                           <Zoom
                             a11yNameButtonUnzoom={messages.previewZoomCloseLabel}
@@ -1155,7 +1155,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               alt={messages.exportPreviewLabel}
-                              className="mx-auto block h-auto w-full cursor-zoom-in shadow-lg"
+                              className="mx-auto block h-auto w-full cursor-zoom-in rounded-[1.1rem] shadow-lg xl:rounded-none"
                               draggable={false}
                               src={previewZoomUrl}
                               style={{
@@ -1193,14 +1193,14 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
 
       <Sheet open={isHistoryOpen} onOpenChange={handleHistoryOpenChange}>
         <SheetContent side="right" className="flex h-full w-full max-w-none flex-col border-l border-border/70 bg-background p-0 sm:max-w-xl">
-          <SheetHeader className="border-b border-border/60 px-5 py-4">
+          <SheetHeader className="sticky top-0 z-10 border-b border-border/60 bg-background/95 px-4 py-4 backdrop-blur-md sm:px-5">
             <SheetTitle className="text-base font-semibold">{messages.historyTitle}</SheetTitle>
             <SheetDescription className="text-xs leading-5 text-muted-foreground">{messages.historyDescription}</SheetDescription>
           </SheetHeader>
 
           <div className="flex min-h-0 flex-1 flex-col">
             <ScrollArea className="min-h-0 flex-1">
-              <div className="space-y-2 p-4">
+              <div className="space-y-2 p-3 sm:p-4">
                 {versions.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border/70 px-4 py-8 text-sm text-muted-foreground">
                     {messages.emptyHistory}
@@ -1249,9 +1249,8 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
               </div>
             </ScrollArea>
 
-            <Separator />
-
-            <div className="space-y-3 p-4">
+            <div className="sticky bottom-0 border-t border-border/60 bg-background/95 p-3 backdrop-blur-md sm:p-4">
+              <div className="space-y-3">
               {selectedVersion ? (
                 <>
                   <div className="rounded-lg border border-border/70 bg-background/70 px-3 py-2">
@@ -1320,6 +1319,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
               ) : (
                 <div className="text-xs text-muted-foreground">{messages.emptyHistory}</div>
               )}
+              </div>
             </div>
           </div>
         </SheetContent>

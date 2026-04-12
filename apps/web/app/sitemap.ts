@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { LOCALES } from '@/i18n/config';
 import { toAbsoluteUrl } from '@/lib/seo/site-origin';
 
-const INDEXABLE_LOCALIZED_PATHS = ['/', '/starter', '/notes'];
+const INDEXABLE_LOCALIZED_PATHS = ['/', '/starter', '/notes', '/use-cases'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
