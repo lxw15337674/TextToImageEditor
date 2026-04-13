@@ -1160,7 +1160,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
 
               <div
                 className={cn(
-                  'flex flex-col overflow-visible xl:min-h-0 xl:overflow-y-auto',
+                  'flex flex-col overflow-visible xl:min-h-0',
                   mobilePane === 'editor' ? 'hidden xl:flex' : 'flex',
                 )}
               >
@@ -1169,9 +1169,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                     <div className="flex items-center justify-between gap-2 pb-1 sm:pb-0">
                       <div className="flex items-center gap-3 min-w-0">
                         <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50 shrink-0">{messages.previewCardTitle}</span>
-                        <span className="truncate text-sm font-semibold tabular-nums text-muted-foreground/60 hidden sm:inline-block">
-                          {dimensions.width}×{effectivePreviewHeight}
-                        </span>
                       </div>
 
                       <div className="flex items-center justify-end gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden sm:pb-0">
@@ -1257,39 +1254,37 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           </div>
                         </div>
                       </div>
-
-                      <span className="truncate text-sm font-semibold tabular-nums text-muted-foreground/60 sm:hidden pr-1">
-                        {dimensions.width}×{effectivePreviewHeight}
-                      </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-background/30 px-3 py-4 sm:px-4 xl:px-0 xl:py-0">
-                  <div className="flex flex-col gap-0 overflow-hidden rounded-[1.25rem] border border-border/60 bg-background/70 shadow-sm xl:rounded-none xl:border-x-0 xl:border-b-0 xl:border-t-0 xl:bg-transparent xl:shadow-none">
-                    <div className="w-full shadow-sm">
-                      <div className="overflow-auto bg-muted/20 px-3 py-3 sm:px-4 sm:py-4 xl:bg-muted/30 xl:px-0 xl:py-0">
+                <div className="bg-background/30 px-3 py-4 sm:px-4 xl:flex-1 xl:flex xl:flex-col xl:px-0 xl:py-0">
+                  <div className="flex flex-col gap-0 overflow-hidden rounded-[1.25rem] border border-border/60 bg-background/70 shadow-sm xl:flex-1 xl:rounded-none xl:border-x-0 xl:border-b-0 xl:border-t-0 xl:bg-transparent xl:shadow-none">
+                    <div className="w-full shadow-sm xl:flex-1 xl:flex xl:flex-col">
+                      <div className="overflow-auto bg-muted/20 px-3 py-3 sm:px-4 sm:py-4 xl:flex-1 xl:flex xl:flex-col xl:bg-muted/30 xl:p-8">
                         {previewZoomUrl ? (
-                          <Zoom
-                            a11yNameButtonUnzoom={messages.previewZoomCloseLabel}
-                            a11yNameButtonZoom={messages.previewZoomOpenLabel}
-                            classDialog="poster-preview-zoom-dialog"
-                            zoomMargin={24}
+                          <div 
+                            className="mx-auto w-full xl:m-auto shrink-0" 
+                            style={{ maxWidth: dimensions.width * posterPreviewScale }}
                           >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              alt={messages.exportPreviewLabel}
-                              className="mx-auto block h-auto w-full cursor-zoom-in rounded-[1.1rem] shadow-lg xl:rounded-none"
-                              draggable={false}
-                              src={previewZoomUrl}
-                              style={{
-                                maxWidth: dimensions.width * posterPreviewScale,
-                              }}
-                            />
-                          </Zoom>
+                            <Zoom
+                              a11yNameButtonUnzoom={messages.previewZoomCloseLabel}
+                              a11yNameButtonZoom={messages.previewZoomOpenLabel}
+                              classDialog="poster-preview-zoom-dialog"
+                              zoomMargin={24}
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                alt={messages.exportPreviewLabel}
+                                className="mx-auto block h-auto w-full cursor-zoom-in rounded-[1.1rem] shadow-lg xl:rounded-none"
+                                draggable={false}
+                                src={previewZoomUrl}
+                              />
+                            </Zoom>
+                          </div>
                         ) : isDocumentReady ? (
                           <div
-                            className="mx-auto flex items-center justify-center text-sm text-muted-foreground"
+                            className="mx-auto flex items-center justify-center text-sm text-muted-foreground xl:m-auto shrink-0"
                             style={{
                               width: '100%',
                               maxWidth: dimensions.width * posterPreviewScale,
@@ -1300,7 +1295,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           </div>
                         ) : (
                           <div
-                            className="mx-auto overflow-hidden rounded-[1.1rem] border border-border/60 bg-background/80 shadow-lg xl:rounded-none"
+                            className="mx-auto overflow-hidden rounded-[1.1rem] border border-border/60 bg-background/80 shadow-lg xl:m-auto xl:rounded-none shrink-0"
                             style={{
                               width: '100%',
                               maxWidth: dimensions.width * posterPreviewScale,
