@@ -3,6 +3,7 @@
 import { ArrowUpRight, LayoutGrid, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { ModeToggle } from '@/components/ModeToggle';
 import { Button } from '@/components/ui/button';
@@ -222,8 +223,14 @@ function HeaderMobileNavigation({
 
 export function SiteHeader({ locale }: { locale: Locale }) {
   const pathname = usePathname();
+  const [isHydrated, setIsHydrated] = useState(false);
   const messages = getMessages(locale).common;
-  const barePath = stripLocalePrefix(pathname ?? '/');
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const barePath = isHydrated ? stripLocalePrefix(pathname ?? window.location.pathname) : '/';
   const headerConfig = getSiteHeaderConfig(locale, barePath);
 
   return (

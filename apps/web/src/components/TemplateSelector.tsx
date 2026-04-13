@@ -2,6 +2,7 @@
 
 import { FilterCombobox } from '@/components/ui/filter-combobox';
 import type { ExportTemplate } from '@/lib/editor/types';
+import { cn } from '@/lib/utils';
 
 export interface TemplateSelectorOption {
   value: ExportTemplate;
@@ -18,6 +19,7 @@ interface TemplateSelectorProps {
   emptyText: string;
   clearLabel?: string;
   disabled?: boolean;
+  className?: string;
   onValueChange: (value: ExportTemplate) => void;
 }
 
@@ -37,6 +39,7 @@ export function TemplateSelector({
   emptyText,
   clearLabel,
   disabled = false,
+  className,
   onValueChange,
 }: TemplateSelectorProps) {
   const comboboxOptions = options.map((option) => ({
@@ -53,7 +56,7 @@ export function TemplateSelector({
       emptyText={emptyText}
       clearLabel={clearLabel}
       disabled={disabled}
-      inputClassName="h-11 rounded-lg border-border/60 bg-background/50 text-sm"
+      inputClassName={cn("h-11 rounded-lg border-border/60 bg-background/50 text-sm", className)}
       contentClassName="rounded-lg border-border/60 bg-popover/95 backdrop-blur-md shadow-xl"
       listClassName="max-h-72"
       itemClassName="rounded-md px-3 py-2 text-sm"

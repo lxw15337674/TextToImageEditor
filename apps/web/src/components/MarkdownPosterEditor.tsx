@@ -8,7 +8,24 @@ import { EditorView, keymap } from '@codemirror/view';
 import dynamic from 'next/dynamic';
 import { useTheme } from 'next-themes';
 import { startTransition, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
-import { Download, FolderOpen, History, Import, LoaderCircle, Redo2, RotateCcw, Share2, Undo2 } from 'lucide-react';
+import {
+  BookmarkPlus,
+  CodeXml,
+  Download,
+  Eraser,
+  FileImage,
+  FileUp,
+  History,
+  Image,
+  ImageUp,
+  Import,
+  LoaderCircle,
+  Pencil,
+  Redo2,
+  RotateCcw,
+  Trash2,
+  Undo2,
+} from 'lucide-react';
 import Zoom from 'react-medium-image-zoom';
 import { toast } from 'sonner';
 import {
@@ -22,21 +39,19 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { TemplateSelector, type TemplateSelectorOption } from '@/components/TemplateSelector';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Skeleton } from '@/components/ui/skeleton';
 import { AppPageContainer, WorkspaceSurface } from '@/components/app-page-shell';
 import {
   buildMarkdownExport,
@@ -62,6 +77,7 @@ import {
 import {
   createDefaultDocument,
   createVersionFromDocument,
+  deleteAllVersions,
   deleteVersion,
   duplicateVersionAsMilestone,
   EDITOR_DOCUMENT_ID,
@@ -81,10 +97,18 @@ const CodeMirror = dynamic(() => import('@uiw/react-codemirror'), {
 });
 
 type MobilePane = 'editor' | 'preview';
+type PreviewRenderInput = {
+  content: string;
+  contentFormat: ContentFormat;
+  fontSizePreset: PosterFontSize;
+  template: NonNullable<EditorDocument['exportTemplate']>;
+};
 
 const DOCUMENT_AUTOSAVE_IDLE_MS = 1_000;
 const AUTO_SNAPSHOT_IDLE_MS = 120_000;
 const AUTO_SNAPSHOT_ACTIVE_INTERVAL_MS = 600_000;
+const PREVIEW_INPUT_DEBOUNCE_MS = 600;
+const PREVIEW_CONFIG_DEBOUNCE_MS = 200;
 
 const VERSION_KIND_STYLES: Record<VersionKind, string> = {
   auto: 'border-sky-500/30 bg-sky-500/10 text-sky-200',
@@ -92,6 +116,16 @@ const VERSION_KIND_STYLES: Record<VersionKind, string> = {
   'import-backup': 'border-amber-500/30 bg-amber-500/10 text-amber-100',
   'rollback-backup': 'border-fuchsia-500/30 bg-fuchsia-500/10 text-fuchsia-100',
   'reset-backup': 'border-rose-500/30 bg-rose-500/10 text-rose-100',
+};
+
+const SHELL_FALLBACK_DOCUMENT: EditorDocument = {
+  id: EDITOR_DOCUMENT_ID,
+  content: '',
+  contentFormat: 'plain',
+  exportTemplate: 'xiaohongshu-light',
+  fontSizePreset: 'medium',
+  updatedAt: 0,
+  lastSavedAt: 0,
 };
 
 function getVersionKindLabel(kind: VersionKind, messages: ReturnType<typeof getMessages>['notes']) {
@@ -173,6 +207,8 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   const lastVersionSignatureRef = useRef('');
   const lastAutoSnapshotAtRef = useRef(0);
   const latestDocumentSignatureRef = useRef('');
+  const previewRequestIdRef = useRef(0);
+  const lastPreviewSourceRef = useRef<PreviewRenderInput | null>(null);
 
   const [documentState, setDocumentState] = useState<EditorDocument | null>(null);
   const [versions, setVersions] = useState<EditorVersion[]>([]);
@@ -190,6 +226,8 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
   const [previewHeight, setPreviewHeight] = useState<number | null>(null);
   const [previewZoomUrl, setPreviewZoomUrl] = useState<string | null>(null);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [isClearHistoryDialogOpen, setIsClearHistoryDialogOpen] = useState(false);
+  const [previewRenderInput, setPreviewRenderInput] = useState<PreviewRenderInput | null>(null);
 
   const previewContent = useDeferredValue(documentState?.content ?? '');
   const previewTemplate = documentState?.exportTemplate;
@@ -270,20 +308,50 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
 
   useEffect(() => {
     if (!previewTemplate) {
+      setPreviewRenderInput(null);
+      return;
+    }
+
+    const nextPreviewInput: PreviewRenderInput = {
+      content: previewContent,
+      contentFormat,
+      fontSizePreset: previewFontSizePreset,
+      template: previewTemplate,
+    };
+    const previousPreviewInput = lastPreviewSourceRef.current;
+    const contentChanged = previousPreviewInput ? previousPreviewInput.content !== nextPreviewInput.content : false;
+    const delay = contentChanged ? PREVIEW_INPUT_DEBOUNCE_MS : PREVIEW_CONFIG_DEBOUNCE_MS;
+
+    lastPreviewSourceRef.current = nextPreviewInput;
+
+    const timeout = window.setTimeout(() => {
+      setPreviewRenderInput(nextPreviewInput);
+    }, delay);
+
+    return () => {
+      window.clearTimeout(timeout);
+    };
+  }, [previewContent, contentFormat, previewFontSizePreset, previewTemplate]);
+
+  useEffect(() => {
+    if (!previewRenderInput) {
       return;
     }
 
     let active = true;
-    const timeout = window.setTimeout(async () => {
+    const requestId = ++previewRequestIdRef.current;
+    const currentPreviewInput = previewRenderInput;
+
+    async function renderPreview() {
       try {
         const layout = await resolvePosterPreviewLayout(
-          previewContent,
-          contentFormat,
-          previewTemplate,
-          previewFontSizePreset,
+          currentPreviewInput.content,
+          currentPreviewInput.contentFormat,
+          currentPreviewInput.template,
+          currentPreviewInput.fontSizePreset,
         );
 
-        if (!active) {
+        if (!active || requestId !== previewRequestIdRef.current) {
           return;
         }
 
@@ -291,17 +359,17 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
         setIsPosterOverflowing(layout.isClipped);
 
         const blob = await renderPosterBlob(
-          previewContent,
-          contentFormat,
-          previewTemplate,
-          previewFontSizePreset,
+          currentPreviewInput.content,
+          currentPreviewInput.contentFormat,
+          currentPreviewInput.template,
+          currentPreviewInput.fontSizePreset,
           1,
           1,
           layout.height,
         );
         const nextUrl = URL.createObjectURL(blob);
 
-        if (!active) {
+        if (!active || requestId !== previewRequestIdRef.current) {
           URL.revokeObjectURL(nextUrl);
           return;
         }
@@ -314,22 +382,18 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
           URL.revokeObjectURL(previousUrl);
         }
       } catch (error) {
-        if (active) {
+        if (active && requestId === previewRequestIdRef.current) {
           console.error(error);
         }
       }
-    }, 200);
+    }
+
+    void renderPreview();
 
     return () => {
       active = false;
-      window.clearTimeout(timeout);
     };
-  }, [
-    previewContent,
-    contentFormat,
-    previewFontSizePreset,
-    previewTemplate,
-  ]);
+  }, [previewRenderInput]);
 
   useEffect(() => {
     if (!documentState || !isHydrated) {
@@ -535,22 +599,6 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     syncHistoryDepth(editorViewRef.current);
   }
 
-  async function handleCreateMilestone() {
-    if (!documentState) {
-      return;
-    }
-
-    try {
-      await createVersionFromDocument(documentState, 'milestone', createManualMilestoneLabel(messages.milestoneLabelPrefix, locale));
-      lastVersionSignatureRef.current = createSnapshotSignature(documentState);
-      await refreshVersions();
-      toast.success(messages.milestoneSaved);
-    } catch (error) {
-      console.error(error);
-      toast.error(messages.versionError);
-    }
-  }
-
   async function handleImportFile(event: React.ChangeEvent<HTMLInputElement>) {
     const selectedFile = event.target.files?.[0];
 
@@ -729,6 +777,31 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     }
   }
 
+  async function handleClearHistory() {
+    if (!documentState) {
+      return;
+    }
+
+    setIsBusy(true);
+
+    try {
+      await deleteAllVersions(documentState.id);
+      setVersions([]);
+      setSelectedVersionId(null);
+      setEditingLabelId(null);
+      setEditingLabelValue('');
+      lastVersionSignatureRef.current = createSnapshotSignature(documentState);
+      lastAutoSnapshotAtRef.current = 0;
+      setIsClearHistoryDialogOpen(false);
+      toast.success(messages.clearHistorySuccess);
+    } catch (error) {
+      console.error(error);
+      toast.error(messages.clearHistoryError);
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
   async function exportPosterImage(shareInsteadOfDownload: boolean) {
     if (!documentState) {
       return;
@@ -823,23 +896,12 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     }
   }
 
-  if (!documentState) {
-    return (
-      <AppPageContainer variant="workspace" width="content">
-        <Card className="w-full border-border/70">
-          <CardContent className="flex min-h-[16rem] items-center justify-center gap-3 p-6 text-muted-foreground">
-            <LoaderCircle className="size-5 animate-spin" />
-            <span>{messages.loadingDocument}</span>
-          </CardContent>
-        </Card>
-      </AppPageContainer>
-    );
-  }
-
   const dimensions = POSTER_DIMENSIONS;
   const effectivePreviewHeight = previewHeight ?? dimensions.height;
   const posterPreviewScale = Math.min(1, 420 / dimensions.width);
   const selectedVersion = versions.find((version) => version.id === selectedVersionId) ?? null;
+  const isDocumentReady = documentState !== null;
+  const currentDocument = documentState ?? SHELL_FALLBACK_DOCUMENT;
   const templateOptions: TemplateSelectorOption[] = [
     { value: 'calendar-essay-light', label: `${messages.templateCalendarEssay} · ${messages.exportThemeLight}`, aliases: ['calendar essay', 'chronicle'] },
     { value: 'calendar-essay-dark', label: `${messages.templateCalendarEssay} · ${messages.exportThemeDark}`, aliases: ['calendar essay', 'chronicle'] },
@@ -906,151 +968,193 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                   mobilePane === 'preview' ? 'hidden xl:flex' : 'flex',
                 )}
               >
-                <div className="sticky top-0 z-20 flex flex-col gap-3 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:h-14 xl:flex-row xl:items-center xl:justify-between xl:gap-4 xl:rounded-tl-[calc(var(--radius)-1px)] xl:px-5 xl:py-0">
-                  <div className="flex min-w-0 items-center justify-start gap-2 max-w-full overflow-x-auto [&::-webkit-scrollbar]:hidden pb-1 sm:pb-0">
-                    <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50 shrink-0 mr-2">{messages.editorCardTitle}</span>
-                      <Separator orientation="vertical" className="mx-1 hidden h-5 opacity-20 sm:block" />
-
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent"
-                        onClick={() => setIsHistoryOpen(true)}
-                        disabled={isBusy}
-                      >
-                        <History className="size-[18px]" data-icon="inline-start" />
-                        <span className="hidden lg:inline">{messages.history}</span>
-                      </Button>
-
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent"
-                            disabled={isBusy}
-                          >
-                            {isBusy ? (
-                              <LoaderCircle className="size-[18px] animate-spin" data-icon="inline-start" />
-                            ) : (
-                              <FolderOpen className="size-[18px]" data-icon="inline-start" />
-                            )}
-                            <span className="hidden lg:inline">{messages.fileMenu}</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-56 p-2">
-                          <DropdownMenuLabel className="px-3 py-2 text-sm uppercase tracking-[0.12em] opacity-60">{messages.fileMenu}</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => void handleCreateMilestone()} className="gap-2.5 px-3 py-2.5 text-sm">
-                            <RotateCcw className="size-[18px] opacity-70" /> {messages.saveMilestone}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 text-sm">
-                            <Import className="size-[18px] opacity-70" /> {messages.importFile}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={handleExportMarkdown} className="gap-2.5 px-3 py-2.5 text-sm">
-                            <Download className="size-[18px] opacity-70" /> {messages.exportMarkdown}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={handleExportPlainText} className="gap-2.5 px-3 py-2.5 text-sm">
+                <div className="sticky top-0 z-20 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:rounded-tl-[calc(var(--radius)-1px)] xl:px-5">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-2 pb-1 sm:pb-0">
+                      <div className="flex min-w-0 items-center gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent"
+                              disabled={isBusy || !isDocumentReady}
+                            >
+                              {isBusy ? (
+                                <LoaderCircle className="size-[18px] animate-spin" data-icon="inline-start" />
+                              ) : (
+                                <FileUp className="size-[18px]" data-icon="inline-start" />
+                              )}
+                              <span className="hidden lg:inline">{messages.importButton}</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="start" className="w-56 p-2">
+                            <DropdownMenuLabel className="px-3 py-2 text-sm uppercase tracking-[0.12em] opacity-60">{messages.importButton}</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => fileInputRef.current?.click()} className="gap-2.5 px-3 py-2.5 text-sm">
+                              <Import className="size-[18px] opacity-70" /> {messages.importFile}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleExportMarkdown} className="gap-2.5 px-3 py-2.5 text-sm">
+                              <Download className="size-[18px] opacity-70" /> {messages.exportMarkdown}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={handleExportPlainText} className="gap-2.5 px-3 py-2.5 text-sm">
                             <Download className="size-[18px] opacity-70" /> {messages.exportText}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator className="opacity-50" />
-                          <DropdownMenuItem
-                            onClick={() => setIsResetDialogOpen(true)}
-                            className="gap-2.5 px-3 py-2.5 text-sm text-destructive focus:text-destructive"
-                          >
-                            <RotateCcw className="size-[18px] opacity-70" /> {messages.resetNote}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                                        <div className="flex items-center cursor-help ml-auto pl-2 shrink-0" title={getSaveStatusLabel(saveStatus, messages)}>
+
+                        <div className="flex items-center rounded-xl border border-border/60 bg-muted/30 p-1 xl:rounded-lg xl:border-0 xl:bg-muted/40 shrink-0">
+                          <button
+                            type="button"
+                            className={cn(
+                              'rounded-md px-3 py-1 text-sm font-bold transition-all',
+                              isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                            )}
+                            onClick={() => handleDocumentChange('contentFormat', 'plain')}
+                            disabled={isBusy || !isDocumentReady}
+                          >
+                            TXT
+                          </button>
+                          <button
+                            type="button"
+                            className={cn(
+                              'rounded-md px-3 py-1 text-sm font-bold transition-all',
+                              !isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                            )}
+                            onClick={() => handleDocumentChange('contentFormat', 'markdown')}
+                            disabled={isBusy || !isDocumentReady}
+                          >
+                            MD
+                          </button>
+                        </div>
+                      </div>
+
                       <div
-                        className={cn(
-                          'size-2 rounded-full transition-all duration-500',
-                          saveStatus === 'saved' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 
-                          saveStatus === 'saving' ? 'bg-amber-500 animate-pulse' : 'bg-sky-500',
-                        )}
-                      />
-                      <span className="ml-2 truncate whitespace-nowrap text-sm font-semibold tracking-normal text-muted-foreground/80">
-                        {getSaveStatusLabel(saveStatus, messages)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex w-full flex-col gap-2 xl:w-auto xl:flex-row xl:flex-nowrap xl:items-center">
-                    <div className="flex items-center rounded-xl border border-border/60 bg-muted/30 p-1 xl:mr-1 xl:rounded-lg xl:border-0 xl:bg-muted/40">
-                      <button
-                        type="button"
-                        className={cn(
-                          'rounded-md px-3 py-1.5 text-sm font-bold transition-all',
-                          isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
-                        )}
-                        onClick={() => handleDocumentChange('contentFormat', 'plain')}
-                        disabled={isBusy}
+                        className="flex items-center gap-2 cursor-help shrink-0"
+                        title={isDocumentReady ? getSaveStatusLabel(saveStatus, messages) : messages.loadingDocument}
                       >
-                        TXT
-                      </button>
-                      <button
-                        type="button"
-                        className={cn(
-                          'rounded-md px-3 py-1.5 text-sm font-bold transition-all',
-                          !isPlainTextMode ? 'bg-background text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground',
+                        {isDocumentReady ? (
+                          <div
+                            className={cn(
+                              'size-2 rounded-full transition-all duration-500',
+                              saveStatus === 'saved' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' :
+                              saveStatus === 'saving' ? 'bg-amber-500 animate-pulse' : 'bg-sky-500',
+                            )}
+                          />
+                        ) : (
+                          <LoaderCircle className="size-3.5 animate-spin text-muted-foreground/80" />
                         )}
-                        onClick={() => handleDocumentChange('contentFormat', 'markdown')}
-                        disabled={isBusy}
-                      >
-                        MD
-                      </button>
+                        <span className="truncate whitespace-nowrap text-sm font-semibold tracking-normal text-muted-foreground/80">
+                          {isDocumentReady ? getSaveStatusLabel(saveStatus, messages) : messages.loadingDocument}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex min-w-0 items-center gap-1 overflow-x-auto pb-1 xl:flex-none xl:overflow-visible xl:pb-0">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-9 w-9 shrink-0 rounded-xl border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground xl:rounded-md xl:border-transparent" 
-                        onClick={handleUndo} 
-                        disabled={!canUndo || isBusy}
-                        title={messages.undo}
-                      >
-                        <Undo2 className="size-[18px]" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        className="h-9 w-9 shrink-0 rounded-xl border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground xl:rounded-md xl:border-transparent" 
-                        onClick={handleRedo} 
-                        disabled={!canRedo || isBusy}
-                        title={messages.redo}
-                      >
-                        <Redo2 className="size-[18px]" />
-                      </Button>
+                    <div className="flex items-center justify-between gap-4 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden sm:gap-2 sm:pb-0 xl:overflow-visible">
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-9 w-9 shrink-0 rounded-xl border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground xl:rounded-md xl:border-transparent" 
+                          onClick={handleUndo} 
+                          disabled={!canUndo || isBusy || !isDocumentReady}
+                          title={messages.undo}
+                        >
+                          <Undo2 className="size-[18px]" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-9 w-9 shrink-0 rounded-xl border border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground xl:rounded-md xl:border-transparent" 
+                          onClick={handleRedo} 
+                          disabled={!canRedo || isBusy || !isDocumentReady}
+                          title={messages.redo}
+                        >
+                          <Redo2 className="size-[18px]" />
+                        </Button>
 
-</div>
+                      </div>
+
+                      <div className="flex items-center gap-1 shrink-0">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent"
+                          onClick={() => setIsResetDialogOpen(true)}
+                          disabled={isBusy || !isDocumentReady}
+                        >
+                          <Eraser className="size-[18px]" data-icon="inline-start" />
+                          <span>{messages.resetNote}</span>
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent"
+                          onClick={() => setIsHistoryOpen(true)}
+                          disabled={isBusy || !isDocumentReady}
+                        >
+                          <History className="size-[18px]" data-icon="inline-start" />
+                          <span>{messages.history}</span>
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-destructive hover:bg-destructive/10 hover:text-destructive sm:px-3 xl:rounded-md xl:border-transparent"
+                          onClick={() => setIsClearHistoryDialogOpen(true)}
+                          disabled={isBusy || !isDocumentReady || versions.length === 0}
+                        >
+                          <Trash2 className="size-[18px]" data-icon="inline-start" />
+                          <span className="hidden xl:inline">{messages.clearHistory}</span>
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
                 <div className="markdown-editor h-[calc(100svh-15rem)] min-h-[24rem] max-h-[72svh] flex-1 overflow-y-auto xl:h-auto xl:min-h-0 xl:max-h-none">
-                  <CodeMirror
-                    value={documentState.content}
-                    theme={resolvedTheme === 'dark' ? oneDark : 'light'}
-                    basicSetup={{
-                      lineNumbers: false,
-                      foldGutter: false,
-                      highlightActiveLineGutter: false,
-                    }}
-                    extensions={editorExtensions}
-                    onChange={(value, viewUpdate) => {
-                      handleDocumentChange('content', value);
-                      syncHistoryDepth(viewUpdate.view);
-                    }}
-                    onCreateEditor={(view) => {
-                      editorViewRef.current = view;
-                      syncHistoryDepth(view);
-                      view.dispatch({
-                        selection: EditorSelection.cursor(documentState.content.length),
-                      });
-                    }}
-                    editable={!isBusy}
-                  />
+                  {isDocumentReady ? (
+                    <CodeMirror
+                      value={currentDocument.content}
+                      theme={resolvedTheme === 'dark' ? oneDark : 'light'}
+                      basicSetup={{
+                        lineNumbers: false,
+                        foldGutter: false,
+                        highlightActiveLineGutter: false,
+                      }}
+                      extensions={editorExtensions}
+                      onChange={(value, viewUpdate) => {
+                        handleDocumentChange('content', value);
+                        syncHistoryDepth(viewUpdate.view);
+                      }}
+                      onCreateEditor={(view) => {
+                        editorViewRef.current = view;
+                        syncHistoryDepth(view);
+                        view.dispatch({
+                          selection: EditorSelection.cursor(currentDocument.content.length),
+                        });
+                      }}
+                      editable={!isBusy}
+                    />
+                  ) : (
+                    <div className="flex h-full min-h-[24rem] flex-col gap-5 px-4 py-5 sm:px-5 sm:py-6">
+                      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                        <LoaderCircle className="size-4 animate-spin" />
+                        <span>{messages.loadingDocument}</span>
+                      </div>
+                      <div className="space-y-3">
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-4 w-[92%]" />
+                        <Skeleton className="h-4 w-[88%]" />
+                        <Skeleton className="h-4 w-[96%]" />
+                        <Skeleton className="h-4 w-3/4" />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1060,94 +1164,110 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                   mobilePane === 'editor' ? 'hidden xl:flex' : 'flex',
                 )}
               >
-                <div className="sticky top-0 z-20 flex flex-col gap-3 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:h-14 xl:flex-row xl:items-center xl:justify-between xl:gap-4 xl:rounded-tr-[calc(var(--radius)-1px)] xl:px-5 xl:py-0">
-                  <div className="flex min-w-0 items-center justify-between gap-3">
-                    <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50">{messages.previewCardTitle}</span>
-                    <span className="truncate text-sm font-semibold tabular-nums text-muted-foreground/60">
-                      {dimensions.width}×{effectivePreviewHeight}
-                    </span>
-                  </div>
+                <div className="sticky top-0 z-20 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:rounded-tr-[calc(var(--radius)-1px)] xl:px-5">
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-2 pb-1 sm:pb-0">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-sm font-black tracking-[0.14em] uppercase opacity-50 shrink-0">{messages.previewCardTitle}</span>
+                        <span className="truncate text-sm font-semibold tabular-nums text-muted-foreground/60 hidden sm:inline-block">
+                          {dimensions.width}×{effectivePreviewHeight}
+                        </span>
+                      </div>
 
-                  <div className="flex w-full items-center gap-2 sm:w-auto">
-                    <Button 
-                      type="button" 
-                      variant="ghost" 
-                      size="sm"
-                        className="h-10 flex-1 gap-2 rounded-xl border border-border/60 bg-muted/20 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:flex-none sm:rounded-md sm:border-transparent sm:bg-transparent" 
-                      disabled={isBusy} 
-                      onClick={() => void exportPosterImage(true)}
-                    >
-                        {isBusy ? <LoaderCircle className="size-[18px] animate-spin" /> : <Share2 className="size-[18px]" />}
-                      <span className="hidden sm:inline">{messages.shareImage}</span>
-                    </Button>
-                    
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <div className="flex items-center justify-end gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden sm:pb-0">
                         <Button 
                           type="button" 
-                          variant="ghost"
+                          variant="ghost" 
                           size="sm"
-                            className="h-10 flex-1 gap-2 rounded-xl border border-border/60 bg-muted/20 px-3 text-sm font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:flex-none sm:rounded-md sm:border-transparent sm:bg-transparent" 
-                          disabled={isBusy}
+                          className="h-9 flex-1 shrink-0 gap-2 rounded-xl border border-border/60 bg-muted/20 px-3 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:flex-none sm:border-transparent sm:bg-transparent sm:px-3 xl:rounded-md xl:border-transparent" 
+                          disabled={isBusy || !isDocumentReady} 
+                          onClick={() => void exportPosterImage(true)}
                         >
-                            {isBusy ? <LoaderCircle className="size-[18px] animate-spin" /> : <Download className="size-[18px]" />}
-                          <span className="hidden sm:inline">{messages.exportMenu}</span>
+                          {isBusy ? <LoaderCircle className="size-[18px] animate-spin" /> : <ImageUp className="size-[18px]" />}
+                          <span>{messages.shareImage}</span>
                         </Button>
-                      </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-52 p-2">
-                          <DropdownMenuLabel className="px-3 py-2 text-sm uppercase tracking-[0.12em] opacity-60">{messages.exportMenu}</DropdownMenuLabel>
-                          <DropdownMenuItem onClick={() => void exportPosterImage(false)} className="gap-2.5 px-3 py-2.5 text-sm">
-                          {messages.exportImage}
-                        </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => void exportPosterJpeg()} className="gap-2.5 px-3 py-2.5 text-sm">
-                          {messages.exportJpeg}
-                        </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => void handleExportHtml()} className="gap-2.5 px-3 py-2.5 text-sm">
-                          {messages.exportHtml}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                </div>
-
-                <div className="border-b border-border/60 bg-muted/5">
-                  <div className="grid gap-3 px-3 py-4 sm:px-4 xl:grid-cols-2 xl:gap-x-8 xl:gap-y-5 xl:px-5 xl:py-5">
-                    <div className="space-y-2 rounded-2xl border border-border/60 bg-background/50 p-3 xl:rounded-none xl:border-0 xl:bg-transparent xl:p-0">
-                      <label className="text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground/80">{messages.exportTemplateLabel}</label>
-                      <TemplateSelector
-                        options={templateOptions}
-                        value={documentState.exportTemplate}
-                        placeholder={messages.templateSearchPlaceholder}
-                        emptyText={messages.templateSearchEmpty}
-                        clearLabel={messages.templateSearchPlaceholder}
-                        disabled={isBusy}
-                        onValueChange={(value) => handleDocumentChange('exportTemplate', value)}
-                      />
+                        
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              type="button" 
+                              variant="ghost"
+                              size="sm"
+                              className="h-9 flex-1 shrink-0 gap-2 rounded-xl border border-border/60 bg-muted/20 px-3 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:flex-none sm:border-transparent sm:bg-transparent sm:px-3 xl:rounded-md xl:border-transparent" 
+                              disabled={isBusy || !isDocumentReady}
+                            >
+                              {isBusy ? <LoaderCircle className="size-[18px] animate-spin" /> : <Download className="size-[18px]" />}
+                              <span>{messages.exportMenu}</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-52 p-2">
+                            <DropdownMenuLabel className="px-3 py-2 text-sm uppercase tracking-[0.12em] opacity-60">{messages.exportMenu}</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => void exportPosterImage(false)} className="gap-2.5 px-3 py-2.5 text-sm">
+                              <Image className="size-[18px] opacity-70" />
+                              {messages.exportImage}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => void exportPosterJpeg()} className="gap-2.5 px-3 py-2.5 text-sm">
+                              <FileImage className="size-[18px] opacity-70" />
+                              {messages.exportJpeg}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => void handleExportHtml()} className="gap-2.5 px-3 py-2.5 text-sm">
+                              <CodeXml className="size-[18px] opacity-70" />
+                              {messages.exportHtml}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
 
-                    <div className="space-y-2 rounded-2xl border border-border/60 bg-background/50 p-3 xl:rounded-none xl:border-0 xl:bg-transparent xl:p-0">
-                      <label className="text-sm font-bold uppercase tracking-[0.08em] text-muted-foreground/80">{messages.fontSizeLabel}</label>
-                      <Select value={documentState.fontSizePreset} onValueChange={(value) => handleDocumentChange('fontSizePreset', value as PosterFontSize)}>
-                        <SelectTrigger className="h-11 rounded-lg border-border/60 bg-background/50 text-sm">
-                          <SelectValue placeholder={messages.fontSizeLabel} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="small">{messages.fontSizeSmall}</SelectItem>
-                          <SelectItem value="medium">{messages.fontSizeMedium}</SelectItem>
-                          <SelectItem value="large">{messages.fontSizeLarge}</SelectItem>
-                        </SelectContent>
-                      </Select>
+                    <div className="flex items-center justify-between gap-4 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden sm:gap-2 sm:pb-0 xl:overflow-visible">
+                      <div className="flex w-full items-center gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden sm:w-auto shrink-0 xl:overflow-visible">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 rounded-xl px-1 py-1 xl:rounded-lg">
+                          <span className="pl-2 text-xs font-bold uppercase tracking-wider opacity-70 shrink-0">{messages.exportTemplateLabel}</span>
+                          <div className="w-[160px] sm:w-[180px]">
+                            <TemplateSelector
+                              options={templateOptions}
+                              value={currentDocument.exportTemplate}
+                              placeholder={messages.templateSearchPlaceholder}
+                              emptyText={messages.templateSearchEmpty}
+                              clearLabel={messages.templateSearchPlaceholder}
+                              disabled={isBusy || !isDocumentReady}
+                              className="h-7 w-full rounded-md border-transparent bg-background hover:bg-background/80 text-sm shadow-sm"
+                              onValueChange={(value) => handleDocumentChange('exportTemplate', value)}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/30 rounded-xl px-1 py-1 xl:rounded-lg">
+                          <span className="pl-2 text-xs font-bold uppercase tracking-wider opacity-70 shrink-0">{messages.fontSizeLabel}</span>
+                          <div className="w-[80px] sm:w-[90px]">
+                            <Select
+                              value={currentDocument.fontSizePreset}
+                              onValueChange={(value) => handleDocumentChange('fontSizePreset', value as PosterFontSize)}
+                              disabled={isBusy || !isDocumentReady}
+                            >
+                              <SelectTrigger className="h-7 w-full rounded-md border-transparent bg-background hover:bg-background/80 text-sm shadow-sm">
+                                <SelectValue placeholder={messages.fontSizeLabel} />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="small">{messages.fontSizeSmall}</SelectItem>
+                                <SelectItem value="medium">{messages.fontSizeMedium}</SelectItem>
+                                <SelectItem value="large">{messages.fontSizeLarge}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                      </div>
+
+                      <span className="truncate text-sm font-semibold tabular-nums text-muted-foreground/60 sm:hidden pr-1">
+                        {dimensions.width}×{effectivePreviewHeight}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="bg-background/30 px-3 py-4 sm:px-4 xl:px-0 xl:py-0">
                   <div className="flex flex-col gap-0 overflow-hidden rounded-[1.25rem] border border-border/60 bg-background/70 shadow-sm xl:rounded-none xl:border-x-0 xl:border-b-0 xl:border-t-0 xl:bg-transparent xl:shadow-none">
-                    <div className="w-full border-b border-border/60 bg-background/80 shadow-sm xl:bg-background/70">
-                      <div className="flex items-center justify-between gap-3 px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/50">
-                        <span>{messages.exportPreviewLabel}</span>
-                      </div>
-
+                    <div className="w-full shadow-sm">
                       <div className="overflow-auto bg-muted/20 px-3 py-3 sm:px-4 sm:py-4 xl:bg-muted/30 xl:px-0 xl:py-0">
                         {previewZoomUrl ? (
                           <Zoom
@@ -1167,7 +1287,7 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                               }}
                             />
                           </Zoom>
-                        ) : (
+                        ) : isDocumentReady ? (
                           <div
                             className="mx-auto flex items-center justify-center text-sm text-muted-foreground"
                             style={{
@@ -1177,6 +1297,27 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                             }}
                           >
                             {messages.exportPreviewLoading}
+                          </div>
+                        ) : (
+                          <div
+                            className="mx-auto overflow-hidden rounded-[1.1rem] border border-border/60 bg-background/80 shadow-lg xl:rounded-none"
+                            style={{
+                              width: '100%',
+                              maxWidth: dimensions.width * posterPreviewScale,
+                              aspectRatio: `${dimensions.width} / ${effectivePreviewHeight}`,
+                            }}
+                          >
+                            <div className="flex h-full w-full flex-col gap-4 p-5 sm:p-6">
+                              <Skeleton className="h-6 w-40" />
+                              <Skeleton className="h-4 w-full" />
+                              <Skeleton className="h-4 w-[94%]" />
+                              <Skeleton className="h-4 w-[86%]" />
+                              <Skeleton className="h-4 w-[90%]" />
+                              <div className="mt-auto grid gap-3">
+                                <Skeleton className="h-20 w-full" />
+                                <Skeleton className="h-20 w-full" />
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -1297,9 +1438,11 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                   ) : (
                     <div className="flex flex-wrap gap-2">
                       <Button type="button" size="sm" onClick={() => void handleRestoreVersion(selectedVersion)} disabled={isBusy}>
+                        <RotateCcw className="size-4" data-icon="inline-start" />
                         {messages.restoreVersion}
                       </Button>
                       <Button type="button" size="sm" variant="outline" onClick={() => void handleDuplicateAsMilestone(selectedVersion)} disabled={isBusy}>
+                        <BookmarkPlus className="size-4" data-icon="inline-start" />
                         {messages.saveAsMilestone}
                       </Button>
                       {selectedVersion.kind === 'milestone' ? (
@@ -1313,11 +1456,13 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                           }}
                           disabled={isBusy}
                         >
+                          <Pencil className="size-4" data-icon="inline-start" />
                           {messages.renameMilestone}
                         </Button>
                       ) : null}
                       {selectedVersion.kind === 'auto' ? (
                         <Button type="button" size="sm" variant="outline" onClick={() => void handleDeleteAutoVersion(selectedVersion.id)} disabled={isBusy}>
+                          <Trash2 className="size-4" data-icon="inline-start" />
                           {messages.deleteVersion}
                         </Button>
                       ) : null}
@@ -1343,6 +1488,21 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
             <AlertDialogCancel disabled={isBusy}>{messages.cancel}</AlertDialogCancel>
             <AlertDialogAction onClick={() => void handleResetNote()} disabled={isBusy}>
               {messages.resetNote}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isClearHistoryDialogOpen} onOpenChange={setIsClearHistoryDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{messages.clearHistoryConfirmTitle}</AlertDialogTitle>
+            <AlertDialogDescription>{messages.clearHistoryConfirmDescription}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isBusy}>{messages.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => void handleClearHistory()} disabled={isBusy}>
+              {messages.clearHistory}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

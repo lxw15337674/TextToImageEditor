@@ -163,6 +163,10 @@ export async function deleteVersion(id: string) {
   await db.versions.delete(id);
 }
 
+export async function deleteAllVersions(documentId = EDITOR_DOCUMENT_ID) {
+  await db.versions.where('documentId').equals(documentId).delete();
+}
+
 export async function trimAutoSnapshots(limit = AUTO_SNAPSHOT_LIMIT) {
   const autoVersions = await db.versions.where('kind').equals('auto').sortBy('createdAt');
 

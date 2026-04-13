@@ -127,9 +127,8 @@ export interface LocaleMessages {
     statusSaved: string;
     undo: string;
     redo: string;
-    saveMilestone: string;
     history: string;
-    fileMenu: string;
+    importButton: string;
     importFile: string;
     exportMarkdown: string;
     exportText: string;
@@ -166,6 +165,11 @@ export interface LocaleMessages {
     resetSuccess: string;
     resetError: string;
     resetNote: string;
+    clearHistory: string;
+    clearHistorySuccess: string;
+    clearHistoryError: string;
+    clearHistoryConfirmTitle: string;
+    clearHistoryConfirmDescription: string;
     resetConfirmTitle: string;
     resetConfirmDescription: string;
     versionKindRollbackBackup: string;
