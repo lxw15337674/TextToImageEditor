@@ -145,7 +145,7 @@ const USE_CASES_PAGE_COPY: Record<Locale, UseCasesPageCopy> = {
     metadataDescription:
       '了解 LinkDisk 为什么适合匿名分享文本和文件：无需登录即可发送，支持密码、过期时间、访问次数等设置，也适合发送较大的附件。',
     eyebrow: '匿名分享工作流',
-    title: '使用场景',
+    title: '无需登录、即用即走的匿名分享工具',
     description:
       'LinkDisk 适合临时分享文本和文件。你不需要登录，就可以直接生成分享链接；也可以按需要设置密码、过期时间、访问次数等规则，并支持带上大附件一起发送。',
     primaryCta: '打开 LinkDisk',

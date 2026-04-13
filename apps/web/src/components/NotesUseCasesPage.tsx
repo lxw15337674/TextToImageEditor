@@ -45,38 +45,38 @@ export function NotesUseCasesPage({ locale }: NotesUseCasesPageProps) {
             <Button asChild size="lg">
               <Link href={withLocalePrefix('/notes', locale)}>{messages.primaryCta}</Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
-              <a href="#use-cases">{messages.secondaryCta}</a>
-            </Button>
           </div>
         </div>
 
         <Card className="border-border/70 bg-background/70 shadow-none">
-          <CardHeader>
+          <CardHeader className="space-y-3">
             <CardTitle>{messages.problemTitle}</CardTitle>
-            <CardDescription>{messages.problemDescription}</CardDescription>
+            <CardDescription className="text-sm leading-6">{messages.problemDescription}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {messages.proofItems.map((item, index) => {
-              const Icon = proofIcons[index % proofIcons.length] ?? ShieldCheck;
-
-              return (
-                <div key={item.title} className="rounded-2xl border border-border/60 bg-card px-4 py-3">
-                  <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                      <Icon className="size-4" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium text-foreground">{item.title}</p>
-                      <p className="text-sm leading-6 text-muted-foreground">{item.description}</p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </CardContent>
         </Card>
       </PagePanel>
+
+      <PageSection>
+        <div className="grid gap-4 md:grid-cols-3">
+          {messages.proofItems.map((item, index) => {
+            const Icon = proofIcons[index % proofIcons.length] ?? ShieldCheck;
+
+            return (
+              <Card key={item.title} className="border-border/70">
+                <CardHeader className="space-y-4">
+                  <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                    <Icon className="size-5" />
+                  </div>
+                  <div className="space-y-2">
+                    <CardTitle className="text-xl">{item.title}</CardTitle>
+                    <CardDescription className="text-sm leading-6">{item.description}</CardDescription>
+                  </div>
+                </CardHeader>
+              </Card>
+            );
+          })}
+        </div>
+      </PageSection>
 
       <PageSection className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" spacing="none">
         {messages.valueItems.map((item, index) => {
@@ -168,9 +168,6 @@ export function NotesUseCasesPage({ locale }: NotesUseCasesPageProps) {
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
               <Link href={withLocalePrefix('/notes', locale)}>{messages.ctaPrimary}</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <a href="#faq">{messages.ctaSecondary}</a>
             </Button>
           </div>
         </div>

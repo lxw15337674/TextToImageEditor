@@ -26,9 +26,6 @@ export function UseCasesPage({ locale }: { locale: Locale }) {
             <Button asChild size="lg">
               <Link href={withLocalePrefix('/linkdisk', locale)}>{copy.primaryCta}</Link>
             </Button>
-            <Button asChild size="lg" variant="outline">
-              <a href="#use-cases">{copy.secondaryCta}</a>
-            </Button>
           </div>
         </div>
 
@@ -122,9 +119,6 @@ export function UseCasesPage({ locale }: { locale: Locale }) {
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
               <Link href={withLocalePrefix('/linkdisk', locale)}>{copy.ctaPrimary}</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <a href="#faq">{copy.ctaSecondary}</a>
             </Button>
           </div>
         </div>
