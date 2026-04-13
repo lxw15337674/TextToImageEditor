@@ -1,31 +1,13 @@
-import type { Metadata } from 'next';
-import { UseCasesPage } from '@/components/UseCasesPage';
-import { getMessages } from '@/i18n/messages';
+import { permanentRedirect } from 'next/navigation';
 import { resolveRouteLocale } from '@/lib/route-locale';
-import { createMarketingMetadata } from '@/lib/seo/marketing-metadata';
 
 interface UseCasesRoutePageProps {
   params: Promise<{ locale: string }>;
-}
-
-export async function generateMetadata({ params }: UseCasesRoutePageProps): Promise<Metadata> {
-  const { locale: requestedLocale } = await params;
-  const locale = resolveRouteLocale(requestedLocale);
-  const allMessages = getMessages(locale);
-  const messages = allMessages.useCasesHub;
-
-  return createMarketingMetadata({
-    locale,
-    pathname: '/use-cases',
-    title: messages.metadataTitle,
-    description: messages.metadataDescription,
-    siteName: allMessages.common.siteName,
-  });
 }
 
 export default async function UseCasesRoutePage({ params }: UseCasesRoutePageProps) {
   const { locale: requestedLocale } = await params;
   const locale = resolveRouteLocale(requestedLocale);
 
-  return <UseCasesPage locale={locale} />;
+  permanentRedirect(`/${locale}`);
 }

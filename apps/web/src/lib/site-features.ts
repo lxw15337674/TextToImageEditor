@@ -16,6 +16,7 @@ export interface SiteFeatureItem {
   icon: LucideIcon;
   group: SiteFeatureGroupId;
   match: string;
+  matchMode?: 'exact' | 'prefix';
   pin: SiteFeaturePin;
   external?: boolean;
 }
@@ -34,42 +35,46 @@ export function getSiteFeatureGroups(locale: Locale): SiteFeatureGroup[] {
   const items: SiteFeatureItem[] = [
     {
       id: 'editor',
-      label: messages.common.openEditor,
+      label: messages.common.featureLabelNotes,
       description: messages.common.featureDescriptionNotes,
       href: withLocalePrefix('/notes', locale),
       icon: FileText,
       group: 'core',
       match: '/notes',
+      matchMode: 'prefix',
       pin: 'left',
     },
     {
       id: 'use-cases',
-      label: messages.common.navUseCases,
+      label: messages.common.featureLabelUseCases,
       description: messages.common.featureDescriptionUseCases,
       href: withLocalePrefix('/use-cases', locale),
       icon: Layers3,
       group: 'core',
       match: '/use-cases',
+      matchMode: 'exact',
       pin: 'right',
     },
     {
       id: 'starter',
-      label: messages.common.navStarter,
+      label: messages.common.featureLabelStarter,
       description: messages.common.featureDescriptionStarter,
       href: withLocalePrefix('/starter', locale),
       icon: BookOpenText,
       group: 'more',
       match: '/starter',
+      matchMode: 'prefix',
       pin: 'none',
     },
     {
       id: 'linkdisk',
-      label: linkDiskMessages.common.siteName,
+      label: linkDiskMessages.common.featureLabelHome,
       description: linkDiskMessages.common.featureDescriptionHome,
       href: withLocalePrefix('/linkdisk', locale),
       icon: Link2,
       group: 'more',
       match: '/linkdisk',
+      matchMode: 'prefix',
       pin: 'none',
     },
   ];
@@ -91,8 +96,8 @@ export function flattenSiteFeatureGroups(groups: SiteFeatureGroup[]): SiteFeatur
 }
 
 export function isSiteFeatureActive(item: SiteFeatureItem, barePath: string) {
-  if (item.id === 'use-cases') {
-    return barePath === item.match || barePath.endsWith('/use-cases');
+  if (item.matchMode === 'exact') {
+    return barePath === item.match;
   }
 
   return barePath === item.match || barePath.startsWith(`${item.match}/`);

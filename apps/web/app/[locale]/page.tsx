@@ -16,8 +16,8 @@ export async function generateMetadata({ params }: LocaleIndexPageProps): Promis
   return createMarketingMetadata({
     locale,
     pathname: '/',
-    title: messages.home.metadataTitle,
-    description: messages.home.metadataDescription,
+    title: messages.useCasesHub.metadataTitle,
+    description: messages.useCasesHub.metadataDescription,
     siteName: messages.common.siteName,
     absoluteTitle: true,
   });

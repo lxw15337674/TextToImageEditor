@@ -37,6 +37,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { AppPageContainer, WorkspaceSurface } from '@/components/app-page-shell';
 import {
   buildMarkdownExport,
   buildPlainTextExport,
@@ -824,14 +825,14 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
 
   if (!documentState) {
     return (
-      <main className="mx-auto flex w-full max-w-6xl flex-1 px-4 py-4 sm:px-6 lg:px-8">
+      <AppPageContainer variant="workspace" width="content">
         <Card className="w-full border-border/70">
           <CardContent className="flex min-h-[16rem] items-center justify-center gap-3 p-6 text-muted-foreground">
             <LoaderCircle className="size-5 animate-spin" />
             <span>{messages.loadingDocument}</span>
           </CardContent>
         </Card>
-      </main>
+      </AppPageContainer>
     );
   }
 
@@ -870,9 +871,9 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     <>
       <input ref={fileInputRef} type="file" accept=".md,.txt,text/plain,text/markdown" className="hidden" onChange={handleImportFile} />
 
-      <main className="mx-auto flex w-full max-w-[92rem] flex-1 px-3 py-3 sm:px-5 sm:py-4 lg:px-8">
-        <Card className="isolate flex w-full flex-1 overflow-hidden border-border/70">
-          <CardContent className="flex w-full flex-1 flex-col p-0">
+      <AppPageContainer variant="workspace" className="py-8 sm:py-10">
+        <WorkspaceSurface>
+          <div className="flex w-full flex-1 flex-col">
             <div className="border-b border-border/60 px-3 py-3 xl:hidden">
               <div className="inline-flex rounded-full border border-border/70 bg-background/80 p-1">
                 <button
@@ -1190,9 +1191,9 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </main>
+          </div>
+        </WorkspaceSurface>
+      </AppPageContainer>
 
       <Sheet open={isHistoryOpen} onOpenChange={handleHistoryOpenChange}>
         <SheetContent side="right" className="flex h-full w-full max-w-none flex-col border-l border-border/70 bg-background p-0 sm:max-w-xl">

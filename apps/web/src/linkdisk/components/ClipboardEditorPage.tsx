@@ -24,6 +24,7 @@ import {
 import { useEffect, useRef, useState, type ClipboardEvent as ReactClipboardEvent, type DragEvent as ReactDragEvent } from 'react';
 import { TurnstileWidget } from '@/linkdisk/components/TurnstileWidget';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AppPageContainer, WorkspaceSurface } from '@/components/app-page-shell';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -1407,8 +1408,9 @@ export function ClipboardEditorPage({
   }
 
   return (
-    <main
-      className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col gap-4 pb-24 sm:gap-6 lg:h-[calc(100dvh-57px)] lg:overflow-hidden lg:pb-0"
+    <AppPageContainer
+      variant="workspace"
+      className="pb-24 lg:h-[calc(100dvh-57px)] lg:overflow-hidden lg:pb-0"
       onPaste={handlePaste}
     >
       {isLoading ? (
@@ -1429,8 +1431,8 @@ export function ClipboardEditorPage({
         </Alert>
       ) : null}
 
-      <Card className="flex h-full min-h-0 w-full flex-1 border-transparent bg-background">
-        <CardContent className="grid h-full min-h-0 w-full items-stretch gap-4 p-3 sm:gap-6 sm:p-4 lg:grid-cols-[minmax(0,1fr)_340px] lg:p-6">
+      <WorkspaceSurface className="border-transparent bg-background shadow-none">
+        <div className="grid h-full min-h-0 w-full items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
             <Card className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-border/70 bg-card/90">
               <CardContent className="flex h-full min-h-0 flex-1 flex-col gap-4 p-3 sm:gap-6 sm:p-4 lg:p-5">
                 <div className="flex flex-col gap-3">
@@ -1897,12 +1899,12 @@ export function ClipboardEditorPage({
               </div>
 
             </div>
-        </CardContent>
-      </Card>
+        </div>
+      </WorkspaceSurface>
 
       {!isManageMode ? (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-background/85 px-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 backdrop-blur lg:hidden">
-          <div className="mx-auto flex w-full max-w-6xl">
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-background/85 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-3 sm:px-6 backdrop-blur lg:hidden">
+          <div className="mx-auto flex w-full max-w-[92rem]">
             <Button
               type="button"
               className="h-11 w-full"
@@ -2117,6 +2119,6 @@ export function ClipboardEditorPage({
         </DialogContent>
       </Dialog>
 
-    </main>
+    </AppPageContainer>
   );
 }

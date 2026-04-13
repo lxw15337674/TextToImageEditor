@@ -16,6 +16,7 @@ interface LocaleMessages {
     languageLabel: string;
     accessCodeShort: string;
     accessByCode: string;
+    featureLabelHome: string;
     featureDescriptionHome: string;
     mobileMenuOpenLabel: string;
     mobileMenuDescription: string;
@@ -376,6 +377,7 @@ const messages: Record<Locale, LocaleMessages> = {
       languageLabel: 'Language',
       accessCodeShort: 'Code',
       accessByCode: 'Open by code',
+      featureLabelHome: 'LinkDisk',
       featureDescriptionHome: 'Share text and files in seconds with one clean link.',
       mobileMenuOpenLabel: 'Open menu',
       mobileMenuDescription: 'Use the drawer on mobile to keep the header compact.',
@@ -764,6 +766,7 @@ const messages: Record<Locale, LocaleMessages> = {
       languageLabel: '语言',
       accessCodeShort: '分享码',
       accessByCode: '使用分享码',
+      featureLabelHome: 'LinkDisk',
       featureDescriptionHome: '用链接快速分享文字和文件。',
       mobileMenuOpenLabel: '打开菜单',
       mobileMenuDescription: '在移动端使用抽屉菜单，避免顶部导航撑宽页面。',
@@ -1152,6 +1155,7 @@ const messages: Record<Locale, LocaleMessages> = {
       languageLabel: 'Idioma',
       accessCodeShort: 'Codigo',
       accessByCode: 'Abrir con codigo',
+      featureLabelHome: 'LinkDisk',
       featureDescriptionHome: 'Comparte texto y archivos en segundos con un enlace limpio.',
       mobileMenuOpenLabel: 'Abrir menu',
       mobileMenuDescription: 'Usa el menu lateral en movil para mantener el encabezado compacto.',
@@ -1539,6 +1543,7 @@ const messages: Record<Locale, LocaleMessages> = {
       languageLabel: '言語',
       accessCodeShort: '共有コード',
       accessByCode: '共有コードで開く',
+      featureLabelHome: 'LinkDisk',
       featureDescriptionHome: 'テキストも添付も、1 本のわかりやすいリンクですぐ共有できます。',
       mobileMenuOpenLabel: 'メニューを開く',
       mobileMenuDescription: 'モバイルではドロワーメニューを使い、ヘッダーが横に広がりすぎないようにします。',

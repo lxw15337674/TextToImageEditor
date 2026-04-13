@@ -8,6 +8,9 @@ export interface LocaleMessages {
     navStarter: string;
     navNotes: string;
     openEditor: string;
+    featureLabelNotes: string;
+    featureLabelUseCases: string;
+    featureLabelStarter: string;
     featureLauncher: string;
     featureMenuDescription: string;
     featureDescriptionNotes: string;
@@ -107,9 +110,11 @@ export interface LocaleMessages {
     notesTitle: string;
     notesDescription: string;
     notesCta: string;
+    notesAppCta: string;
     linkdiskTitle: string;
     linkdiskDescription: string;
     linkdiskCta: string;
+    linkdiskAppCta: string;
   };
   notes: {
     metadataTitle: string;

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { Locale } from '@/i18n/config';
 import { withLocalePrefix } from '@/i18n/config';
 import { getMessages } from '@/i18n/messages';
-import { AppPageContainer, PagePanel, SectionIntro } from '@/components/app-page-shell';
+import { AppPageContainer, PagePanel, PageSection, SectionIntro } from '@/components/app-page-shell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -30,7 +30,7 @@ export function NotesUseCasesPage({ locale }: NotesUseCasesPageProps) {
   };
 
   return (
-    <AppPageContainer className="gap-8 py-8 sm:py-10 lg:gap-10">
+    <AppPageContainer variant="marketing">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
       <PagePanel className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.9fr)] lg:items-end">
@@ -78,7 +78,7 @@ export function NotesUseCasesPage({ locale }: NotesUseCasesPageProps) {
         </Card>
       </PagePanel>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <PageSection className="grid gap-4 md:grid-cols-2 xl:grid-cols-4" spacing="none">
         {messages.valueItems.map((item, index) => {
           const Icon = valueIcons[index % valueIcons.length] ?? CheckCircle2;
 
@@ -96,9 +96,9 @@ export function NotesUseCasesPage({ locale }: NotesUseCasesPageProps) {
             </Card>
           );
         })}
-      </section>
+      </PageSection>
 
-      <section id="use-cases" className="space-y-4">
+      <PageSection id="use-cases">
         <SectionIntro
           title={<h2 className="text-3xl font-semibold tracking-tight">{messages.useCasesTitle}</h2>}
           description={messages.useCasesDescription}
@@ -116,9 +116,9 @@ export function NotesUseCasesPage({ locale }: NotesUseCasesPageProps) {
             </Card>
           ))}
         </div>
-      </section>
+      </PageSection>
 
-      <section className="space-y-4">
+      <PageSection>
         <SectionIntro
           title={<h2 className="text-3xl font-semibold tracking-tight">{messages.comparisonTitle}</h2>}
           description={messages.comparisonDescription}
@@ -136,9 +136,9 @@ export function NotesUseCasesPage({ locale }: NotesUseCasesPageProps) {
             </Card>
           ))}
         </div>
-      </section>
+      </PageSection>
 
-      <section id="faq" className="space-y-4">
+      <PageSection id="faq">
         <SectionIntro
           title={<h2 className="text-3xl font-semibold tracking-tight">{messages.faqTitle}</h2>}
           description={messages.faqDescription}
@@ -156,7 +156,7 @@ export function NotesUseCasesPage({ locale }: NotesUseCasesPageProps) {
             </Card>
           ))}
         </div>
-      </section>
+      </PageSection>
 
       <PagePanel>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">

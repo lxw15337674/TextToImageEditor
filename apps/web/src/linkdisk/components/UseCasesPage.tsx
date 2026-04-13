@@ -1,6 +1,6 @@
 import { Link2, LockKeyhole, Package } from 'lucide-react';
 import Link from 'next/link';
-import { AppPageContainer, PagePanel, SectionIntro } from '@/components/app-page-shell';
+import { AppPageContainer, PagePanel, PageSection, SectionIntro } from '@/components/app-page-shell';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Locale } from '@/i18n/config';
@@ -13,7 +13,7 @@ export function UseCasesPage({ locale }: { locale: Locale }) {
   const copy = getUseCasesPageCopy(locale);
 
   return (
-    <AppPageContainer className="gap-8 py-8 sm:py-10 lg:gap-10">
+    <AppPageContainer variant="marketing">
       <PagePanel className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.9fr)] lg:items-end">
         <div className="space-y-5">
           <SectionIntro
@@ -40,7 +40,7 @@ export function UseCasesPage({ locale }: { locale: Locale }) {
         </Card>
       </PagePanel>
 
-      <section className="space-y-4">
+      <PageSection>
         <SectionIntro
           title={<h2 className="text-3xl font-semibold tracking-tight">{copy.strengthsTitle}</h2>}
           description={copy.strengthsDescription}
@@ -68,9 +68,9 @@ export function UseCasesPage({ locale }: { locale: Locale }) {
             );
           })}
         </div>
-      </section>
+      </PageSection>
 
-      <section id="use-cases" className="space-y-4">
+      <PageSection id="use-cases">
         <SectionIntro
           title={<h2 className="text-3xl font-semibold tracking-tight">{copy.scenariosTitle}</h2>}
           description={copy.scenariosDescription}
@@ -89,9 +89,9 @@ export function UseCasesPage({ locale }: { locale: Locale }) {
             </Card>
           ))}
         </div>
-      </section>
+      </PageSection>
 
-      <section id="faq" className="space-y-4">
+      <PageSection id="faq">
         <SectionIntro
           title={<h2 className="text-3xl font-semibold tracking-tight">{copy.faqTitle}</h2>}
           description={copy.faqDescription}
@@ -110,7 +110,7 @@ export function UseCasesPage({ locale }: { locale: Locale }) {
             </Card>
           ))}
         </div>
-      </section>
+      </PageSection>
 
       <PagePanel>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
