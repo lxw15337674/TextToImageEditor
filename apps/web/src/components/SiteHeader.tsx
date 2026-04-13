@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUpRight, LayoutGrid, Menu } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, LayoutGrid, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -75,17 +75,23 @@ function renderFeatureLink(item: SiteFeatureItem, barePath: string, className?: 
 }
 
 function HeaderLeftArea({
+  barePath,
   brand,
   leftArea,
+  featureItems,
+  messages,
   mobile = false,
 }: {
+  barePath: string;
   brand: SiteHeaderConfig['brand'];
   leftArea: SiteHeaderConfig['leftArea'];
+  featureItems: SiteFeatureItem[];
+  messages: ReturnType<typeof getMessages>['common'];
   mobile?: boolean;
 }) {
   const containerClassName = mobile
-    ? 'flex min-w-0 flex-1 items-center gap-2 md:hidden'
-    : 'hidden min-w-0 items-center gap-2 md:flex';
+    ? 'flex min-w-0 flex-1 items-center gap-1.5 md:hidden'
+    : 'hidden min-w-0 items-center gap-1.5 md:flex';
   const brandClassName = 'min-w-0 shrink-0 truncate text-sm font-medium text-foreground transition-colors hover:text-primary';
 
   return (
@@ -93,7 +99,27 @@ function HeaderLeftArea({
       <Link href={brand.href} className={brandClassName}>
         {brand.label}
       </Link>
-      {leftArea.kind === 'brand-label' ? (
+      {!mobile ? (
+        <>
+          <span className="shrink-0 text-muted-foreground mr-0.5">/</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                className="h-8 px-2 -ml-1.5 text-muted-foreground transition-colors hover:bg-accent/50 hover:text-foreground data-[state=open]:bg-accent data-[state=open]:text-foreground"
+              >
+                <span className="min-w-0 truncate">{leftArea.kind === 'brand-label' ? leftArea.label : messages.featureLauncher}</span>
+                <ChevronDown className="ml-1.5 size-3.5 opacity-50 shrink-0" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-[36rem] max-w-[calc(100vw-2rem)] p-4">
+              <HeaderFeatureList barePath={barePath} items={featureItems} listClassName="grid gap-3 sm:grid-cols-2" />
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
+      ) : leftArea.kind === 'brand-label' ? (
         <>
           <span className="shrink-0 text-muted-foreground">/</span>
           <Link href={leftArea.href} className="min-w-0 truncate text-sm text-muted-foreground transition-colors hover:text-foreground">
@@ -136,30 +162,6 @@ function HeaderActionButton({
         {primary ? <ArrowUpRight data-icon="inline-end" /> : null}
       </Link>
     </Button>
-  );
-}
-
-function HeaderFeatureLauncher({
-  barePath,
-  featureItems,
-  messages,
-}: {
-  barePath: string;
-  featureItems: SiteFeatureItem[];
-  messages: ReturnType<typeof getMessages>['common'];
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button type="button" size="sm" variant="outline">
-          <LayoutGrid data-icon="inline-start" />
-          {messages.featureLauncher}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[36rem] max-w-[calc(100vw-2rem)] p-4">
-        <HeaderFeatureList barePath={barePath} items={featureItems} listClassName="grid gap-3 sm:grid-cols-2" />
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
 
@@ -237,9 +239,22 @@ export function SiteHeader({ locale }: { locale: Locale }) {
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/95 backdrop-blur-xl">
       <div className="mx-auto h-14 w-full max-w-[92rem] px-4 sm:px-6 lg:px-8">
         <div className="flex h-full min-w-0 items-center gap-2">
-          <HeaderLeftArea brand={headerConfig.brand} leftArea={headerConfig.leftArea} mobile />
+          <HeaderLeftArea
+            barePath={barePath}
+            brand={headerConfig.brand}
+            leftArea={headerConfig.leftArea}
+            featureItems={headerConfig.launcherItems}
+            messages={messages}
+            mobile
+          />
 
-          <HeaderLeftArea brand={headerConfig.brand} leftArea={headerConfig.leftArea} />
+          <HeaderLeftArea
+            barePath={barePath}
+            brand={headerConfig.brand}
+            leftArea={headerConfig.leftArea}
+            featureItems={headerConfig.launcherItems}
+            messages={messages}
+          />
 
           <div className="ml-auto hidden items-center gap-2 md:flex">
             {headerConfig.quickActions.map((item) => (
@@ -252,7 +267,6 @@ export function SiteHeader({ locale }: { locale: Locale }) {
               themeDarkLabel={messages.themeDark}
               themeSystemLabel={messages.themeSystem}
             />
-            <HeaderFeatureLauncher barePath={barePath} featureItems={headerConfig.launcherItems} messages={messages} />
           </div>
 
           <div className="ml-auto md:hidden">
