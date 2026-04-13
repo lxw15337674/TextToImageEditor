@@ -89,9 +89,9 @@ export const enMessages: LocaleMessages = {
       ],
     },
     writedeckUseCases: {
-      metadataTitle: 'A text editor where your writing does not get lost',
+      metadataTitle: 'WriteDeck use cases for local-first writing, version history, and share-image export',
       metadataDescription:
-        'Write drafts, notes, and social copy with autosave, version history, local-first protection, and share-image export.',
+        'Explore WriteDeck use cases for drafts, notes, and social copy with autosave, local version history, rollback, and share-image export.',
       eyebrow: 'Local-first writing editor',
       title: 'A text editor where your writing does not get lost',
       description:
@@ -223,8 +223,9 @@ export const enMessages: LocaleMessages = {
       linkdiskAppCta: 'Open LinkDisk',
     },
     writedeck: {
-      metadataTitle: 'WriteDeck',
-      metadataDescription: 'WriteDeck is a local-first writing editor with autosave, version history, rollback, and share-image export.',
+      metadataTitle: 'Local-first writing editor with version history and share-image export | WriteDeck',
+      metadataDescription:
+        'WriteDeck is a local-first writing editor for plain text and Markdown with autosave, local version history, rollback, and share-image export.',
       title: 'WriteDeck',
       description: 'Write in plain text or Markdown, keep every draft recoverable locally, and export polished share images without creating an account.',
       loadingDocument: 'Loading your local document…',
@@ -281,6 +282,8 @@ export const enMessages: LocaleMessages = {
       versionKindRollbackBackup: 'Rollback backup',
       versionLabelPlaceholder: 'Add a milestone label',
       saveVersionLabel: 'Save label',
+      hidePreview: 'Hide share pane',
+      showPreview: 'Show share pane',
       versionLabelSaved: 'Version label updated.',
       restoreVersion: 'Restore version',
       saveAsMilestone: 'Save as milestone',

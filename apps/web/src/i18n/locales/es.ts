@@ -90,9 +90,9 @@ export const esMessages: LocaleMessages = {
       ],
     },
     writedeckUseCases: {
-      metadataTitle: 'Un editor de escritura donde tu texto no se pierde',
+      metadataTitle: 'Casos de uso de WriteDeck para escritura local-first, historial y exportación visual',
       metadataDescription:
-        'Editor de escritura local-first con autoguardado, historial de versiones, restauración y exportación a imagen para borradores, notas y texto para compartir.',
+        'Descubre cómo encaja WriteDeck en borradores, notas y textos para compartir con autoguardado, historial local, restauración y exportación a imagen.',
       eyebrow: 'Editor de escritura local-first',
       title: 'Un editor de escritura donde tu texto no se pierde',
       description:
@@ -223,8 +223,9 @@ export const esMessages: LocaleMessages = {
       linkdiskAppCta: 'Abrir LinkDisk',
     },
     writedeck: {
-      metadataTitle: 'WriteDeck',
-      metadataDescription: 'WriteDeck es un editor de escritura local-first con autoguardado, historial, restauración y exportación a imagen para compartir.',
+      metadataTitle: 'Editor de escritura local-first con historial y exportación a imagen | WriteDeck',
+      metadataDescription:
+        'WriteDeck es un editor de escritura local-first para texto plano y Markdown con autoguardado, historial local, restauración y exportación a imagen para compartir.',
       title: 'WriteDeck',
       description: 'Escribe en texto plano o Markdown, conserva cada borrador en este navegador y exporta imágenes listas para compartir.',
       loadingDocument: 'Cargando tu documento local…',
@@ -274,6 +275,7 @@ export const esMessages: LocaleMessages = {
       clearHistory: 'Borrar historial',
       clearHistorySuccess: 'El historial de versiones se ha borrado.',
       clearHistoryError: 'No se pudo borrar el historial.',
+      hidePreview: 'Ocultar panel de compartir',
       clearHistoryConfirmTitle: '¿Borrar todo el historial de versiones?',
       clearHistoryConfirmDescription: 'El contenido actual se conservará, pero todas las instantáneas, hitos y copias de seguridad se eliminarán de forma permanente.',
       resetConfirmTitle: '¿Seguro?',
@@ -281,6 +283,7 @@ export const esMessages: LocaleMessages = {
       versionKindRollbackBackup: 'Copia antes de restaurar',
       versionLabelPlaceholder: 'Añade una etiqueta al hito',
       saveVersionLabel: 'Guardar etiqueta',
+      showPreview: 'Mostrar panel de compartir',
       versionLabelSaved: 'Etiqueta actualizada.',
       restoreVersion: 'Restaurar versión',
       saveAsMilestone: 'Guardar como hito',

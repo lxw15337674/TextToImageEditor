@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
+import { SeoJsonLd } from '@/components/SeoJsonLd';
 import { ClipboardEditorPage } from '@/linkdisk/components/ClipboardEditorPage';
-import { SeoJsonLd } from '@/linkdisk/components/SeoJsonLd';
 import { getMessages } from '@/linkdisk/i18n/messages';
 import { buildHomeSeoGraph, LINKDISK_BASE_PATH } from '@/linkdisk/lib/seo/marketing-pages';
 import { resolveRouteLocale } from '@/lib/route-locale';

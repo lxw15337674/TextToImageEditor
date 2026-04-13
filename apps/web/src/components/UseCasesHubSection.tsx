@@ -10,17 +10,19 @@ import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/ca
 interface UseCasesHubSectionProps {
   id?: string;
   locale: Locale;
+  titleAs?: 'h1' | 'h2';
 }
 
-export function UseCasesHubSection({ id, locale }: UseCasesHubSectionProps) {
+export function UseCasesHubSection({ id, locale, titleAs = 'h2' }: UseCasesHubSectionProps) {
   const messages = getMessages(locale).useCasesHub;
+  const TitleTag = titleAs;
 
   return (
     <PageSection id={id}>
       <PagePanel className="space-y-5">
         <SectionIntro
           eyebrow={messages.eyebrow}
-          title={<h2 className="max-w-4xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl">{messages.title}</h2>}
+          title={<TitleTag className="max-w-4xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl">{messages.title}</TitleTag>}
           description={messages.description}
           className="space-y-3"
           titleClassName="max-w-4xl text-balance text-3xl font-semibold tracking-tight sm:text-4xl"

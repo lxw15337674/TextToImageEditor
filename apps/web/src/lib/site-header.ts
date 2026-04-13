@@ -28,6 +28,10 @@ export interface SiteHeaderConfig {
   quickActions: SiteFeatureItem[];
 }
 
+function isSiteFeatureItem(item: SiteFeatureItem | null): item is SiteFeatureItem {
+  return item !== null;
+}
+
 function resolveUseCasesQuickAction(locale: Locale, barePath: string, item: SiteFeatureItem): SiteFeatureItem | null {
   if (barePath === '/') {
     return null;
@@ -110,6 +114,6 @@ export function getSiteHeaderConfig(locale: Locale, barePath: string): SiteHeade
     quickActions: allItems
       .filter((item) => item.pin === 'right')
       .map((item) => (item.id === 'use-cases' ? resolveUseCasesQuickAction(locale, barePath, item) : item))
-      .filter((item) => item !== null) as SiteFeatureItem[],
+      .filter(isSiteFeatureItem),
   };
 }

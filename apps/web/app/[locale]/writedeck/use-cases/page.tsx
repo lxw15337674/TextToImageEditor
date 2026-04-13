@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
+import { SeoJsonLd } from '@/components/SeoJsonLd';
 import { WriteDeckUseCasesPage } from '@/components/WriteDeckUseCasesPage';
-import { getMessages } from '@/i18n/messages';
 import { resolveRouteLocale } from '@/lib/route-locale';
-import { createMarketingMetadata } from '@/lib/seo/marketing-metadata';
+import {
+  buildWriteDeckUseCasesSeoGraph,
+  createWriteDeckUseCasesMetadata,
+} from '@/lib/seo/writedeck-marketing-pages';
 
 interface WriteDeckUseCasesRoutePageProps {
   params: Promise<{ locale: string }>;
@@ -11,21 +14,18 @@ interface WriteDeckUseCasesRoutePageProps {
 export async function generateMetadata({ params }: WriteDeckUseCasesRoutePageProps): Promise<Metadata> {
   const { locale: requestedLocale } = await params;
   const locale = resolveRouteLocale(requestedLocale);
-  const allMessages = getMessages(locale);
-  const messages = allMessages.writedeckUseCases;
 
-  return createMarketingMetadata({
-    locale,
-    pathname: '/writedeck/use-cases',
-    title: messages.metadataTitle,
-    description: messages.metadataDescription,
-    siteName: allMessages.common.siteName,
-  });
+  return createWriteDeckUseCasesMetadata(locale);
 }
 
 export default async function WriteDeckUseCasesRoutePage({ params }: WriteDeckUseCasesRoutePageProps) {
   const { locale: requestedLocale } = await params;
   const locale = resolveRouteLocale(requestedLocale);
 
-  return <WriteDeckUseCasesPage locale={locale} />;
+  return (
+    <>
+      <SeoJsonLd id={`seo-jsonld-${locale}-writedeck-use-cases`} graph={buildWriteDeckUseCasesSeoGraph(locale)} />
+      <WriteDeckUseCasesPage locale={locale} />
+    </>
+  );
 }

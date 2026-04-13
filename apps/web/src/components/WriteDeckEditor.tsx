@@ -21,6 +21,8 @@ import {
   Import,
   LoaderCircle,
   Pencil,
+  PanelRightClose,
+  PanelRightOpen,
   Redo2,
   RotateCcw,
   Trash2,
@@ -218,6 +220,7 @@ export function WriteDeckEditor({ locale }: { locale: Locale }) {
   const [canUndo, setCanUndo] = useState(false);
   const [canRedo, setCanRedo] = useState(false);
   const [mobilePane, setMobilePane] = useState<MobilePane>('editor');
+  const [showPreviewPane, setShowPreviewPane] = useState(true);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [editingLabelId, setEditingLabelId] = useState<string | null>(null);
@@ -961,11 +964,13 @@ export function WriteDeckEditor({ locale }: { locale: Locale }) {
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col xl:grid xl:min-h-0 xl:grid-cols-2">
+            <div className={cn("flex flex-1 flex-col xl:grid xl:min-h-0", showPreviewPane ? "xl:grid-cols-2" : "xl:grid-cols-1")}>
               <div
                 className={cn(
-                  'flex flex-col xl:min-h-0 xl:border-r xl:border-border/60',
-                  mobilePane === 'preview' ? 'hidden xl:flex' : 'flex',
+                  'flex flex-col xl:min-h-0',
+                  showPreviewPane && 'xl:border-r xl:border-border/60',
+                  mobilePane === 'preview' ? 'hidden' : 'flex',
+                  'xl:flex',
                 )}
               >
                 <div className="sticky top-0 z-20 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:rounded-tl-[calc(var(--radius)-1px)] xl:px-5">
@@ -1028,24 +1033,37 @@ export function WriteDeckEditor({ locale }: { locale: Locale }) {
                         </div>
                       </div>
 
-                      <div
-                        className="flex items-center gap-2 cursor-help shrink-0"
-                        title={isDocumentReady ? getSaveStatusLabel(saveStatus, messages) : messages.loadingDocument}
-                      >
-                        {isDocumentReady ? (
-                          <div
-                            className={cn(
-                              'size-2 rounded-full transition-all duration-500',
-                              saveStatus === 'saved' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' :
-                              saveStatus === 'saving' ? 'bg-amber-500 animate-pulse' : 'bg-sky-500',
-                            )}
-                          />
-                        ) : (
-                          <LoaderCircle className="size-3.5 animate-spin text-muted-foreground/80" />
-                        )}
-                        <span className="truncate whitespace-nowrap text-sm font-semibold tracking-normal text-muted-foreground/80">
-                          {isDocumentReady ? getSaveStatusLabel(saveStatus, messages) : messages.loadingDocument}
-                        </span>
+                      <div className="flex items-center gap-4 shrink-0">
+                        <div
+                          className="flex items-center gap-2 cursor-help"
+                          title={isDocumentReady ? getSaveStatusLabel(saveStatus, messages) : messages.loadingDocument}
+                        >
+                          {isDocumentReady ? (
+                            <div
+                              className={cn(
+                                'size-2 rounded-full transition-all duration-500',
+                                saveStatus === 'saved' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' :
+                                saveStatus === 'saving' ? 'bg-amber-500 animate-pulse' : 'bg-sky-500',
+                              )}
+                            />
+                          ) : (
+                            <LoaderCircle className="size-3.5 animate-spin text-muted-foreground/80" />
+                          )}
+                          <span className="truncate whitespace-nowrap text-sm font-semibold tracking-normal text-muted-foreground/80">
+                            {isDocumentReady ? getSaveStatusLabel(saveStatus, messages) : messages.loadingDocument}
+                          </span>
+                        </div>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="hidden xl:flex h-9 shrink-0 gap-2 rounded-xl border border-transparent px-2 text-muted-foreground hover:bg-muted/50 hover:text-foreground sm:px-3 xl:rounded-md xl:border-transparent"
+                          onClick={() => setShowPreviewPane(!showPreviewPane)}
+                        >
+                          {showPreviewPane ? <PanelRightClose className="size-[18px]" data-icon="inline-start" /> : <PanelRightOpen className="size-[18px]" data-icon="inline-start" />}
+                          <span>{showPreviewPane ? messages.hidePreview : messages.showPreview}</span>
+                        </Button>
                       </div>
                     </div>
 
@@ -1115,7 +1133,7 @@ export function WriteDeckEditor({ locale }: { locale: Locale }) {
                   </div>
                 </div>
 
-                <div className="markdown-editor h-[calc(100svh-15rem)] min-h-[24rem] max-h-[72svh] flex-1 overflow-y-auto xl:h-auto xl:min-h-0 xl:max-h-none">
+                <div className="markdown-editor h-[calc(100svh-15rem)] min-h-[24rem] max-h-[72svh] flex-1 overflow-y-auto xl:h-auto xl:min-h-0 xl:max-h-none [&_.cm-editor]:!bg-transparent [&_.cm-scroller]:!bg-transparent [&_.cm-activeLine]:!bg-transparent [&_.cm-gutters]:!bg-transparent [&_.cm-activeLineGutter]:!bg-transparent">
                   {isDocumentReady ? (
                     <CodeMirror
                       value={currentDocument.content}
@@ -1161,7 +1179,8 @@ export function WriteDeckEditor({ locale }: { locale: Locale }) {
               <div
                 className={cn(
                   'flex flex-col overflow-visible xl:min-h-0',
-                  mobilePane === 'editor' ? 'hidden xl:flex' : 'flex',
+                  mobilePane === 'editor' ? 'hidden' : 'flex',
+                  showPreviewPane ? 'xl:flex' : 'xl:hidden',
                 )}
               >
                 <div className="sticky top-0 z-20 border-b border-border/40 bg-background/95 px-3 py-3 backdrop-blur-md sm:px-4 xl:rounded-tr-[calc(var(--radius)-1px)] xl:px-5">

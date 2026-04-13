@@ -175,6 +175,8 @@ export interface LocaleMessages {
     versionKindRollbackBackup: string;
     versionLabelPlaceholder: string;
     saveVersionLabel: string;
+    hidePreview: string;
+    showPreview: string;
     versionLabelSaved: string;
     restoreVersion: string;
     saveAsMilestone: string;

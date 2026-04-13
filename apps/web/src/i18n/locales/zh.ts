@@ -86,8 +86,9 @@ export const zhMessages: LocaleMessages = {
       ],
     },
     writedeckUseCases: {
-      metadataTitle: '文字不会轻易丢失的文本编辑器',
-      metadataDescription: '适合草稿、笔记和内容迭代的本地优先文本编辑器，支持自动保存、历史版本、回滚和分享图导出。',
+      metadataTitle: 'WriteDeck 使用场景：本地优先写作、版本记录与分享图导出',
+      metadataDescription:
+        '查看 WriteDeck 如何用于草稿、笔记和内容迭代，支持自动保存、本地版本记录、回滚和分享图导出。',
       eyebrow: '本地优先文本编辑器',
       title: '文字不会轻易丢失的文本编辑器',
       description:
@@ -217,8 +218,9 @@ export const zhMessages: LocaleMessages = {
       linkdiskAppCta: '打开 LinkDisk',
     },
     writedeck: {
-      metadataTitle: 'WriteDeck',
-      metadataDescription: 'WriteDeck 是一款本地优先的文字编辑器，支持自动保存、历史版本、回滚和分享图导出。',
+      metadataTitle: '本地优先的写作编辑器，支持版本记录与分享图导出 | WriteDeck',
+      metadataDescription:
+        'WriteDeck 是一款支持纯文本和 Markdown 的本地优先写作编辑器，提供自动保存、本地版本记录、回滚和分享图导出。',
       title: 'WriteDeck',
       description: '用纯文本或 Markdown 持续写作，把版本记录留在本机，再把定稿导出成适合分享的图片。',
       loadingDocument: '正在加载本地文档…',
@@ -275,6 +277,8 @@ export const zhMessages: LocaleMessages = {
       versionKindRollbackBackup: '回滚前备份',
       versionLabelPlaceholder: '输入里程碑标签',
       saveVersionLabel: '保存标签',
+      hidePreview: '收起分享区',
+      showPreview: '展开分享区',
       versionLabelSaved: '版本标签已更新。',
       restoreVersion: '恢复此版本',
       saveAsMilestone: '另存为里程碑',

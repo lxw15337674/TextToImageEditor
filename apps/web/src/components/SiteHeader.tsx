@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowUpRight, ChevronDown, LayoutGrid, Menu } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';

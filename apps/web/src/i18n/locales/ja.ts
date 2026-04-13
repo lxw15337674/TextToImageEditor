@@ -89,9 +89,9 @@ export const jaMessages: LocaleMessages = {
       ],
     },
     writedeckUseCases: {
-      metadataTitle: '書いた内容が消えにくいテキストエディタ',
+      metadataTitle: 'WriteDeck の利用シーン: ローカルファースト執筆、履歴管理、共有画像書き出し',
       metadataDescription:
-        '下書き、メモ、文章の推敲に向いたローカルファーストのエディタ。自動保存、履歴、復元、共有画像の書き出しに対応しています。',
+        '下書き、メモ、推敲中の文章に WriteDeck がどう合うかを確認できます。自動保存、ローカル履歴、復元、共有画像の書き出しに対応します。',
       eyebrow: 'ローカルファーストエディタ',
       title: '書いた内容が消えにくいテキストエディタ',
       description:
@@ -222,8 +222,9 @@ export const jaMessages: LocaleMessages = {
       linkdiskAppCta: 'LinkDisk を開く',
     },
     writedeck: {
-      metadataTitle: 'WriteDeck',
-      metadataDescription: 'WriteDeck は、ローカルファーストで自動保存、履歴、復元、共有画像の書き出しに対応した執筆エディタです。',
+      metadataTitle: 'ローカルファーストの執筆エディタ、履歴管理と共有画像書き出し対応 | WriteDeck',
+      metadataDescription:
+        'WriteDeck はプレーンテキストと Markdown に対応したローカルファーストの執筆エディタです。自動保存、ローカル履歴、復元、共有画像の書き出しを備えています。',
       title: 'WriteDeck',
       description: 'プレーンテキストまたは Markdown で書き、このブラウザに下書きと履歴を残し、共有しやすい画像を書き出せます。',
       loadingDocument: 'ローカルのドキュメントを読み込み中…',
@@ -273,6 +274,7 @@ export const jaMessages: LocaleMessages = {
       clearHistory: '履歴を削除',
       clearHistorySuccess: 'バージョン履歴を削除しました。',
       clearHistoryError: '履歴の削除に失敗しました。',
+      hidePreview: '共有パネルを閉じる',
       clearHistoryConfirmTitle: 'すべての履歴を削除しますか？',
       clearHistoryConfirmDescription: '現在の内容は保持されますが、自動スナップショット、マイルストーン、バックアップ版はすべて完全に削除されます。',
       resetConfirmTitle: 'リセットしますか？',
@@ -280,6 +282,7 @@ export const jaMessages: LocaleMessages = {
       versionKindRollbackBackup: 'ロールバック前バックアップ',
       versionLabelPlaceholder: 'マイルストーン名を入力',
       saveVersionLabel: 'ラベルを保存',
+      showPreview: '共有パネルを開く',
       versionLabelSaved: 'ラベルを更新しました。',
       restoreVersion: 'この版を復元',
       saveAsMilestone: 'マイルストーンとして保存',

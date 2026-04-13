@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { SeoJsonLd } from '@/linkdisk/components/SeoJsonLd';
+import { SeoJsonLd } from '@/components/SeoJsonLd';
 import { UseCasesPage } from '@/linkdisk/components/UseCasesPage';
 import { resolveRouteLocale } from '@/lib/route-locale';
 import {

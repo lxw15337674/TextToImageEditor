@@ -16,23 +16,9 @@ const valueIcons = [FileClock, History, CheckCircle2, ImageUp] as const;
 
 export function WriteDeckUseCasesPage({ locale }: WriteDeckUseCasesPageProps) {
   const messages = getMessages(locale).writedeckUseCases;
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: messages.faqs.map((item) => ({
-      '@type': 'Question',
-      name: item.question,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.answer,
-      },
-    })),
-  };
 
   return (
     <AppPageContainer variant="marketing">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
-
       <PagePanel className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.9fr)] lg:items-end">
         <div className="space-y-5">
           <SectionIntro

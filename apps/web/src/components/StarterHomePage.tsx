@@ -6,5 +6,5 @@ interface StarterHomePageProps {
 }
 
 export function StarterHomePage({ locale }: StarterHomePageProps) {
-  return <UseCasesPage locale={locale} />;
+  return <UseCasesPage locale={locale} titleAs="h1" />;
 }

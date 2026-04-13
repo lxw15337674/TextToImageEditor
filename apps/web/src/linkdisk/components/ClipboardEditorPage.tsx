@@ -1432,7 +1432,7 @@ export function ClipboardEditorPage({
       ) : null}
 
       <WorkspaceSurface className="border-transparent bg-background shadow-none">
-        <div className="grid h-full min-h-0 w-full items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+        <div className="grid h-full min-h-0 w-full items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_480px]">
             <Card className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-border/70 bg-card/90">
               <CardContent className="flex h-full min-h-0 flex-1 flex-col gap-4 p-3 sm:gap-6 sm:p-4 lg:p-5">
                 <div className="flex flex-col gap-3">
