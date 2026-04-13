@@ -5,17 +5,17 @@ import { withLocalePrefix } from '@/i18n/config';
 import { getMessages } from '@/i18n/messages';
 import { AppPageContainer, PagePanel, PageSection, SectionIntro } from '@/components/app-page-shell';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
-interface NotesUseCasesPageProps {
+interface WriteDeckUseCasesPageProps {
   locale: Locale;
 }
 
 const proofIcons = [ShieldCheck, History, ImageUp] as const;
 const valueIcons = [FileClock, History, CheckCircle2, ImageUp] as const;
 
-export function NotesUseCasesPage({ locale }: NotesUseCasesPageProps) {
-  const messages = getMessages(locale).useCases;
+export function WriteDeckUseCasesPage({ locale }: WriteDeckUseCasesPageProps) {
+  const messages = getMessages(locale).writedeckUseCases;
   const faqSchema = {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
@@ -43,7 +43,7 @@ export function NotesUseCasesPage({ locale }: NotesUseCasesPageProps) {
           />
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
-              <Link href={withLocalePrefix('/notes', locale)}>{messages.primaryCta}</Link>
+              <Link href={withLocalePrefix('/writedeck', locale)}>{messages.primaryCta}</Link>
             </Button>
           </div>
         </div>
@@ -167,7 +167,7 @@ export function NotesUseCasesPage({ locale }: NotesUseCasesPageProps) {
           />
           <div className="flex flex-col gap-3 sm:flex-row">
             <Button asChild size="lg">
-              <Link href={withLocalePrefix('/notes', locale)}>{messages.ctaPrimary}</Link>
+              <Link href={withLocalePrefix('/writedeck', locale)}>{messages.ctaPrimary}</Link>
             </Button>
           </div>
         </div>

@@ -35,12 +35,12 @@ export function getSiteFeatureGroups(locale: Locale): SiteFeatureGroup[] {
   const items: SiteFeatureItem[] = [
     {
       id: 'editor',
-      label: messages.common.featureLabelNotes,
-      description: messages.common.featureDescriptionNotes,
-      href: withLocalePrefix('/notes', locale),
+      label: messages.common.featureLabelWriteDeck,
+      description: messages.common.featureDescriptionWriteDeck,
+      href: withLocalePrefix('/writedeck', locale),
       icon: FileText,
       group: 'core',
-      match: '/notes',
+      match: '/writedeck',
       matchMode: 'prefix',
       pin: 'left',
     },

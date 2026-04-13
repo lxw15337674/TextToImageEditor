@@ -128,7 +128,7 @@ const SHELL_FALLBACK_DOCUMENT: EditorDocument = {
   lastSavedAt: 0,
 };
 
-function getVersionKindLabel(kind: VersionKind, messages: ReturnType<typeof getMessages>['notes']) {
+function getVersionKindLabel(kind: VersionKind, messages: ReturnType<typeof getMessages>['writedeck']) {
   switch (kind) {
     case 'milestone':
       return messages.versionKindMilestone;
@@ -143,7 +143,7 @@ function getVersionKindLabel(kind: VersionKind, messages: ReturnType<typeof getM
   }
 }
 
-function getSaveStatusLabel(status: SaveStatus, messages: ReturnType<typeof getMessages>['notes']) {
+function getSaveStatusLabel(status: SaveStatus, messages: ReturnType<typeof getMessages>['writedeck']) {
   switch (status) {
     case 'saving':
       return messages.statusSaving;
@@ -197,8 +197,8 @@ async function convertBlobToJpegBlob(blob: Blob, quality = 0.92) {
   return jpegBlob;
 }
 
-export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
-  const messages = getMessages(locale).notes;
+export function WriteDeckEditor({ locale }: { locale: Locale }) {
+  const messages = getMessages(locale).writedeck;
   const { resolvedTheme } = useTheme();
   const editorViewRef = useRef<EditorView | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -245,12 +245,12 @@ export function MarkdownPosterEditor({ locale }: { locale: Locale }) {
     const html = document.documentElement;
     const body = document.body;
 
-    html.classList.add('notes-scroll-lock');
-    body.classList.add('notes-scroll-lock');
+    html.classList.add('writedeck-scroll-lock');
+    body.classList.add('writedeck-scroll-lock');
 
     return () => {
-      html.classList.remove('notes-scroll-lock');
-      body.classList.remove('notes-scroll-lock');
+      html.classList.remove('writedeck-scroll-lock');
+      body.classList.remove('writedeck-scroll-lock');
     };
   }, []);
 

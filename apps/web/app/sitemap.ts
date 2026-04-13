@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { LOCALES } from '@/i18n/config';
 import { toAbsoluteUrl } from '@/lib/seo/site-origin';
 
-const INDEXABLE_LOCALIZED_PATHS = ['/', '/linkdisk', '/linkdisk/use-cases', '/notes', '/notes/use-cases'];
+const INDEXABLE_LOCALIZED_PATHS = ['/', '/linkdisk', '/linkdisk/use-cases', '/writedeck', '/writedeck/use-cases'];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const configured = process.env.SITE_LAST_MODIFIED?.trim();

@@ -23,8 +23,8 @@ export default async function OpenGraphImage({ params }: OpenGraphImageProps) {
   return createPageSocialImage({
     locale,
     siteName: messages.common.siteName,
-    title: messages.useCases.metadataTitle,
-    description: messages.useCases.metadataDescription,
-    tags: [messages.useCases.eyebrow, messages.common.navNotes, messages.common.navUseCases],
+    title: messages.writedeck.metadataTitle,
+    description: messages.writedeck.metadataDescription,
+    tags: [messages.common.navWriteDeck, messages.writedeck.history, messages.writedeck.shareImage],
   });
 }

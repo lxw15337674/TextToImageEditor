@@ -298,8 +298,8 @@
   }
 
   @media (min-width: 1280px) {
-    html.notes-scroll-lock,
-    body.notes-scroll-lock {
+    html.writedeck-scroll-lock,
+    body.writedeck-scroll-lock {
       height: 100%;
       overflow: hidden;
     }

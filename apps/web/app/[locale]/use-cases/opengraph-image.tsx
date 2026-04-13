@@ -25,6 +25,6 @@ export default async function OpenGraphImage({ params }: OpenGraphImageProps) {
     siteName: messages.common.siteName,
     title: messages.useCasesHub.metadataTitle,
     description: messages.useCasesHub.metadataDescription,
-    tags: [messages.common.navUseCases, messages.useCasesHub.notesTitle, messages.useCasesHub.linkdiskTitle],
+    tags: [messages.common.navUseCases, messages.useCasesHub.writedeckTitle, messages.useCasesHub.linkdiskTitle],
   });
 }

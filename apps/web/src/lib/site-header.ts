@@ -28,12 +28,16 @@ export interface SiteHeaderConfig {
   quickActions: SiteFeatureItem[];
 }
 
-function resolveUseCasesQuickAction(locale: Locale, barePath: string, item: SiteFeatureItem): SiteFeatureItem {
-  if (barePath === '/notes' || barePath.startsWith('/notes/')) {
+function resolveUseCasesQuickAction(locale: Locale, barePath: string, item: SiteFeatureItem): SiteFeatureItem | null {
+  if (barePath === '/') {
+    return null;
+  }
+
+  if (barePath === '/writedeck' || barePath.startsWith('/writedeck/')) {
     return {
       ...item,
-      href: withLocalePrefix('/notes/use-cases', locale),
-      match: '/notes/use-cases',
+      href: withLocalePrefix('/writedeck/use-cases', locale),
+      match: '/writedeck/use-cases',
       matchMode: 'exact',
     };
   }
@@ -47,23 +51,18 @@ function resolveUseCasesQuickAction(locale: Locale, barePath: string, item: Site
     };
   }
 
-  return {
-    ...item,
-    href: withLocalePrefix('/', locale),
-    match: '/',
-    matchMode: 'exact',
-  };
+  return item;
 }
 
 function resolveLeftArea(locale: Locale, barePath: string): SiteHeaderLeftArea {
   const messages = getMessages(locale);
   const linkDiskMessages = getLinkDiskMessages(locale);
 
-  if (barePath === '/notes' || barePath.startsWith('/notes/')) {
+  if (barePath === '/writedeck' || barePath.startsWith('/writedeck/')) {
     return {
       kind: 'brand-label',
-      label: messages.common.featureLabelNotes,
-      href: withLocalePrefix('/notes', locale),
+      label: messages.common.featureLabelWriteDeck,
+      href: withLocalePrefix('/writedeck', locale),
     };
   }
 
@@ -110,6 +109,7 @@ export function getSiteHeaderConfig(locale: Locale, barePath: string): SiteHeade
     leftArea: resolveLeftArea(locale, barePath),
     quickActions: allItems
       .filter((item) => item.pin === 'right')
-      .map((item) => (item.id === 'use-cases' ? resolveUseCasesQuickAction(locale, barePath, item) : item)),
+      .map((item) => (item.id === 'use-cases' ? resolveUseCasesQuickAction(locale, barePath, item) : item))
+      .filter((item) => item !== null) as SiteFeatureItem[],
   };
 }

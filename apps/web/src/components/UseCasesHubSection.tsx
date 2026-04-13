@@ -32,21 +32,21 @@ export function UseCasesHubSection({ id, locale }: UseCasesHubSectionProps) {
         <Card className="border-border/70 bg-card/80">
           <CardHeader className="space-y-5 p-6 sm:p-7">
             <div className="space-y-3">
-              <CardTitle className="text-2xl sm:text-3xl">{messages.notesTitle}</CardTitle>
+              <CardTitle className="text-2xl sm:text-3xl">{messages.writedeckTitle}</CardTitle>
               <CardDescription className="max-w-2xl text-sm leading-6 sm:text-base sm:leading-7">
-                {messages.notesDescription}
+                {messages.writedeckDescription}
               </CardDescription>
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <Button asChild size="lg" className="gap-2">
-                <Link href={withLocalePrefix('/notes', locale)}>
-                  {messages.notesAppCta}
+                <Link href={withLocalePrefix('/writedeck', locale)}>
+                  {messages.writedeckAppCta}
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="secondary" className="gap-2">
-                <Link href={withLocalePrefix('/notes/use-cases', locale)}>
-                  {messages.notesCta}
+                <Link href={withLocalePrefix('/writedeck/use-cases', locale)}>
+                  {messages.writedeckCta}
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>

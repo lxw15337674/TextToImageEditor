@@ -6,14 +6,14 @@ export interface LocaleMessages {
     navHome: string;
     navUseCases: string;
     navStarter: string;
-    navNotes: string;
+    navWriteDeck: string;
     openEditor: string;
-    featureLabelNotes: string;
+    featureLabelWriteDeck: string;
     featureLabelUseCases: string;
     featureLabelStarter: string;
     featureLauncher: string;
     featureMenuDescription: string;
-    featureDescriptionNotes: string;
+    featureDescriptionWriteDeck: string;
     featureDescriptionUseCases: string;
     featureDescriptionStarter: string;
     featureGroupCore: string;
@@ -60,7 +60,7 @@ export interface LocaleMessages {
     checklistDescription: string;
     checklist: string[];
   };
-  useCases: {
+  writedeckUseCases: {
     metadataTitle: string;
     metadataDescription: string;
     eyebrow: string;
@@ -107,16 +107,16 @@ export interface LocaleMessages {
     eyebrow: string;
     title: string;
     description: string;
-    notesTitle: string;
-    notesDescription: string;
-    notesCta: string;
-    notesAppCta: string;
+    writedeckTitle: string;
+    writedeckDescription: string;
+    writedeckCta: string;
+    writedeckAppCta: string;
     linkdiskTitle: string;
     linkdiskDescription: string;
     linkdiskCta: string;
     linkdiskAppCta: string;
   };
-  notes: {
+  writedeck: {
     metadataTitle: string;
     metadataDescription: string;
     title: string;
